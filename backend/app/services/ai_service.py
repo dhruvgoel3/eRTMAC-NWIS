@@ -190,7 +190,7 @@ class DemoAIProvider:
                 {"detail": "OIL-X101: Formation Tipam, Depth 3720m (similar), Directional trajectory, Distance ~5.3 km — 84% similar"},
                 {"detail": "OIL-X106: Formation Tipam, Depth 3400m (shallower), Directional trajectory, Distance ~11.2 km — 71% similar"},
             ],
-            "risk_interpretation": "OIL-X104's high similarity means its historical events are highly relevant for current drilling operations. X104 experienced Mud Loss at 3110m, Stuck Pipe at 3275m, and Torque Spike at 3445m — all in the Tipam formation.",
+            "risk_interpretation": "OIL-X104's high similarity means its historical events are highly relevant for current drilling operations. X104 experienced Mud Loss at 3120m, Stuck Pipe at 3280m, and Torque Spike at 3450m — all in the Tipam formation.",
             "sources": sources[:3],
             "confidence": "HIGH",
             "evidence_items": evidence[:4],

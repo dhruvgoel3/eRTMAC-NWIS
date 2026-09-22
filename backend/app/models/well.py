@@ -44,6 +44,18 @@ class Well(Base):
     cementing_notes = Column(Text)
     lessons_learned = Column(Text)
     operator = Column(String(100), default="Oil India Limited")
+    
+    # Provenance and public dataset attribution
+    source_dataset = Column(String(50), default="OIL_SYNTHETIC", index=True)
+    license = Column(String(100), default="Proprietary / Synthetic")
+    country = Column(String(50), default="India")
+    basin = Column(String(100), default="Assam-Arakan")
+    
+    # Extended coordinates and geology
+    x_coord = Column(Float, nullable=True)  # UTM Easting (m)
+    y_coord = Column(Float, nullable=True)  # UTM Northing (m)
+    lithology = Column(String(100), nullable=True)  # Dominant lithology
+    
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationships
@@ -52,3 +64,4 @@ class Well(Base):
     documents = relationship("Document", back_populates="well")
     risk_zones = relationship("RiskZone", back_populates="well")
     alerts = relationship("Alert", back_populates="well")
+    logs = relationship("WellLog", back_populates="well")  # Depth-series log records

@@ -11,8 +11,9 @@ import {
   Bell,
   Sparkles,
   Compass,
+  Zap,
 } from "lucide-react";
-import { SimulationState, Alert } from "../types";
+import { SimulationState } from "../types";
 
 interface HeaderProps {
   activeTab: string;
@@ -24,6 +25,15 @@ interface HeaderProps {
   unreadAlertsCount: number;
   onOpenAlerts: () => void;
 }
+
+const NAV_TABS = [
+  { id: "overview",   icon: <Activity size={15} />,  label: "Overview" },
+  { id: "map",        icon: <MapPin size={15} />,     label: "GIS Offset Map" },
+  { id: "similarity", icon: <Layers size={15} />,     label: "Similarity Matrix" },
+  { id: "events",     icon: <FileText size={15} />,   label: "Drilling Events" },
+  { id: "ai",         icon: <Bot size={15} />,        label: "OIL AI Copilot" },
+  { id: "documents",  icon: <Sparkles size={15} />,   label: "Documents & DDR" },
+];
 
 export const Header: React.FC<HeaderProps> = ({
   activeTab,
@@ -37,7 +47,6 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const isRunning = simulation?.is_running ?? false;
   const speed = simulation?.speed_multiplier ?? 1;
-
   const nextSpeed = speed === 1 ? 5 : speed === 5 ? 10 : 1;
 
   return (
@@ -45,7 +54,7 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Brand */}
       <div className="brand-section">
         <div className="brand-logo-badge">
-          <Compass size={22} />
+          <Compass size={20} />
         </div>
         <div>
           <div className="brand-title">
@@ -53,84 +62,48 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="oil-badge">Oil India Limited</span>
           </div>
           <div className="brand-subtitle">
-            Nearby Wells Intelligence & Decision Support Platform
+            Nearby Wells Intelligence &amp; Decision Support
           </div>
         </div>
       </div>
 
-      {/* Navigation Tabs */}
+      {/* Navigation */}
       <nav className="nav-tabs">
-        <button
-          className={`nav-tab-btn ${activeTab === "overview" ? "active" : ""}`}
-          onClick={() => setActiveTab("overview")}
-        >
-          <Activity size={16} />
-          Overview
-        </button>
-        <button
-          className={`nav-tab-btn ${activeTab === "map" ? "active" : ""}`}
-          onClick={() => setActiveTab("map")}
-        >
-          <MapPin size={16} />
-          GIS Offset Map
-        </button>
-        <button
-          className={`nav-tab-btn ${activeTab === "similarity" ? "active" : ""}`}
-          onClick={() => setActiveTab("similarity")}
-        >
-          <Layers size={16} />
-          Similarity Matrix
-        </button>
-        <button
-          className={`nav-tab-btn ${activeTab === "events" ? "active" : ""}`}
-          onClick={() => setActiveTab("events")}
-        >
-          <FileText size={16} />
-          Drilling Events
-        </button>
-        <button
-          className={`nav-tab-btn ${activeTab === "ai" ? "active" : ""}`}
-          onClick={() => setActiveTab("ai")}
-        >
-          <Bot size={16} />
-          OIL AI Copilot
-        </button>
-        <button
-          className={`nav-tab-btn ${activeTab === "documents" ? "active" : ""}`}
-          onClick={() => setActiveTab("documents")}
-        >
-          <Sparkles size={16} />
-          Documents & DDR
-        </button>
+        {NAV_TABS.map((tab) => (
+          <button
+            key={tab.id}
+            className={`nav-tab-btn ${activeTab === tab.id ? "active" : ""}`}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            {tab.icon}
+            {tab.label}
+          </button>
+        ))}
       </nav>
 
-      {/* Right Controls: Simulation & Alerts */}
+      {/* Right Controls */}
       <div className="header-controls">
         {/* Simulation Pill */}
         <div className="sim-controls-pill">
-          <span style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600 }}>
-            SIM:
+          <span style={{ fontSize: 10, color: "var(--color-muted-slate)", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+            SIM
           </span>
           <button
             className={`sim-btn ${isRunning ? "pause" : "play"}`}
             onClick={onTogglePlay}
-            title={isRunning ? "Pause Drilling Simulation" : "Start Drilling Simulation"}
+            title={isRunning ? "Pause Simulation" : "Start Simulation"}
           >
-            {isRunning ? <Pause size={14} /> : <Play size={14} />}
+            {isRunning ? <Pause size={13} /> : <Play size={13} />}
           </button>
-          <button
-            className="sim-btn"
-            onClick={onReset}
-            title="Reset Simulation to 3,050m"
-          >
-            <RotateCcw size={14} />
+          <button className="sim-btn" onClick={onReset} title="Reset">
+            <RotateCcw size={13} />
           </button>
           <button
             className="speed-badge"
             onClick={() => onChangeSpeed(nextSpeed)}
-            title="Click to cycle speed (1x -> 5x -> 10x)"
+            title="Cycle simulation speed"
           >
-            {speed}x
+            {speed}×
           </button>
         </div>
 
@@ -138,31 +111,35 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={onOpenAlerts}
           className="btn-secondary"
-          style={{ position: "relative", padding: "7px 12px" }}
+          style={{
+            position: "relative",
+            padding: "7px 12px",
+            gap: 6,
+          }}
           title="Active Alerts"
         >
-          <Bell size={16} color={unreadAlertsCount > 0 ? "var(--accent-amber)" : "inherit"} />
+          <Bell
+            size={15}
+            color={unreadAlertsCount > 0 ? "var(--accent-amber)" : "currentColor"}
+          />
           {unreadAlertsCount > 0 && (
-            <span
-              style={{
-                position: "absolute",
-                top: -5,
-                right: -5,
-                background: "var(--accent-rose)",
-                color: "white",
-                fontSize: 10,
-                fontWeight: 700,
-                width: 18,
-                height: 18,
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "0 0 8px rgba(244, 63, 94, 0.8)",
-              }}
-            >
-              {unreadAlertsCount}
-            </span>
+            <>
+              <span style={{ fontSize: 12, fontWeight: 600 }}>
+                {unreadAlertsCount}
+              </span>
+              <span
+                style={{
+                  position: "absolute",
+                  top: -4,
+                  right: -4,
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: "var(--accent-rose)",
+                  border: "2px solid var(--color-sheet-white)",
+                }}
+              />
+            </>
           )}
         </button>
       </div>

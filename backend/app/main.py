@@ -15,6 +15,7 @@ from app.routers.routers import (
     ai_router,
     simulation_router,
     events_router,
+    datasets_router,
 )
 
 
@@ -49,6 +50,7 @@ app.include_router(alerts_router)
 app.include_router(ai_router)
 app.include_router(simulation_router)
 app.include_router(events_router)
+app.include_router(datasets_router)
 
 
 from app.database import get_db_info

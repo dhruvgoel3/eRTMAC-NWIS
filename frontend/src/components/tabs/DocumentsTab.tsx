@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { FileText, Search, Filter, Bot, ExternalLink, Sparkles, BookOpen } from "lucide-react";
+import { FileText, Search, Bot, BookOpen, Tag, Calendar } from "lucide-react";
 import { DocumentItem } from "../../types";
 import { api } from "../../services/api";
 
 interface DocumentsTabProps {
   onAskAIAboutDoc?: (docTitle: string) => void;
 }
+
+const DOC_TYPE_BADGE: Record<string, string> = {
+  WCR:        "badge-canopy",
+  DDR:        "badge-amber",
+  MUD_LOG:    "badge-emerald",
+  CEMENTING:  "badge-violet",
+};
 
 export const DocumentsTab: React.FC<DocumentsTabProps> = ({ onAskAIAboutDoc }) => {
   const [docs, setDocs] = useState<DocumentItem[]>([]);
@@ -14,9 +21,7 @@ export const DocumentsTab: React.FC<DocumentsTabProps> = ({ onAskAIAboutDoc }) =
   const [searchQuery, setSearchQuery] = useState("");
   const [activeDoc, setActiveDoc] = useState<DocumentItem | null>(null);
 
-  useEffect(() => {
-    fetchDocs();
-  }, [selectedType]);
+  useEffect(() => { fetchDocs(); }, [selectedType]);
 
   const fetchDocs = async () => {
     try {
@@ -25,9 +30,7 @@ export const DocumentsTab: React.FC<DocumentsTabProps> = ({ onAskAIAboutDoc }) =
       if (selectedType !== "ALL") params.doc_type = selectedType;
       const data = await api.getDocuments(params);
       setDocs(data);
-      if (data.length > 0 && !activeDoc) {
-        setActiveDoc(data[0]);
-      }
+      if (data.length > 0 && !activeDoc) setActiveDoc(data[0]);
     } catch (err) {
       console.error("Failed to fetch documents", err);
     } finally {
@@ -47,97 +50,74 @@ export const DocumentsTab: React.FC<DocumentsTabProps> = ({ onAskAIAboutDoc }) =
   });
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "380px 1fr", gap: 20, height: "calc(100vh - 180px)" }}>
-      {/* Left Documents List */}
-      <div className="glass-card" style={{ display: "flex", flexDirection: "column", height: "100%", padding: 16 }}>
-        <div className="card-header" style={{ marginBottom: 12 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 20, height: "calc(100vh - 220px)" }}>
+
+      {/* Document List */}
+      <div className="glass-card" style={{ display: "flex", flexDirection: "column", height: "100%", padding: "16px" }}>
+        <div className="card-header" style={{ marginBottom: 14 }}>
           <div className="card-title">
-            <BookOpen size={18} color="var(--accent-cyan)" />
+            <BookOpen size={16} color="var(--color-canopy)" />
             Institutional Reports ({docs.length})
           </div>
         </div>
 
-        {/* Filter Controls */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14 }}>
-          <input
-            type="text"
-            className="input-control"
-            placeholder="Search report title, well ID..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-
-          <select
-            className="input-control"
-            value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
-          >
+        {/* Filters */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
+          <div style={{ position: "relative" }}>
+            <Search size={13} style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", color: "var(--color-muted-slate)" }} />
+            <input
+              type="text"
+              className="input-control"
+              style={{ paddingLeft: 28 }}
+              placeholder="Search report title, well ID…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <select className="input-control" value={selectedType} onChange={(e) => setSelectedType(e.target.value)}>
             <option value="ALL">All Document Types</option>
             <option value="WCR">Well Completion Reports (WCR)</option>
             <option value="DDR">Daily Drilling Reports (DDR)</option>
             <option value="MUD_LOG">Mud Logging Summaries</option>
-            <option value="CEMENTING">Cementing & Casing Records</option>
+            <option value="CEMENTING">Cementing &amp; Casing Records</option>
           </select>
         </div>
 
-        {/* List of Documents */}
-        <div
-          style={{
-            flex: 1,
-            overflowY: "auto",
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
-            paddingRight: 4,
-          }}
-        >
+        {/* Doc List */}
+        <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 6, paddingRight: 4 }}>
           {loading ? (
-            <div style={{ padding: 20, textAlign: "center", color: "var(--text-muted)" }}>
-              Loading reports catalog...
-            </div>
+            <div style={{ padding: 20, textAlign: "center", color: "var(--color-muted-slate)" }}>Loading reports…</div>
           ) : filteredDocs.length === 0 ? (
-            <div style={{ padding: 20, textAlign: "center", color: "var(--text-muted)" }}>
-              No documents matched.
-            </div>
+            <div style={{ padding: 20, textAlign: "center", color: "var(--color-muted-slate)" }}>No documents matched.</div>
           ) : (
             filteredDocs.map((doc) => {
               const isSelected = activeDoc?.id === doc.id;
-
               return (
                 <div
                   key={doc.id}
                   onClick={() => setActiveDoc(doc)}
                   style={{
-                    background: isSelected ? "rgba(0, 210, 255, 0.12)" : "var(--bg-elevated)",
-                    border: "1px solid " + (isSelected ? "var(--accent-cyan)" : "var(--border-subtle)"),
-                    borderRadius: "var(--radius-sm)",
                     padding: "10px 12px",
+                    borderRadius: 8,
+                    border: "1px solid",
+                    borderColor: isSelected ? "var(--color-canopy)" : "var(--color-sage-mist)",
+                    background: isSelected ? "rgba(16,67,54,0.06)" : "var(--bg-elevated)",
                     cursor: "pointer",
                     transition: "all 0.15s ease",
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-                    <span
-                      className={`badge ${
-                        doc.doc_type === "WCR"
-                          ? "badge-cyan"
-                          : doc.doc_type === "DDR"
-                          ? "badge-amber"
-                          : "badge-emerald"
-                      }`}
-                    >
+                    <span className={`badge ${DOC_TYPE_BADGE[doc.doc_type] || "badge-canopy"}`}>
                       {doc.doc_type}
                     </span>
-                    <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                    <span style={{ fontSize: 10, color: "var(--color-muted-slate)", fontWeight: 600 }}>
                       {doc.well_id}
                     </span>
                   </div>
-
-                  <strong style={{ fontSize: 13, color: isSelected ? "var(--accent-cyan)" : "inherit" }}>
+                  <strong style={{ fontSize: 13, color: isSelected ? "var(--color-canopy)" : "var(--color-bark)", display: "block", lineHeight: 1.4 }}>
                     {doc.title}
                   </strong>
-
-                  <div style={{ fontSize: 11, color: "var(--text-secondary)", marginTop: 2 }}>
+                  <div style={{ fontSize: 11, color: "var(--color-muted-slate)", marginTop: 2 }}>
                     {doc.file_name}
                   </div>
                 </div>
@@ -147,8 +127,8 @@ export const DocumentsTab: React.FC<DocumentsTabProps> = ({ onAskAIAboutDoc }) =
         </div>
       </div>
 
-      {/* Right Document Viewer */}
-      <div className="glass-card" style={{ overflowY: "auto", height: "100%", padding: 24 }}>
+      {/* Document Viewer */}
+      <div className="glass-card" style={{ overflowY: "auto", height: "100%", padding: 28 }}>
         {activeDoc ? (
           <div>
             {/* Header */}
@@ -157,49 +137,65 @@ export const DocumentsTab: React.FC<DocumentsTabProps> = ({ onAskAIAboutDoc }) =
                 display: "flex",
                 alignItems: "flex-start",
                 justifyContent: "space-between",
-                borderBottom: "1px solid var(--border-subtle)",
-                paddingBottom: 16,
-                marginBottom: 20,
+                paddingBottom: 20,
+                marginBottom: 24,
+                borderBottom: "1px solid var(--color-sage-mist)",
               }}
             >
               <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                  <span className="badge badge-cyan">{activeDoc.doc_type}</span>
-                  <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
-                    Well: <strong>{activeDoc.well_id || "Regional"}</strong>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                  <span className={`badge ${DOC_TYPE_BADGE[activeDoc.doc_type] || "badge-canopy"}`}>
+                    {activeDoc.doc_type}
                   </span>
-                  <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
-                    File: <code>{activeDoc.file_name}</code>
+                  <span style={{ fontSize: 12, color: "var(--color-muted-slate)" }}>
+                    Well: <strong style={{ color: "var(--color-canopy)" }}>{activeDoc.well_id || "Regional"}</strong>
+                  </span>
+                  <span style={{ fontSize: 12, color: "var(--color-muted-slate)" }}>
+                    <code style={{ background: "var(--bg-elevated)", padding: "2px 6px", borderRadius: 4, border: "1px solid var(--color-sage-mist)", fontSize: 11 }}>
+                      {activeDoc.file_name}
+                    </code>
                   </span>
                 </div>
-                <h1 style={{ fontSize: 20, fontWeight: 700 }}>{activeDoc.title}</h1>
+                <h1 style={{ fontSize: 22, fontWeight: 500, color: "var(--color-ink)", letterSpacing: "-0.02em", lineHeight: 1.2 }}>
+                  {activeDoc.title}
+                </h1>
               </div>
 
               {onAskAIAboutDoc && (
                 <button
                   className="btn-primary"
                   onClick={() => onAskAIAboutDoc(activeDoc.title)}
+                  style={{ flexShrink: 0, gap: 6 }}
                 >
-                  <Bot size={14} />
+                  <Bot size={13} />
                   Ask AI About This Report
                 </button>
               )}
             </div>
 
-            {/* Document Summary */}
-            <div style={{ marginBottom: 24 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", marginBottom: 8 }}>
-                EXECUTIVE ENGINEERING SUMMARY
-              </h3>
+            {/* Summary */}
+            <div style={{ marginBottom: 28 }}>
+              <div
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: "0.07em",
+                  textTransform: "uppercase",
+                  color: "var(--color-muted-slate)",
+                  marginBottom: 12,
+                }}
+              >
+                Executive Engineering Summary
+              </div>
               <div
                 style={{
                   background: "var(--bg-elevated)",
-                  padding: 16,
-                  borderRadius: "var(--radius-md)",
-                  border: "1px solid var(--border-subtle)",
+                  padding: "18px 20px",
+                  borderRadius: 10,
+                  border: "1px solid var(--color-sage-mist)",
                   fontSize: 13,
-                  lineHeight: 1.6,
-                  color: "var(--text-secondary)",
+                  lineHeight: 1.7,
+                  color: "var(--color-slate)",
                 }}
               >
                 {activeDoc.summary}
@@ -209,23 +205,32 @@ export const DocumentsTab: React.FC<DocumentsTabProps> = ({ onAskAIAboutDoc }) =
             {/* Key Findings */}
             {activeDoc.key_findings && (
               <div>
-                <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", marginBottom: 8 }}>
-                  EXTRACTED DRILLING LESSONS & CRITICAL FINDINGS
-                </h3>
                 <div
                   style={{
-                    background: "rgba(11, 17, 32, 0.7)",
-                    padding: 16,
-                    borderRadius: "var(--radius-md)",
-                    border: "1px solid var(--border-subtle)",
-                    fontSize: 13,
-                    lineHeight: 1.6,
-                    color: "var(--text-primary)",
+                    fontSize: 10,
+                    fontWeight: 700,
+                    letterSpacing: "0.07em",
+                    textTransform: "uppercase",
+                    color: "var(--color-muted-slate)",
+                    marginBottom: 12,
                   }}
                 >
-                  <ul style={{ paddingLeft: 20, display: "flex", flexDirection: "column", gap: 8 }}>
+                  Extracted Drilling Lessons &amp; Critical Findings
+                </div>
+                <div
+                  style={{
+                    background: "rgba(16,67,54,0.04)",
+                    padding: "18px 20px",
+                    borderRadius: 10,
+                    border: "1px solid rgba(16,67,54,0.14)",
+                    borderLeft: "3px solid var(--color-canopy)",
+                  }}
+                >
+                  <ul style={{ paddingLeft: 18, display: "flex", flexDirection: "column", gap: 8 }}>
                     {activeDoc.key_findings.split("\n").map((finding, idx) => (
-                      <li key={idx}>{finding.replace(/^[•\-\*]\s*/, "")}</li>
+                      <li key={idx} style={{ fontSize: 13, lineHeight: 1.6, color: "var(--color-bark)" }}>
+                        {finding.replace(/^[•\-\*]\s*/, "")}
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -233,7 +238,8 @@ export const DocumentsTab: React.FC<DocumentsTabProps> = ({ onAskAIAboutDoc }) =
             )}
           </div>
         ) : (
-          <div style={{ padding: 40, textAlign: "center", color: "var(--text-muted)" }}>
+          <div style={{ padding: 60, textAlign: "center", color: "var(--color-muted-slate)" }}>
+            <BookOpen size={32} style={{ marginBottom: 12, opacity: 0.3, display: "block", margin: "0 auto 12px" }} />
             Select a document from the left catalog to inspect.
           </div>
         )}

@@ -1,5 +1,5 @@
 import React from "react";
-import { X, Calendar, Compass, ShieldAlert, Layers, Clock, Award } from "lucide-react";
+import { X, Layers, ShieldAlert, Clock } from "lucide-react";
 import { Well } from "../types";
 
 interface WellDossierModalProps {
@@ -8,13 +8,26 @@ interface WellDossierModalProps {
   onAskAIAboutWell?: (wellId: string) => void;
 }
 
+const SEV_BADGE: Record<string, string> = {
+  CRITICAL: "badge-rose",
+  HIGH:     "badge-amber",
+  MEDIUM:   "badge-amber",
+  LOW:      "badge-emerald",
+};
+
+const SEV_LEFT: Record<string, string> = {
+  CRITICAL: "#b91c42",
+  HIGH:     "#f97316",
+  MEDIUM:   "#c47d0e",
+  LOW:      "#0d7a4e",
+};
+
 export const WellDossierModal: React.FC<WellDossierModalProps> = ({
   well,
   onClose,
   onAskAIAboutWell,
 }) => {
   if (!well) return null;
-
   const events = well.events || [];
 
   return (
@@ -23,8 +36,8 @@ export const WellDossierModal: React.FC<WellDossierModalProps> = ({
         position: "fixed",
         inset: 0,
         zIndex: 2000,
-        background: "rgba(3, 7, 18, 0.8)",
-        backdropFilter: "blur(6px)",
+        background: "rgba(16,31,30,0.55)",
+        backdropFilter: "blur(4px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -33,15 +46,15 @@ export const WellDossierModal: React.FC<WellDossierModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="glass-card"
         style={{
           width: "100%",
-          maxWidth: 820,
+          maxWidth: 860,
           maxHeight: "90vh",
           overflowY: "auto",
-          background: "#0d1424",
-          border: "1px solid var(--border-medium)",
-          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.7)",
+          background: "var(--color-sheet-white)",
+          border: "1px solid var(--color-sage-mist)",
+          borderRadius: 16,
+          padding: 32,
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -51,38 +64,41 @@ export const WellDossierModal: React.FC<WellDossierModalProps> = ({
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            borderBottom: "1px solid var(--border-subtle)",
-            paddingBottom: 16,
-            marginBottom: 20,
+            borderBottom: "1px solid var(--color-sage-mist)",
+            paddingBottom: 20,
+            marginBottom: 24,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <div
               style={{
-                width: 44,
-                height: 44,
-                borderRadius: "var(--radius-md)",
-                background: well.is_active
-                  ? "radial-gradient(circle, #00d2ff, #0369a1)"
-                  : "linear-gradient(135deg, #334155, #1e293b)",
+                width: 48,
+                height: 48,
+                borderRadius: 10,
+                background: well.is_active ? "var(--color-canopy)" : "var(--bg-elevated)",
+                border: "1px solid var(--color-sage-mist)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "white",
+                color: well.is_active ? "var(--color-mint-pulse)" : "var(--color-canopy)",
                 fontWeight: 700,
+                fontSize: 13,
+                letterSpacing: "-0.01em",
+                fontFamily: "var(--font-mono)",
               }}
             >
               {well.well_id.slice(-4)}
             </div>
             <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <h2 style={{ fontSize: 20, fontWeight: 700 }}>{well.name}</h2>
-                <span className="badge badge-cyan">{well.well_id}</span>
-                {well.is_active && <span className="badge badge-emerald">ACTIVE RIG</span>}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+                <h2 style={{ fontSize: 20, fontWeight: 500, color: "var(--color-ink)", letterSpacing: "-0.02em" }}>
+                  {well.name}
+                </h2>
+                <span className="badge badge-canopy">{well.well_id}</span>
+                {well.is_active && <span className="badge badge-mint">ACTIVE RIG</span>}
               </div>
-              <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2 }}>
-                {well.field} • {well.operator} • Lat: {well.latitude.toFixed(4)}°, Lon:{" "}
-                {well.longitude.toFixed(4)}°
+              <div style={{ fontSize: 12, color: "var(--color-muted-slate)" }}>
+                {well.field} &nbsp;·&nbsp; {well.operator} &nbsp;·&nbsp; {well.latitude.toFixed(4)}°N, {well.longitude.toFixed(4)}°E
               </div>
             </div>
           </div>
@@ -90,135 +106,88 @@ export const WellDossierModal: React.FC<WellDossierModalProps> = ({
           <button
             onClick={onClose}
             style={{
-              background: "transparent",
-              border: "none",
-              color: "var(--text-muted)",
+              background: "var(--bg-elevated)",
+              border: "1px solid var(--color-sage-mist)",
+              color: "var(--color-slate)",
               cursor: "pointer",
-              padding: 4,
+              padding: 8,
+              borderRadius: 8,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "all 0.15s ease",
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--color-canopy)"; e.currentTarget.style.color = "white"; e.currentTarget.style.borderColor = "var(--color-canopy)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "var(--bg-elevated)"; e.currentTarget.style.color = "var(--color-slate)"; e.currentTarget.style.borderColor = "var(--color-sage-mist)"; }}
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
-        {/* Quick Specs Grid */}
+        {/* Spec Grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 24 }}>
+          {[
+            { label: "TARGET FORMATION", value: well.formation,          color: "var(--color-canopy)" },
+            { label: "TOTAL DEPTH",      value: `${well.total_depth.toLocaleString()}m`, color: "var(--color-bark)" },
+            { label: "TRAJECTORY",       value: well.trajectory_type,    color: "var(--color-bark)" },
+            { label: "DESIGN MUD WT",    value: `${well.mud_weight} ppg`,color: "#c47d0e" },
+          ].map((s) => (
+            <div
+              key={s.label}
+              style={{
+                padding: "14px 16px",
+                borderRadius: 10,
+                background: "var(--bg-elevated)",
+                border: "1px solid var(--color-sage-mist)",
+              }}
+            >
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "var(--color-muted-slate)", marginBottom: 6 }}>
+                {s.label}
+              </div>
+              <div style={{ fontSize: 16, fontWeight: 600, color: s.color }}>
+                {s.value}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Casing & Cementing */}
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: 12,
+            padding: "16px 18px",
+            borderRadius: 10,
+            background: "var(--bg-elevated)",
+            border: "1px solid var(--color-sage-mist)",
             marginBottom: 24,
           }}
         >
-          <div
-            style={{
-              background: "var(--bg-elevated)",
-              padding: "12px 14px",
-              borderRadius: "var(--radius-md)",
-              border: "1px solid var(--border-subtle)",
-            }}
-          >
-            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>TARGET FORMATION</div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "var(--accent-cyan)", marginTop: 4 }}>
-              {well.formation}
-            </div>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "var(--color-muted-slate)", marginBottom: 8 }}>
+            Drilling Architecture &amp; Casing Program
           </div>
-
-          <div
-            style={{
-              background: "var(--bg-elevated)",
-              padding: "12px 14px",
-              borderRadius: "var(--radius-md)",
-              border: "1px solid var(--border-subtle)",
-            }}
-          >
-            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>TOTAL DEPTH</div>
-            <div style={{ fontSize: 15, fontWeight: 700, marginTop: 4 }}>
-              {well.total_depth.toLocaleString()} m
-            </div>
-          </div>
-
-          <div
-            style={{
-              background: "var(--bg-elevated)",
-              padding: "12px 14px",
-              borderRadius: "var(--radius-md)",
-              border: "1px solid var(--border-subtle)",
-            }}
-          >
-            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>TRAJECTORY</div>
-            <div style={{ fontSize: 15, fontWeight: 700, marginTop: 4 }}>
-              {well.trajectory_type}
-            </div>
-          </div>
-
-          <div
-            style={{
-              background: "var(--bg-elevated)",
-              padding: "12px 14px",
-              borderRadius: "var(--radius-md)",
-              border: "1px solid var(--border-subtle)",
-            }}
-          >
-            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>DESIGN MUD WT</div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#f59e0b", marginTop: 4 }}>
-              {well.mud_weight} ppg
-            </div>
-          </div>
-        </div>
-
-        {/* Casing & Cementing Program */}
-        <div
-          style={{
-            background: "rgba(11, 17, 32, 0.6)",
-            padding: 16,
-            borderRadius: "var(--radius-md)",
-            border: "1px solid var(--border-subtle)",
-            marginBottom: 20,
-          }}
-        >
-          <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 8 }}>
-            DRILLING ARCHITECTURE & CASING PROGRAM
-          </div>
-          <p style={{ fontSize: 13, color: "var(--text-primary)", marginBottom: 6 }}>
+          <p style={{ fontSize: 13, color: "var(--color-bark)", lineHeight: 1.6, marginBottom: 6 }}>
             {well.casing_program || "Standard casing string: 20\" conductor, 13-3/8\" surface, 9-5/8\" intermediate."}
           </p>
-          <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
-            Cementing Notes: {well.cementing_notes || "Standard API Class G cement with fluid loss additives."}
+          <div style={{ fontSize: 12, color: "var(--color-muted-slate)" }}>
+            Cementing: {well.cementing_notes || "Standard API Class G cement with fluid loss additives."}
           </div>
         </div>
 
-        {/* Historical Events Encountered */}
-        <div style={{ marginBottom: 20 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 12,
-            }}
-          >
-            <div style={{ fontSize: 14, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
-              <ShieldAlert size={16} color="var(--accent-amber)" />
-              Recorded Drilling Incidents & NPT Events ({events.length})
+        {/* Events */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: "var(--color-bark)", display: "flex", alignItems: "center", gap: 8 }}>
+              <ShieldAlert size={16} color="#c47d0e" />
+              Recorded Drilling Incidents &amp; NPT Events ({events.length})
             </div>
             {well.total_npt !== undefined && (
-              <span style={{ fontSize: 12, color: "var(--accent-rose)", fontWeight: 600 }}>
-                Total NPT: {well.total_npt.toFixed(1)} hrs
+              <span style={{ fontSize: 13, color: "#b91c42", fontWeight: 600 }}>
+                Total NPT: {well.total_npt.toFixed(1)}h
               </span>
             )}
           </div>
 
           {events.length === 0 ? (
-            <div
-              style={{
-                padding: 16,
-                textAlign: "center",
-                color: "var(--text-muted)",
-                background: "rgba(255,255,255,0.02)",
-                borderRadius: "var(--radius-md)",
-              }}
-            >
+            <div style={{ padding: 24, textAlign: "center", color: "var(--color-muted-slate)", background: "var(--bg-elevated)", borderRadius: 10, border: "1px solid var(--color-sage-mist)" }}>
               No major NPT incidents recorded on this well.
             </div>
           ) : (
@@ -228,57 +197,41 @@ export const WellDossierModal: React.FC<WellDossierModalProps> = ({
                   key={ev.id}
                   style={{
                     background: "var(--bg-elevated)",
-                    border: "1px solid var(--border-subtle)",
-                    borderRadius: "var(--radius-md)",
-                    padding: 12,
+                    border: "1px solid var(--color-sage-mist)",
+                    borderLeft: `3px solid ${SEV_LEFT[ev.severity] || "#afc4bf"}`,
+                    borderRadius: 10,
+                    padding: "12px 16px",
                   }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      marginBottom: 6,
-                    }}
-                  >
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span
-                        className={`badge ${
-                          ev.severity === "CRITICAL"
-                            ? "badge-rose"
-                            : ev.severity === "HIGH"
-                            ? "badge-amber"
-                            : "badge-cyan"
-                        }`}
-                      >
+                      <span className={`badge ${SEV_BADGE[ev.severity] || "badge-canopy"}`}>
                         {ev.event_type}
                       </span>
-                      <span style={{ fontSize: 12, fontWeight: 600 }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: "var(--color-bark)" }}>
                         {ev.depth_start}m – {ev.depth_end}m
                       </span>
-                      <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
-                        ({ev.formation})
-                      </span>
+                      <span style={{ fontSize: 11, color: "var(--color-muted-slate)" }}>({ev.formation})</span>
                     </div>
-                    <span style={{ fontSize: 12, color: "var(--accent-rose)", fontWeight: 600 }}>
+                    <span style={{ fontSize: 12, color: "#b91c42", fontWeight: 700, display: "flex", alignItems: "center", gap: 4 }}>
+                      <Clock size={12} />
                       +{ev.npt_hours}h NPT
                     </span>
                   </div>
-
-                  <p style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 6 }}>
+                  <p style={{ fontSize: 12, color: "var(--color-slate)", marginBottom: 8, lineHeight: 1.5 }}>
                     {ev.description}
                   </p>
-
                   <div
                     style={{
                       fontSize: 11,
-                      background: "rgba(0,0,0,0.25)",
+                      background: "rgba(13,122,78,0.06)",
                       padding: "6px 10px",
-                      borderRadius: 4,
-                      color: "var(--text-muted)",
+                      borderRadius: 6,
+                      border: "1px solid rgba(13,122,78,0.15)",
+                      color: "var(--color-slate)",
                     }}
                   >
-                    <strong style={{ color: "var(--accent-emerald)" }}>Mitigation Applied: </strong>
+                    <strong style={{ color: "#0d7a4e" }}>Mitigation Applied: </strong>
                     {ev.mitigation}
                   </div>
                 </div>
@@ -287,24 +240,42 @@ export const WellDossierModal: React.FC<WellDossierModalProps> = ({
           )}
         </div>
 
-        {/* Footer Actions */}
+        {/* Lessons */}
+        {well.lessons_learned && (
+          <div
+            style={{
+              padding: "14px 16px",
+              borderRadius: 10,
+              background: "rgba(16,67,54,0.04)",
+              border: "1px solid rgba(16,67,54,0.14)",
+              borderLeft: "3px solid var(--color-canopy)",
+              marginBottom: 24,
+            }}
+          >
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "var(--color-canopy)", marginBottom: 8 }}>
+              Lessons Learned
+            </div>
+            <p style={{ fontSize: 13, color: "var(--color-slate)", lineHeight: 1.6 }}>
+              {well.lessons_learned}
+            </p>
+          </div>
+        )}
+
+        {/* Footer */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "flex-end",
-            gap: 12,
-            borderTop: "1px solid var(--border-subtle)",
+            gap: 10,
+            borderTop: "1px solid var(--color-sage-mist)",
             paddingTop: 16,
           }}
         >
           {onAskAIAboutWell && (
             <button
               className="btn-primary"
-              onClick={() => {
-                onClose();
-                onAskAIAboutWell(well.well_id);
-              }}
+              onClick={() => { onClose(); onAskAIAboutWell(well.well_id); }}
             >
               Ask AI Copilot About {well.well_id}
             </button>

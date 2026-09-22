@@ -35,6 +35,13 @@ def well_to_dict(well: Well, distance_km: float = None) -> dict:
         "cementing_notes": well.cementing_notes,
         "lessons_learned": well.lessons_learned,
         "operator": well.operator,
+        "source_dataset": getattr(well, "source_dataset", "OIL_SYNTHETIC") or "OIL_SYNTHETIC",
+        "license": getattr(well, "license", "Proprietary / Synthetic") or "Proprietary / Synthetic",
+        "country": getattr(well, "country", "India") or "India",
+        "basin": getattr(well, "basin", "Assam-Arakan") or "Assam-Arakan",
+        "x_coord": getattr(well, "x_coord", None),
+        "y_coord": getattr(well, "y_coord", None),
+        "lithology": getattr(well, "lithology", None),
         "distance_km": distance_km,
     }
 
@@ -43,15 +50,18 @@ def well_to_dict(well: Well, distance_km: float = None) -> dict:
 def get_all_wells(
     formation: Optional[str] = None,
     status: Optional[str] = None,
+    source_dataset: Optional[str] = None,
     limit: int = Query(100, le=200),
     db: Session = Depends(get_db),
 ):
-    """Get all wells with optional filters."""
+    """Get all wells with optional filters (including source_dataset)."""
     q = db.query(Well)
     if formation:
         q = q.filter(Well.formation == formation)
     if status:
         q = q.filter(Well.status == status)
+    if source_dataset:
+        q = q.filter(Well.source_dataset == source_dataset)
     wells = q.limit(limit).all()
     return [well_to_dict(w) for w in wells]
 

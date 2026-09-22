@@ -1,0 +1,27 @@
+{
+  "generated_at": "2026-09-22T15:21:56.113686",
+  "total_public_wells": 13,
+  "by_dataset": {
+    "FORCE_2020": 6,
+    "EQUINOR_VOLVE": 7
+  },
+  "depth_range_meters": {
+    "min": 2840.0,
+    "max": 4150.0,
+    "avg": 3425.4
+  },
+  "formations": [
+    "Draupne Fm.",
+    "Heimdal Fm.",
+    "Hugin Fm.",
+    "Skagerrak Fm.",
+    "Sleipner Fm.",
+    "Sognefjord Fm."
+  ],
+  "lithologies": [
+    "Sandstone",
+    "Sandstone/Shale",
+    "Shale"
+  ],
+  "disclaimer": "Public research and education datasets only. Not Oil India Limited operational data."
+}

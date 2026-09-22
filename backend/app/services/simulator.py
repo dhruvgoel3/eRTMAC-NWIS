@@ -23,10 +23,11 @@ from app.services.risk_engine import generate_depth_alerts
 # ─── Demo scenario trigger depths ────────────────────────────────────────────
 DEMO_TRIGGERS = [
     {"depth": 3095, "type": "APPROACHING", "event": "MUD_LOSS"},
-    {"depth": 3110, "type": "ENTERED",     "event": "MUD_LOSS"},
-    {"depth": 3180, "type": "APPROACHING", "event": "STUCK_PIPE"},
-    {"depth": 3210, "type": "ENTERED",     "event": "STUCK_PIPE"},
-    {"depth": 3250, "type": "APPROACHING", "event": "TORQUE_SPIKE"},
+    {"depth": 3120, "type": "ENTERED",     "event": "MUD_LOSS"},
+    {"depth": 3250, "type": "APPROACHING", "event": "STUCK_PIPE"},
+    {"depth": 3280, "type": "ENTERED",     "event": "STUCK_PIPE"},
+    {"depth": 3420, "type": "APPROACHING", "event": "TORQUE_SPIKE"},
+    {"depth": 3450, "type": "ENTERED",     "event": "TORQUE_SPIKE"},
 ]
 
 # Track which triggers have fired (in-memory, reset on reset)

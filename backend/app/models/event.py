@@ -34,6 +34,7 @@ class WellEvent(Base):
 
     # Date and source
     event_date = Column(DateTime)
+    source_dataset = Column(String(50), default="OIL_SYNTHETIC", index=True)
     document_id = Column(Integer, ForeignKey("documents.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 

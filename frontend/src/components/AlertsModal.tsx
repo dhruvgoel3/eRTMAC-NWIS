@@ -1,5 +1,5 @@
 import React from "react";
-import { X, Bell, AlertTriangle, ShieldCheck, Check } from "lucide-react";
+import { X, Bell, ShieldCheck, Check, Clock } from "lucide-react";
 import { Alert } from "../types";
 
 interface AlertsModalProps {
@@ -8,15 +8,32 @@ interface AlertsModalProps {
   onAcknowledge: (id: number) => void;
 }
 
+const SEV_BADGE: Record<string, string> = {
+  CRITICAL: "badge-rose",
+  HIGH:     "badge-amber",
+  MEDIUM:   "badge-amber",
+  LOW:      "badge-emerald",
+};
+
+const SEV_LEFT: Record<string, string> = {
+  CRITICAL: "#b91c42",
+  HIGH:     "#f97316",
+  MEDIUM:   "#c47d0e",
+  LOW:      "#0d7a4e",
+};
+
 export const AlertsModal: React.FC<AlertsModalProps> = ({ alerts, onClose, onAcknowledge }) => {
+  const unack = alerts.filter((a) => !a.acknowledged);
+  const acked = alerts.filter((a) => a.acknowledged);
+
   return (
     <div
       style={{
         position: "fixed",
         inset: 0,
         zIndex: 2100,
-        background: "rgba(3, 7, 18, 0.8)",
-        backdropFilter: "blur(6px)",
+        background: "rgba(16,31,30,0.55)",
+        backdropFilter: "blur(4px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -25,41 +42,62 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({ alerts, onClose, onAck
       onClick={onClose}
     >
       <div
-        className="glass-card"
         style={{
           width: "100%",
           maxWidth: 680,
           maxHeight: "85vh",
           overflowY: "auto",
-          background: "#0d1424",
-          border: "1px solid var(--border-medium)",
+          background: "var(--color-sheet-white)",
+          border: "1px solid var(--color-sage-mist)",
+          borderRadius: 16,
+          padding: 28,
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Header */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            borderBottom: "1px solid var(--border-subtle)",
-            paddingBottom: 14,
-            marginBottom: 16,
+            borderBottom: "1px solid var(--color-sage-mist)",
+            paddingBottom: 16,
+            marginBottom: 20,
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Bell size={20} color="var(--accent-amber)" />
-            <h2 style={{ fontSize: 18, fontWeight: 700 }}>Real-Time Drilling Hazard Alerts</h2>
+            <Bell size={18} color="#c47d0e" />
+            <h2 style={{ fontSize: 18, fontWeight: 500, color: "var(--color-ink)", letterSpacing: "-0.02em" }}>
+              Real-Time Drilling Hazard Alerts
+            </h2>
+            {unack.length > 0 && (
+              <span className="badge badge-rose">{unack.length} Active</span>
+            )}
           </div>
           <button
             onClick={onClose}
-            style={{ background: "transparent", border: "none", color: "var(--text-muted)", cursor: "pointer" }}
+            style={{
+              background: "var(--bg-elevated)",
+              border: "1px solid var(--color-sage-mist)",
+              color: "var(--color-slate)",
+              cursor: "pointer",
+              padding: 7,
+              borderRadius: 8,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "all 0.15s ease",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--color-canopy)"; e.currentTarget.style.color = "white"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "var(--bg-elevated)"; e.currentTarget.style.color = "var(--color-slate)"; }}
           >
-            <X size={20} />
+            <X size={16} />
           </button>
         </div>
 
         {alerts.length === 0 ? (
-          <div style={{ padding: 30, textAlign: "center", color: "var(--text-muted)" }}>
+          <div style={{ padding: 40, textAlign: "center", color: "var(--color-muted-slate)" }}>
+            <ShieldCheck size={28} style={{ marginBottom: 10, display: "block", margin: "0 auto 10px", opacity: 0.4 }} />
             No active hazard alerts at this depth.
           </div>
         ) : (
@@ -68,42 +106,37 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({ alerts, onClose, onAck
               <div
                 key={a.id}
                 style={{
-                  background: a.acknowledged ? "rgba(255,255,255,0.02)" : "var(--bg-elevated)",
-                  border: "1px solid " + (a.acknowledged ? "var(--border-subtle)" : "rgba(244,63,94,0.3)"),
-                  borderRadius: "var(--radius-md)",
+                  background: a.acknowledged ? "var(--bg-elevated)" : "var(--color-sheet-white)",
+                  border: "1px solid var(--color-sage-mist)",
+                  borderLeft: `3px solid ${a.acknowledged ? "var(--color-pale-sage)" : (SEV_LEFT[a.severity] || "#afc4bf")}`,
+                  borderRadius: 10,
                   padding: "12px 16px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
+                  gap: 16,
+                  opacity: a.acknowledged ? 0.6 : 1,
+                  transition: "opacity 0.2s ease",
                 }}
               >
-                <div>
+                <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                    <span
-                      className={`badge ${
-                        a.severity === "CRITICAL"
-                          ? "badge-rose"
-                          : a.severity === "HIGH"
-                          ? "badge-amber"
-                          : "badge-cyan"
-                      }`}
-                    >
+                    <span className={`badge ${SEV_BADGE[a.severity] || "badge-canopy"}`}>
                       {a.severity}
                     </span>
-                    <span style={{ fontSize: 12, fontWeight: 700 }}>
-                      Depth: {a.depth.toFixed(1)}m
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "var(--color-bark)" }}>
+                      {a.depth.toFixed(1)}m
                     </span>
-                    <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                    <span style={{ fontSize: 11, color: "var(--color-muted-slate)", display: "flex", alignItems: "center", gap: 3 }}>
+                      <Clock size={11} />
                       {new Date(a.created_at).toLocaleTimeString()}
                     </span>
                   </div>
-
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-bark)", marginBottom: 2 }}>
                     {a.message}
                   </div>
-
                   {a.explanation && (
-                    <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2 }}>
+                    <div style={{ fontSize: 12, color: "var(--color-slate)", lineHeight: 1.5 }}>
                       {a.explanation}
                     </div>
                   )}
@@ -113,14 +146,14 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({ alerts, onClose, onAck
                   <button
                     className="btn-primary"
                     onClick={() => onAcknowledge(a.id)}
-                    style={{ padding: "6px 12px", fontSize: 12 }}
+                    style={{ padding: "6px 12px", fontSize: 11, flexShrink: 0 }}
                   >
-                    <Check size={14} />
+                    <Check size={13} />
                     Acknowledge
                   </button>
                 ) : (
-                  <span style={{ fontSize: 11, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 4 }}>
-                    <ShieldCheck size={14} color="var(--accent-emerald)" />
+                  <span style={{ fontSize: 11, color: "#0d7a4e", display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+                    <ShieldCheck size={14} />
                     Acknowledged
                   </span>
                 )}

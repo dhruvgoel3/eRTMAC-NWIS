@@ -5,11 +5,8 @@ import {
   Sparkles,
   FileText,
   Compass,
-  AlertCircle,
-  HelpCircle,
-  ExternalLink,
-  ShieldCheck,
   Zap,
+  MessageSquare,
 } from "lucide-react";
 import { AICitation, AIQueryResponse, SimulationState } from "../../types";
 import { api } from "../../services/api";
@@ -45,7 +42,7 @@ export const AICopilotTab: React.FC<AICopilotTabProps> = ({
     {
       id: "welcome",
       sender: "ai",
-      text: `Hello, Drilling Engineer. I am the eRTMAC-NWIS AI Copilot for Oil India Limited operations. I have synthesized historical knowledge from 50 offset wells, 16 End of Well Reports (EOWR), and 178 drilling events in the Assam Basin.\n\nCurrently monitoring **${activeWellId}** at **${
+      text: `Hello, Drilling Engineer. I am the eRTMAC-NWIS AI Copilot for Oil India Limited operations. I have synthesized historical knowledge from 50 offset wells, 16 End of Well Reports, and 178 drilling events in the Assam Basin.\n\nCurrently monitoring **${activeWellId}** at **${
         simulation ? simulation.current_depth.toFixed(1) : "3,050.0"
       }m** in **${formation}** formation. How can I assist your drilling decisions today?`,
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
@@ -78,7 +75,6 @@ export const AICopilotTab: React.FC<AICopilotTabProps> = ({
     try {
       const depth = simulation ? simulation.current_depth : 3050.0;
       const res: AIQueryResponse = await api.queryAI(q, activeWellId, depth, formation);
-
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: "ai",
@@ -87,10 +83,8 @@ export const AICopilotTab: React.FC<AICopilotTabProps> = ({
         provider: res.provider,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
-
       setMessages((prev) => [...prev, aiMsg]);
-    } catch (err: any) {
-      console.error("AI query failed", err);
+    } catch (err) {
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: "ai",
@@ -104,46 +98,61 @@ export const AICopilotTab: React.FC<AICopilotTabProps> = ({
   };
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 20, height: "calc(100vh - 180px)" }}>
-      {/* Left Chat Window */}
-      <div className="glass-card" style={{ display: "flex", flexDirection: "column", height: "100%", padding: 0, overflow: "hidden" }}>
-        {/* Chat Header */}
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 20, height: "calc(100vh - 220px)" }}>
+
+      {/* Chat Window */}
+      <div
+        className="glass-card"
+        style={{ display: "flex", flexDirection: "column", height: "100%", padding: 0, overflow: "hidden" }}
+      >
+        {/* Chat Header — Canopy band */}
         <div
           style={{
             padding: "14px 20px",
-            borderBottom: "1px solid var(--border-subtle)",
+            background: "var(--color-canopy)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            background: "rgba(11, 17, 32, 0.5)",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div
               style={{
-                width: 32,
-                height: 32,
-                borderRadius: "var(--radius-sm)",
-                background: "linear-gradient(135deg, #0284c7, #38bdf8)",
+                width: 34,
+                height: 34,
+                borderRadius: 8,
+                background: "rgba(255,255,255,0.12)",
+                border: "1px solid rgba(255,255,255,0.18)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "white",
+                color: "var(--color-mint-pulse)",
               }}
             >
               <Bot size={18} />
             </div>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 700 }}>OIL Drilling Intelligence Assistant</div>
-              <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
-                Active Rig Context: {activeWellId} • Depth: {simulation?.current_depth.toFixed(1)}m • {formation}
+              <div style={{ fontSize: 14, fontWeight: 600, color: "white" }}>
+                OIL Drilling Intelligence Assistant
+              </div>
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginTop: 1 }}>
+                {activeWellId} · {simulation?.current_depth.toFixed(1)}m · {formation}
               </div>
             </div>
           </div>
-
-          <span className="badge badge-emerald">
-            <Zap size={10} />
-            Domain RAG Engine Ready
+          <span
+            style={{
+              fontSize: 9,
+              fontWeight: 700,
+              letterSpacing: "0.07em",
+              textTransform: "uppercase",
+              padding: "3px 8px",
+              borderRadius: 9999,
+              background: "var(--color-mint-pulse)",
+              color: "var(--color-bark)",
+            }}
+          >
+            RAG Engine Ready
           </span>
         </div>
 
@@ -152,15 +161,15 @@ export const AICopilotTab: React.FC<AICopilotTabProps> = ({
           style={{
             flex: 1,
             overflowY: "auto",
-            padding: "20px",
+            padding: "20px 20px",
             display: "flex",
             flexDirection: "column",
             gap: 16,
+            background: "#faf9f6",
           }}
         >
           {messages.map((m) => {
             const isUser = m.sender === "user";
-
             return (
               <div
                 key={m.id}
@@ -172,53 +181,49 @@ export const AICopilotTab: React.FC<AICopilotTabProps> = ({
               >
                 <div
                   style={{
-                    maxWidth: "80%",
+                    maxWidth: "82%",
                     padding: "12px 16px",
-                    borderRadius: "var(--radius-md)",
-                    background: isUser
-                      ? "linear-gradient(135deg, #0284c7, #0369a1)"
-                      : "var(--bg-elevated)",
-                    border: isUser ? "none" : "1px solid var(--border-subtle)",
-                    color: "var(--text-primary)",
+                    borderRadius: isUser ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+                    background: isUser ? "var(--color-canopy)" : "var(--color-sheet-white)",
+                    border: isUser ? "none" : "1px solid var(--color-sage-mist)",
+                    color: isUser ? "white" : "var(--color-bark)",
                     fontSize: 13,
                     lineHeight: 1.6,
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
                   }}
                 >
                   <div style={{ whiteSpace: "pre-wrap" }}>{m.text}</div>
 
-                  {/* Citations / Evidence Cards */}
+                  {/* Citations */}
                   {m.citations && m.citations.length > 0 && (
                     <div
                       style={{
-                        marginTop: 14,
+                        marginTop: 12,
                         paddingTop: 10,
-                        borderTop: "1px solid rgba(255,255,255,0.1)",
+                        borderTop: "1px solid var(--color-sage-mist)",
                         display: "flex",
                         flexDirection: "column",
-                        gap: 8,
+                        gap: 6,
                       }}
                     >
-                      <div style={{ fontSize: 11, fontWeight: 700, color: "var(--accent-cyan)", display: "flex", alignItems: "center", gap: 6 }}>
-                        <FileText size={12} />
-                        GROUND TRUTH EVIDENCE ({m.citations.length} Sources):
+                      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "var(--color-canopy)", display: "flex", alignItems: "center", gap: 5 }}>
+                        <FileText size={11} />
+                        Ground Truth Evidence ({m.citations.length} Sources)
                       </div>
-
                       {m.citations.map((c, idx) => (
                         <div
                           key={idx}
                           style={{
-                            background: "rgba(0,0,0,0.3)",
                             padding: "8px 10px",
-                            borderRadius: 4,
-                            borderLeft: "2px solid var(--accent-cyan)",
+                            borderRadius: 6,
+                            background: "rgba(16,67,54,0.06)",
+                            borderLeft: "2px solid var(--color-canopy)",
                             fontSize: 11,
                           }}
                         >
-                          <div style={{ fontWeight: 600, color: "var(--text-primary)", marginBottom: 2 }}>
-                            {c.source_doc} • Well: {c.well_id} ({c.depth_range})
+                          <div style={{ fontWeight: 600, color: "var(--color-bark)", marginBottom: 2 }}>
+                            {c.source_doc} · Well: {c.well_id} ({c.depth_range})
                           </div>
-                          <div style={{ color: "var(--text-secondary)", fontStyle: "italic" }}>
+                          <div style={{ color: "var(--color-slate)", fontStyle: "italic" }}>
                             "{c.text_snippet}"
                           </div>
                         </div>
@@ -227,17 +232,17 @@ export const AICopilotTab: React.FC<AICopilotTabProps> = ({
                   )}
                 </div>
 
-                <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 4, padding: "0 4px" }}>
-                  {m.timestamp} {m.provider ? `• via ${m.provider}` : ""}
+                <div style={{ fontSize: 10, color: "var(--color-muted-slate)", marginTop: 4, paddingInline: 4 }}>
+                  {m.timestamp}{m.provider ? ` · via ${m.provider}` : ""}
                 </div>
               </div>
             );
           })}
 
           {isQuerying && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--text-muted)", fontSize: 12 }}>
-              <Sparkles size={16} className="animate-spin" color="var(--accent-cyan)" />
-              Synthesizing offset well knowledge and institutional reports...
+            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--color-muted-slate)", fontSize: 12 }}>
+              <Sparkles size={15} style={{ animation: "spin 1.5s linear infinite" }} color="var(--color-canopy)" />
+              Synthesizing offset well knowledge and institutional reports…
             </div>
           )}
 
@@ -247,18 +252,18 @@ export const AICopilotTab: React.FC<AICopilotTabProps> = ({
         {/* Input Bar */}
         <div
           style={{
-            padding: "14px 20px",
-            borderTop: "1px solid var(--border-subtle)",
+            padding: "12px 16px",
+            borderTop: "1px solid var(--color-sage-mist)",
             display: "flex",
             gap: 10,
-            background: "rgba(11, 17, 32, 0.6)",
+            background: "var(--color-sheet-white)",
           }}
         >
           <input
             type="text"
             className="input-control"
-            style={{ flex: 1 }}
-            placeholder={`Ask about risks at ${simulation?.current_depth.toFixed(0)}m, offset mitigations, or casing designs...`}
+            style={{ flex: 1, borderRadius: 8 }}
+            placeholder={`Ask about risks at ${simulation?.current_depth.toFixed(0) ?? "3050"}m, offset mitigations…`}
             value={inputQuery}
             onChange={(e) => setInputQuery(e.target.value)}
             onKeyDown={(e) => {
@@ -272,22 +277,23 @@ export const AICopilotTab: React.FC<AICopilotTabProps> = ({
             className="btn-primary"
             onClick={() => handleSend()}
             disabled={isQuerying || !inputQuery.trim()}
+            style={{ gap: 6, padding: "8px 16px" }}
           >
-            <Send size={16} />
+            <Send size={14} />
             Ask
           </button>
         </div>
       </div>
 
-      {/* Right Prompt Shortcuts & Context Info */}
+      {/* Right: Prompts + Context */}
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        {/* Suggested Queries Card */}
+
+        {/* Suggested Prompts */}
         <div className="glass-card">
-          <div className="card-title" style={{ marginBottom: 12 }}>
-            <Sparkles size={16} color="var(--accent-cyan)" />
+          <div className="card-title" style={{ marginBottom: 14 }}>
+            <Sparkles size={15} color="var(--color-orb-violet)" />
             Recommended Prompts
           </div>
-
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {SAMPLE_PROMPTS.map((p, idx) => (
               <button
@@ -295,61 +301,54 @@ export const AICopilotTab: React.FC<AICopilotTabProps> = ({
                 onClick={() => handleSend(p)}
                 style={{
                   background: "var(--bg-elevated)",
-                  border: "1px solid var(--border-subtle)",
-                  borderRadius: "var(--radius-sm)",
+                  border: "1px solid var(--color-sage-mist)",
+                  borderRadius: 8,
                   padding: "10px 12px",
                   textAlign: "left",
                   fontSize: 12,
-                  color: "var(--text-secondary)",
+                  color: "var(--color-slate)",
                   cursor: "pointer",
                   transition: "all 0.15s ease",
-                  lineHeight: 1.4,
+                  lineHeight: 1.5,
+                  fontFamily: "var(--font-sans)",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "var(--accent-cyan)";
-                  e.currentTarget.style.color = "var(--text-primary)";
+                  e.currentTarget.style.borderColor = "var(--color-canopy)";
+                  e.currentTarget.style.color = "var(--color-bark)";
+                  e.currentTarget.style.background = "rgba(16,67,54,0.04)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "var(--border-subtle)";
-                  e.currentTarget.style.color = "var(--text-secondary)";
+                  e.currentTarget.style.borderColor = "var(--color-sage-mist)";
+                  e.currentTarget.style.color = "var(--color-slate)";
+                  e.currentTarget.style.background = "var(--bg-elevated)";
                 }}
               >
-                "{p}"
+                <MessageSquare size={11} style={{ display: "inline", marginRight: 6, verticalAlign: "middle", opacity: 0.5 }} />
+                {p}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Real-Time Context Card */}
+        {/* Context Card */}
         <div className="glass-card">
-          <div className="card-title" style={{ marginBottom: 12 }}>
-            <Compass size={16} color="var(--accent-emerald)" />
+          <div className="card-title" style={{ marginBottom: 14 }}>
+            <Compass size={15} color="var(--color-canopy)" />
             Drilling Context Passed to AI
           </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 12 }}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--text-muted)" }}>Active Well:</span>
-              <strong>{activeWellId}</strong>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--text-muted)" }}>Current Depth:</span>
-              <strong style={{ color: "var(--accent-cyan)" }}>
-                {simulation ? simulation.current_depth.toFixed(1) : "3,050.0"} m
-              </strong>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--text-muted)" }}>Current Formation:</span>
-              <strong style={{ color: "#38bdf8" }}>{formation}</strong>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--text-muted)" }}>Search Radius:</span>
-              <span>20.0 km</span>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--text-muted)" }}>Analogue Wells:</span>
-              <span>OIL-X104, OIL-X101, OIL-X106</span>
-            </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13 }}>
+            {[
+              { label: "Active Well",      val: activeWellId, color: "var(--color-canopy)" },
+              { label: "Current Depth",    val: `${simulation?.current_depth.toFixed(1) ?? "3,050.0"} m`, color: "var(--color-canopy)" },
+              { label: "Formation",        val: formation, color: "var(--color-canopy)" },
+              { label: "Search Radius",    val: "20.0 km", color: "var(--color-bark)" },
+              { label: "Analogue Wells",   val: "OIL-X104, OIL-X101, OIL-X106", color: "var(--color-bark)" },
+            ].map((row) => (
+              <div key={row.label} style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--color-sage-mist)", paddingBottom: 8 }}>
+                <span style={{ color: "var(--color-muted-slate)", fontSize: 12 }}>{row.label}</span>
+                <strong style={{ fontSize: 12, color: row.color }}>{row.val}</strong>
+              </div>
+            ))}
           </div>
         </div>
       </div>
