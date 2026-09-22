@@ -191,6 +191,13 @@ def get_alerts(
         for a in alerts
     ]
 
+
+@alerts_router.get("/active")
+def get_active_alerts(well_id_str: Optional[str] = None, db: Session = Depends(get_db)):
+    """Convenience endpoint to get unacknowledged alerts."""
+    return get_alerts(well_id_str=well_id_str, acknowledged=False, severity=None, db=db)
+
+
 @alerts_router.post("/{alert_id}/acknowledge")
 def acknowledge_alert(alert_id: int, db: Session = Depends(get_db)):
     alert = db.query(Alert).filter(Alert.id == alert_id).first()

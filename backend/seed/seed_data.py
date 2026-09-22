@@ -329,6 +329,8 @@ def seed_wells(db):
     # ── ADDITIONAL 41 WELLS (wider radius, various formations) ────────────────
     formation_list = list(FORMATIONS.keys())
     for i in range(109, 151):
+        if i == 123:  # OIL-X123 is already added as the active well
+            continue
         angle = random.uniform(0, 2 * math.pi)
         dist_deg = random.uniform(0.02, 0.45)  # 2-50 km approx
         lat_off = dist_deg * math.cos(angle)

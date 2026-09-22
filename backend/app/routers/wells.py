@@ -164,6 +164,31 @@ def get_well(well_id_str: str, db: Session = Depends(get_db)):
     return result
 
 
+@router.get("/{well_id_str}/nearby")
+def get_well_nearby(
+    well_id_str: str,
+    radius_km: float = Query(25.0, description="Search radius in km"),
+    formation: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
+    """Get nearby wells relative to a specific well."""
+    well = db.query(Well).filter(Well.well_id == well_id_str).first()
+    if not well:
+        raise HTTPException(status_code=404, detail=f"Well {well_id_str} not found")
+    all_wells = db.query(Well).filter(Well.well_id != well_id_str).all()
+    nearby = find_nearby_wells(well.latitude, well.longitude, radius_km, all_wells)
+    results = []
+    for w, dist in nearby:
+        if formation and w.formation != formation:
+            continue
+        wd = well_to_dict(w, dist)
+        events = db.query(WellEvent).filter(WellEvent.well_id == w.id).all()
+        wd["event_count"] = len(events)
+        wd["total_npt"] = sum(e.npt_hours for e in events)
+        results.append(wd)
+    return results
+
+
 @router.get("/{well_id_str}/events")
 def get_well_events(
     well_id_str: str,
