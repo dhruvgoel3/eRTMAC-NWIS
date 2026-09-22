@@ -51,6 +51,9 @@ app.include_router(simulation_router)
 app.include_router(events_router)
 
 
+from app.database import get_db_info
+from app.services.supabase_service import get_supabase_status
+
 @app.get("/")
 def root():
     return {
@@ -60,9 +63,21 @@ def root():
         "status": "online",
         "version": "1.0.0",
         "docs_url": "/docs",
+        "database": get_db_info(),
+        "supabase": get_supabase_status(),
     }
 
 
 @app.get("/health")
 def health():
-    return {"status": "healthy", "service": "eRTMAC-NWIS Backend"}
+    return {
+        "status": "healthy",
+        "service": "eRTMAC-NWIS Backend",
+        "database": get_db_info(),
+        "supabase": get_supabase_status(),
+    }
+
+
+@app.get("/api/supabase/status")
+def supabase_status():
+    return get_supabase_status()

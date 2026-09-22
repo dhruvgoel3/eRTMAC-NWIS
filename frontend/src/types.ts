@@ -179,18 +179,33 @@ export interface DashboardData {
     longitude: number;
   };
   simulation: SimulationState;
-  nearby_well_count: number;
-  nearby_wells: Well[];
-  top_similar_well?: SimilarWellResult;
+  current_depth: number;
+  kpis: {
+    nearby_wells_count: number;
+    historical_events_count: number;
+    high_risk_zones_count: number;
+    top_similarity_score: number;
+    top_similar_well: string;
+  };
+  current_risk: {
+    score: number;
+    severity: string;
+    message: string;
+    active_zones: number;
+    active_event_types: string[];
+  };
   risk_zones: RiskZone[];
-  overall_risk: {
+  recent_alerts?: Alert[];
+  nearby_well_count?: number;
+  nearby_wells?: Well[];
+  top_similar_well?: SimilarWellResult;
+  overall_risk?: {
     level: string;
     active_zone_count: number;
     approaching_count: number;
     highest_severity: string;
     summary: string;
   };
-  recent_alerts: Alert[];
-  high_risk_zone_count: number;
-  total_historical_events_nearby: number;
+  high_risk_zone_count?: number;
+  total_historical_events_nearby?: number;
 }

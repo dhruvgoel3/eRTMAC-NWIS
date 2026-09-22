@@ -45,6 +45,14 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   const riskZones = data.risk_zones || [];
   const topSimilar = data.top_similar_well;
 
+  // Helpers for API field name normalization
+  const getRiskLabel = (z: any) =>
+    ((z.risk_type || z.event_type || "UNKNOWN") as string).replace(/_/g, " ");
+  const getSourceWells = (z: any): string[] =>
+    z.source_wells?.length ? z.source_wells : (z.source_well_ids?.map((id: number) => `Well #${id}`) ?? []);
+  const getExplanation = (z: any): string =>
+    z.recommended_action || z.explanation || "";
+
   // Next risk zone ahead
   const upcomingZones = riskZones.filter((z) => z.depth_start > currentDepth);
   const nextZone = upcomingZones.length > 0 ? upcomingZones[0] : null;
@@ -128,11 +136,11 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
               <div style={{ fontSize: 15, fontWeight: 700, marginTop: 4 }}>
                 {activeZone ? (
                   <>
-                    🚨 ACTIVE RISK: Drilling inside {activeZone.risk_type.replace(/_/g, " ")} window ({activeZone.depth_start}m – {activeZone.depth_end}m) in {activeZone.formation} Formation.
+                    🚨 ACTIVE RISK: Drilling inside {getRiskLabel(activeZone)} window ({activeZone.depth_start}m – {activeZone.depth_end}m) in {activeZone.formation} Formation.
                   </>
                 ) : nextZone ? (
                   <>
-                    ⚠️ UPCOMING HAZARD: {nextZone.risk_type.replace(/_/g, " ")} expected at {nextZone.depth_start}m ({distanceToNext}m ahead). Correlated from {nextZone.source_wells.join(", ")}.
+                    ⚠️ UPCOMING HAZARD: {getRiskLabel(nextZone)} expected at {nextZone.depth_start}m ({distanceToNext}m ahead). Correlated from {getSourceWells(nextZone).join(", ")}.
                   </>
                 ) : (
                   <>
@@ -142,8 +150,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
               </div>
 
               <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2 }}>
-                {activeZone?.recommended_action ||
-                  nextZone?.recommended_action ||
+                {(activeZone ? getExplanation(activeZone) : "") ||
+                  (nextZone ? getExplanation(nextZone) : "") ||
                   "Maintain standard drilling parameters. Monitor mud weight and ECD."}
               </div>
             </div>
@@ -198,7 +206,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                   return (
                     <div
                       key={z.id}
-                      title={`${z.risk_type} (${z.depth_start}-${z.depth_end}m)`}
+                      title={`${getRiskLabel(z)} (${z.depth_start}-${z.depth_end}m)`}
                       style={{
                         position: "absolute",
                         left: `${left}%`,
@@ -224,7 +232,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                         padding: "0 4px",
                       }}
                     >
-                      {z.risk_type.replace(/_/g, " ")}
+                      {getRiskLabel(z)}
                     </div>
                   );
                 })}
@@ -311,10 +319,10 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                       </span>
                       <div>
                         <div style={{ fontWeight: 600, fontSize: 13 }}>
-                          {z.depth_start}m – {z.depth_end}m: {z.risk_type.replace(/_/g, " ")}
+                          {z.depth_start}m – {z.depth_end}m: {getRiskLabel(z)}
                         </div>
                         <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
-                          Source Offset Wells: {z.source_wells.join(", ")}
+                          Source Offset Wells: {getSourceWells(z).join(", ")}
                         </div>
                       </div>
                     </div>

@@ -179,9 +179,9 @@ export const GISMapTab: React.FC<GISMapTabProps> = ({
                     <div style={{ fontSize: 12, color: "#cbd5e1" }}>
                       Mud Weight: <strong>{well.mud_weight} ppg</strong>
                     </div>
-                    {well.distance_km !== undefined && (
+                    {well.distance_km != null && (
                       <div style={{ fontSize: 12, color: "#34d399", marginTop: 2 }}>
-                        Distance: <strong>{well.distance_km.toFixed(1)} km</strong> from active rig
+                        Distance: <strong>{Number(well.distance_km).toFixed(1)} km</strong> from active rig
                       </div>
                     )}
                     <button
@@ -319,9 +319,9 @@ export const GISMapTab: React.FC<GISMapTabProps> = ({
                   <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>
                     {w.formation} • TD: {w.total_depth}m
                   </div>
-                  {w.distance_km !== undefined && !w.is_active && (
+                  {w.distance_km != null && !w.is_active && (
                     <div style={{ fontSize: 11, color: "var(--accent-emerald)" }}>
-                      {w.distance_km.toFixed(1)} km away
+                      {Number(w.distance_km).toFixed(1)} km away
                     </div>
                   )}
                 </div>
