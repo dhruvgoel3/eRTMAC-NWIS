@@ -3,6 +3,36 @@
 ### AI-Powered Offset Well Knowledge & Real-Time Decision Support Platform for Drilling Operations
 **Smart India Hackathon (SIH) Prototype | Developed for Oil India Limited (Assam Basin Operations)**
 
+> **One-Line Description:**  
+> **NWIS connects the current drilling operation with historical knowledge from nearby and similar wells, identifies historically significant risk intervals, and uses AI to provide evidence-backed intelligence to drilling teams.**
+
+---
+
+## 👥 Who Uses NWIS? (3 Operational Personas)
+
+```
+                         NWIS
+                          │
+             ┌────────────┼────────────┐
+             │            │            │
+             ▼            ▼            ▼
+       DRILLING       DRILLING     KNOWLEDGE
+       ENGINEER      SUPERVISOR    ADMINISTRATOR
+      (Primary ⭐)   (Oversight)   (Data & System)
+```
+
+1. **Drilling Engineer (Primary User ⭐):**  
+   *"I am drilling this well right now. What happened in nearby wells, and what should I be aware of as I continue?"*  
+   Uses: Live dashboard, GIS map, offset well dossier, similarity matrix, historical risk timeline, proactive alerts, "Why am I seeing this alert?" evidence, "Ask NWIS" AI assistant, and Drilling Memory Graph.
+
+2. **Drilling Supervisor (Operational Oversight):**  
+   *"What is happening across our drilling operations, and which risks require attention?"*  
+   Uses: Multi-well oversight, risk monitoring, alert acknowledgements & escalations, well comparisons, operational analytics, and team audit logs.
+
+3. **Knowledge Administrator (Data & System Management):**  
+   *"Is the historical drilling knowledge available, structured, and accessible to the operational team?"*  
+   Uses: Operator account management, RBAC role assignment, document ingestion (WCR/DDR/Mud Logs), vector chunking triggers, and audit logging.
+
 ---
 
 ## 🚀 Executive Summary

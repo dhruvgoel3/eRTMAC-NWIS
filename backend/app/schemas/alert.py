@@ -23,3 +23,9 @@ class AlertResponse(BaseModel):
 class AlertAcknowledgeResponse(BaseModel):
     status: str = "acknowledged"
     id: int
+
+
+class AlertEscalateResponse(BaseModel):
+    status: str = "escalated"
+    id: int
+    message: str

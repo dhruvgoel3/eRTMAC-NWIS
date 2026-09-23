@@ -1,10 +1,125 @@
 # eRTMAC-NWIS: System Architecture & Technical Design
 
-This document details the architectural blueprint of **eRTMAC-NWIS (Nearby Wells Intelligence System)** developed for Oil India Limited operations.
+> **One-Line Definition:**  
+> **NWIS connects the current drilling operation with historical knowledge from nearby and similar wells, identifies historically significant risk intervals, and uses AI to provide evidence-backed intelligence to drilling teams.**
 
 ---
 
-## 1. System Architecture Overview
+## 1. Who Uses NWIS? (The 3 Operational Personas)
+
+```
+                         NWIS
+                          │
+             ┌────────────┼────────────┐
+             │            │            │
+             ▼            ▼            ▼
+       DRILLING       DRILLING     KNOWLEDGE
+       ENGINEER      SUPERVISOR    ADMINISTRATOR
+       (Primary ⭐)   (Oversight)   (Data & System)
+```
+
+### 1.1 Drilling Engineer — Primary User ⭐
+- **Core Question:** *"I am drilling this well right now. What happened in nearby wells, and what should I be aware of as I continue?"*
+- **Operational Capabilities:**
+  - Live / current active wellbore dashboard (`OIL-X123`)
+  - Interactive GIS nearby well offset map with customizable radii (5–50 km)
+  - Historical offset well dossier & lithology exploration
+  - Deterministic 5-factor similarity analysis (`OIL-X104`: 91%)
+  - Stratigraphic risk horizon & depth interval timelines
+  - Real-time predictive hazard alerts & "Why am I seeing this alert?" evidence modal
+  - "Ask NWIS" domain AI assistant with mandatory 5-part source citations
+  - NWIS Drilling Memory Graph (interactive connected network)
+  - Real-time eRTMAC streaming simulation & telemetry tracking
+
+### 1.2 Drilling Supervisor — Operational Oversight
+- **Core Question:** *"What is happening across our drilling operations, and which risks require attention?"*
+- **Operational Capabilities:**
+  - Multi-well oversight cockpit across Assam Basin rigs
+  - Real-time hazard monitoring & risk severity escalation
+  - Review and acknowledgement of critical wellbore alerts
+  - Side-by-side well comparison & casing program evaluation
+  - Operational NPT analytics & historical mitigations review
+  - AI-assisted risk synthesis across shifts
+  - Operational audit trail & team activity monitoring
+
+### 1.3 Knowledge Administrator — Data & System Management
+- **Core Question:** *"Is the historical drilling knowledge available, structured, and accessible to the operational team?"*
+- **Operational Capabilities:**
+  - Role-based user management (create, assign roles, deactivate accounts)
+  - Document repository management (WCR, DDR, Mud Logs, Cementing Reports)
+  - Triggering OCR, chunking, and 64-dim vector embedding generation
+  - Knowledge base data normalization & dataset provenance verification
+  - Security audit log inspection & system health diagnostics
+
+---
+
+## 2. The Entire Application in One Master Picture
+
+```
+                         HISTORICAL DATA
+                              │
+          ┌───────────────────┼───────────────────┐
+          │                   │                   │
+         WCR                 DDR            Mud Reports
+          │                   │                   │
+          ├─────────────── Geological Data ──────┤
+          │                   │                   │
+          └──────────── Drilling Data ───────────┘
+                              │
+                              ▼
+                     DATA INGESTION
+                              │
+                    OCR / PDF EXTRACTION
+                              │
+                    DATA NORMALIZATION
+                              │
+                              ▼
+                    NWIS KNOWLEDGE BASE
+                              │
+             ┌────────────────┼────────────────┐
+             │                │                │
+             ▼                ▼                ▼
+         Well Data       Historical Events   Documents
+             │                │                │
+             └────────────────┼────────────────┘
+                              │
+                       INTELLIGENCE LAYER
+                              │
+          ┌───────────────────┼───────────────────┐
+          │                   │                   │
+          ▼                   ▼                   ▼
+      Similarity          Risk Engine           RAG
+       Engine                                    │
+          │                   │                   │
+          └───────────────────┼───────────────────┘
+                              │
+                         AI Intelligence
+                              │
+                 ┌────────────┴────────────┐
+                 │                         │
+                 ▼                         ▼
+          CURRENT WELL               HISTORICAL
+          / eRTMAC DATA               KNOWLEDGE
+                 │                         │
+                 └────────────┬────────────┘
+                              ▼
+                       NWIS DASHBOARD
+                              │
+        ┌─────────────────────┼──────────────────────┐
+        │                     │                      │
+        ▼                     ▼                      ▼
+      MAP                   RISK                    AI
+        │                     │                      │
+    Nearby Wells           Alerts                Assistant
+        │                     │                      │
+        └─────────────────────┼──────────────────────┘
+                              ▼
+                      DRILLING ENGINEER
+```
+
+---
+
+## 3. High-Level Technical Architecture
 
 ```mermaid
 flowchart TB
