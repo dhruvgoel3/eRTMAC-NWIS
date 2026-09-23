@@ -4,17 +4,20 @@ Integrates with Supabase Auth identities.
 """
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Boolean, DateTime, Text, ForeignKey, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy import Column, String, Boolean, DateTime, Text, ForeignKey, UniqueConstraint, JSON
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB as PG_JSONB
 from sqlalchemy.orm import relationship
 from app.database import Base
+
+GUID = String(36).with_variant(PG_UUID(as_uuid=True), "postgresql")
+JSON_TYPE = JSON().with_variant(PG_JSONB, "postgresql")
 
 
 class Profile(Base):
     __tablename__ = "profiles"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    auth_user_id = Column(UUID(as_uuid=True), unique=True, nullable=False, index=True)
+    id = Column(GUID, primary_key=True, default=lambda: str(uuid.uuid4()))
+    auth_user_id = Column(GUID, unique=True, nullable=False, index=True)
     employee_id = Column(String(50), unique=True, nullable=True, index=True)
     full_name = Column(String(150), nullable=False)
     email = Column(String(255), nullable=False, index=True)
@@ -34,7 +37,7 @@ class Profile(Base):
 class Role(Base):
     __tablename__ = "roles"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(GUID, primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String(50), unique=True, nullable=False, index=True)
     description = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -47,7 +50,7 @@ class Role(Base):
 class Permission(Base):
     __tablename__ = "permissions"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(GUID, primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String(100), unique=True, nullable=False, index=True)
     description = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -59,10 +62,10 @@ class Permission(Base):
 class UserRole(Base):
     __tablename__ = "user_roles"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False, index=True)
-    role_id = Column(UUID(as_uuid=True), ForeignKey("roles.id", ondelete="CASCADE"), nullable=False, index=True)
-    assigned_by = Column(UUID(as_uuid=True), nullable=True)
+    id = Column(GUID, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(GUID, ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False, index=True)
+    role_id = Column(GUID, ForeignKey("roles.id", ondelete="CASCADE"), nullable=False, index=True)
+    assigned_by = Column(GUID, nullable=True)
     assigned_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     __table_args__ = (
@@ -76,9 +79,9 @@ class UserRole(Base):
 class RolePermission(Base):
     __tablename__ = "role_permissions"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    role_id = Column(UUID(as_uuid=True), ForeignKey("roles.id", ondelete="CASCADE"), nullable=False, index=True)
-    permission_id = Column(UUID(as_uuid=True), ForeignKey("permissions.id", ondelete="CASCADE"), nullable=False, index=True)
+    id = Column(GUID, primary_key=True, default=lambda: str(uuid.uuid4()))
+    role_id = Column(GUID, ForeignKey("roles.id", ondelete="CASCADE"), nullable=False, index=True)
+    permission_id = Column(GUID, ForeignKey("permissions.id", ondelete="CASCADE"), nullable=False, index=True)
 
     __table_args__ = (
         UniqueConstraint("role_id", "permission_id", name="uq_role_permissions_role_permission"),
@@ -91,14 +94,14 @@ class RolePermission(Base):
 class AuditLog(Base):
     __tablename__ = "audit_logs"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("profiles.id", ondelete="SET NULL"), nullable=True, index=True)
+    id = Column(GUID, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(GUID, ForeignKey("profiles.id", ondelete="SET NULL"), nullable=True, index=True)
     action = Column(String(100), nullable=False, index=True)
     resource_type = Column(String(100), nullable=True)
     resource_id = Column(String(100), nullable=True)
     ip_address = Column(String(45), nullable=True)
     user_agent = Column(Text, nullable=True)
-    meta = Column("metadata", JSONB, nullable=True)
+    meta = Column("metadata", JSON_TYPE, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
 
     user = relationship("Profile", back_populates="audit_logs")

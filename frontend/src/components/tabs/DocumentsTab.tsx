@@ -42,8 +42,8 @@ export const DocumentsTab: React.FC<DocumentsTabProps> = ({ onAskAIAboutDoc }) =
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     return (
-      d.title.toLowerCase().includes(q) ||
-      d.file_name.toLowerCase().includes(q) ||
+      (d.title && d.title.toLowerCase().includes(q)) ||
+      (d.file_name && d.file_name.toLowerCase().includes(q)) ||
       (d.summary && d.summary.toLowerCase().includes(q)) ||
       (d.well_id && d.well_id.toLowerCase().includes(q))
     );

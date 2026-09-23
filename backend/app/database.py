@@ -54,22 +54,27 @@ if not raw_db_url:
 DATABASE_URL = sanitize_db_url(raw_db_url)
 Base = declarative_base()
 
-# Exclusively connect to Supabase PostgreSQL
+# Connect to Supabase PostgreSQL with offline SQLite fallback
 try:
     engine = create_engine(
         DATABASE_URL,
-        connect_args={"connect_timeout": 15},
+        connect_args={"connect_timeout": 4},
         pool_pre_ping=True,
         pool_size=10,
         max_overflow=20,
     )
     with engine.connect() as conn:
         conn.execute(text("SELECT 1;"))
-    print("[DB] Connected successfully and exclusively to Supabase PostgreSQL!")
+    print("[DB] Connected successfully to Supabase PostgreSQL!")
     active_db_type = "supabase_postgresql"
 except Exception as e:
-    print(f"[Supabase DB Fatal Error] Failed to connect to Supabase PostgreSQL: {e}")
-    raise RuntimeError(f"Could not establish connection to Supabase PostgreSQL: {e}")
+    print(f"[DB Warning] Supabase unreachable ({e}). Falling back to local offline SQLite database.")
+    os.makedirs("data", exist_ok=True)
+    engine = create_engine(
+        "sqlite:///./data/offline_nwis.db",
+        connect_args={"check_same_thread": False},
+    )
+    active_db_type = "offline_sqlite"
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

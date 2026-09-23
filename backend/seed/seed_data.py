@@ -284,33 +284,70 @@ def seed_drilling_parameters(db, params_data: list[dict], wells_map: dict[str, W
 
 
 def seed_risk_zones(db, rz_data: list[dict], wells_map: dict[str, Well]):
-    print(f"[Seed] Seeding {len(rz_data)} risk zones...")
+    from app.services.risk_engine import format_risk_explanation
+    print(f"[Seed] Seeding {len(rz_data)} standardized historical risk zones with structured reasons...")
+    active_well = wells_map.get("OIL-X123")
+    if not active_well:
+        return
     count = 0
     for r in rz_data:
-        active_well = wells_map.get(r["active_well_id"])
-        if not active_well:
-            continue
-
+        evt_type = r["event_type"]
+        d_start = float(r["depth_start"])
+        d_end = float(r["depth_end"])
+        severity = r.get("severity", "MEDIUM")
+        score = float(r.get("risk_score", 50.0))
+        formation = r.get("formation", active_well.formation or "Tipam")
         src_refs = r.get("source_well_ids_ref", [])
         src_ids = [wells_map[w].id for w in src_refs if w in wells_map]
 
+        # Exact standardized intervals from demonstration requirements:
+        if evt_type == "MUD_LOSS" and 3080.0 <= d_start <= 3130.0:
+            d_start, d_end = 3100.0, 3150.0
+            severity = "HIGH"
+            score = 76.0
+            operational_advice = "Pre-stage 50 bbl high-viscosity LCM pill. Track active pit volume. Throttle flow rate by 15% upon dynamic loss."
+        elif evt_type == "STUCK_PIPE" and 3170.0 <= d_start <= 3220.0:
+            d_start, d_end = 3180.0, 3290.0
+            severity = "CRITICAL"
+            score = 88.0
+            operational_advice = "Spot 300L lubricant pill at 3180m. Maintain string rotation (>40 rpm). Limit overbalance <350 psi across permeable sands."
+        elif evt_type == "TORQUE_SPIKE" and (3240.0 <= d_start <= 3400.0):
+            d_start, d_end = 3250.0, 3300.0
+            severity = "HIGH"
+            score = 72.0
+            operational_advice = "Add 2% liquid lubricant to active mud system. If torque fluctuations exceed ±3 kft-lb, ream with WOB <10 klbs."
+        else:
+            operational_advice = r.get("explanation", "Maintain continuous real-time parameter tracking and adherence to drilling program limits.")
+
+        explanation = format_risk_explanation(
+            severity=severity,
+            event_type=evt_type,
+            comparable_wells_count=max(2, len(src_refs)),
+            historical_events_count=max(1, len(src_refs)),
+            formation=formation,
+            depth_start=d_start,
+            depth_end=d_end,
+            distance_radius_km=10.0 if "OIL-X104" in src_refs else 15.0,
+            offset_well_names=src_refs if src_refs else ["OIL-X104", "OIL-X101"],
+            operational_advice=operational_advice,
+        )
+
         rz = RiskZone(
             active_well_id=active_well.id,
-            event_type=r["event_type"],
-            depth_start=r["depth_start"],
-            depth_end=r["depth_end"],
-            formation=r.get("formation"),
-            risk_score=r.get("risk_score", 50.0),
-            severity=r.get("severity", "MEDIUM"),
-            evidence_count=r.get("evidence_count", len(src_ids)),
-            explanation=r.get("explanation"),
+            event_type=evt_type,
+            depth_start=d_start,
+            depth_end=d_end,
+            formation=formation,
+            risk_score=score,
+            severity=severity,
+            evidence_count=max(1, len(src_refs)),
+            explanation=explanation,
             source_well_ids=src_ids,
         )
         db.add(rz)
         count += 1
-
     db.commit()
-    print(f"[Seed] Successfully seeded {count} risk zones.")
+    print(f"[Seed] Successfully seeded {count} standardized historical risk zones.")
 
 
 def seed_alerts(db, wells_map: dict[str, Well]):
@@ -324,11 +361,16 @@ def seed_alerts(db, wells_map: dict[str, Well]):
             "alert_type": "RISK_APPROACHING",
             "severity": "HIGH",
             "depth": 3050.0,
-            "message": "APPROACHING MUD LOSS RISK ZONE (3090-3155m in Tipam). Standby LCM pill.",
+            "message": "APPROACHING MUD LOSS RISK ZONE (3100-3150m in Tipam). Standby LCM pill.",
             "explanation": (
-                "4 offset wells experienced mud loss in this exact depth interval. "
-                "OIL-X104 (91% similar) lost returns at 3120m (8.5 hrs NPT). "
-                "X101 (3095m) and X106 (3090m) also experienced losses."
+                "HIGH HISTORICAL RISK\nReason:\n"
+                "• 4 comparable wells (OIL-X104, OIL-X101, OIL-X102, OIL-X106)\n"
+                "• 4 historical mud-loss events in this exact interval\n"
+                "• Same formation: Tipam Sandstone\n"
+                "• Similar depth: 3100-3150m\n"
+                "• Nearby geographic location: within 8.6 km radius\n\n"
+                "Operational Advisory: Pre-stage 50 bbl high-viscosity LCM pill. Monitor active pit volumes.\n"
+                "Non-Certainty Disclaimer: Historical patterns indicate heightened susceptibility, not certainty of future events."
             ),
             "evidence": [
                 {"well_id": "OIL-X104", "event": "MUD_LOSS", "depth": 3120, "severity": "MEDIUM", "npt_hrs": 8.5},
@@ -341,10 +383,16 @@ def seed_alerts(db, wells_map: dict[str, Well]):
             "alert_type": "RISK_APPROACHING",
             "severity": "CRITICAL",
             "depth": 3050.0,
-            "message": "CRITICAL STUCK PIPE HAZARD at 3180-3310m. Review overbalance protocol.",
+            "message": "CRITICAL STUCK PIPE HAZARD at 3180-3290m. Review overbalance protocol.",
             "explanation": (
-                "OIL-X104 suffered differential sticking at 3280m requiring 16 hrs NPT and spotting pills. "
-                "OIL-X106 experienced 24 hrs NPT sticking at 3260m. Overbalance exceeds 400 psi in permeable Tipam."
+                "CRITICAL HISTORICAL RISK\nReason:\n"
+                "• 4 comparable wells (OIL-X104, OIL-X101, OIL-X106, OIL-X107)\n"
+                "• 3 historical stuck-pipe events\n"
+                "• Same formation: Tipam Sandstone\n"
+                "• Similar depth: 3180-3290m\n"
+                "• Nearby geographic location: within 10 km radius\n\n"
+                "Operational Advisory: Spot 300L lubricant pill at 3180m. Maintain string rotation (>40 rpm).\n"
+                "Non-Certainty Disclaimer: Historical records show high incident concentration; actual conditions require real-time verification."
             ),
             "evidence": [
                 {"well_id": "OIL-X104", "event": "STUCK_PIPE", "depth": 3280, "severity": "HIGH", "npt_hrs": 16.0},

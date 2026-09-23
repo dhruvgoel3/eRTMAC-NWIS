@@ -464,7 +464,10 @@ def get_memory_graph(
 
     for rank_idx, r in enumerate(ranked):
         offset_well: Well = r["well"]
-        sim_score: float = r["similarity_score"]
+        raw_score: float = r["similarity_score"]
+        # r["similarity_score"] is on 0-100 scale from calculate_similarity
+        sim_pct = raw_score if raw_score > 1.0 else raw_score * 100.0
+        sim_ratio = sim_pct / 100.0
         dist_km: float = r["distance_km"]
         factors: dict = r["factors"]
 
@@ -474,23 +477,23 @@ def get_memory_graph(
         add_node(offset_node_id, {
             "type": "OFFSET_WELL_TOP" if is_top else "OFFSET_WELL",
             "label": offset_well.well_id,
-            "sublabel": f"{sim_score:.0%} similar",
+            "sublabel": f"{sim_pct:.0f}% similar",
             "formation": offset_well.formation,
             "total_depth": offset_well.total_depth,
             "trajectory_type": offset_well.trajectory_type,
             "latitude": offset_well.latitude,
             "longitude": offset_well.longitude,
             "status": offset_well.status,
-            "similarity_score": round(sim_score, 3),
+            "similarity_score": round(sim_ratio, 3),
             "distance_km": round(dist_km, 2),
             "score_breakdown": factors,
-            "description": f"{offset_well.name} · {dist_km:.1f}km · {sim_score:.0%} similarity",
+            "description": f"{offset_well.name} · {dist_km:.1f}km · {sim_pct:.0f}% similarity",
         })
 
         add_edge(anchor_node_id, offset_node_id, {
             "type": "SIMILAR_TO",
-            "label": f"{sim_score:.0%}",
-            "weight": sim_score,
+            "label": f"{sim_pct:.0f}%",
+            "weight": sim_ratio,
         })
 
         # 5. Formation node for offset well (if different)

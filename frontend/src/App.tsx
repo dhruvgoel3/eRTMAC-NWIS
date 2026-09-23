@@ -195,7 +195,14 @@ function OperationsDashboard() {
       />
 
       {/* Main View Area */}
-      <main className="main-content">
+      <main
+        className={activeTab === "memory" ? "main-content--fullbleed" : "main-content"}
+        style={{
+          flex: 1,
+          minHeight: 0,
+          overflowY: activeTab === "memory" ? "hidden" : "auto",
+        }}
+      >
         {activeTab === "overview" && (
           <OverviewTab
             data={dashboardData}

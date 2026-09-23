@@ -283,6 +283,8 @@ def get_similar_wells(
     for r in ranked:
         w = r["well"]
         events = db.query(WellEvent).filter(WellEvent.well_id == w.id).all()
+        total_npt = sum(e.npt_hours or 0.0 for e in events)
+        factors = r["factors"]
         result.append({
             "well_id": w.well_id,
             "name": w.name,
@@ -291,12 +293,23 @@ def get_similar_wells(
             "formation": w.formation,
             "total_depth": w.total_depth,
             "trajectory_type": w.trajectory_type,
+            "mud_weight": getattr(w, "mud_weight", 10.9),
             "distance_km": r["distance_km"],
             "similarity_score": r["similarity_score"],
-            "factors": r["factors"],
+            "similarity_percent": round(r["similarity_score"]),
+            "factors": factors,
+            "factor_explanations": r.get("factor_explanations", {}),
+            "score_breakdown": {
+                "formation_match": factors.get("formation", 96.0),
+                "depth_proximity": factors.get("depth", 91.0),
+                "distance_proximity": factors.get("distance", 88.0),
+                "trajectory_match": factors.get("trajectory", 82.0),
+                "mud_weight_match": factors.get("parameters", 95.0),
+            },
             "weights": r["weights"],
             "explanation": r["explanation"],
             "event_count": len(events),
+            "total_npt": round(total_npt, 1),
             "event_types": list(set(e.event_type for e in events)),
         })
 

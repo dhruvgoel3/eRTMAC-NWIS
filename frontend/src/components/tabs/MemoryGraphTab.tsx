@@ -129,7 +129,7 @@ const SeverityBadge: React.FC<{ severity: string }> = ({ severity }) => (
 );
 
 const ScoreBar: React.FC<{ label: string; value: number }> = ({ label, value }) => {
-  const pct = Math.round(value * 100);
+  const pct = Math.round(value > 1 ? value : value * 100);
   return (
     <div style={{ marginBottom: 6 }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
@@ -140,7 +140,7 @@ const ScoreBar: React.FC<{ label: string; value: number }> = ({ label, value }) 
         <div
           style={{
             height: "100%",
-            width: `${pct}%`,
+            width: `${Math.min(100, pct)}%`,
             background: "linear-gradient(90deg, #6366f1, #8b5cf6)",
             borderRadius: 4,
           }}
@@ -284,7 +284,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ node, onClose }) => {
               ["Trajectory", node.trajectory_type ?? ""],
               ["Status", node.status ?? ""],
               ...(node.distance_km != null ? [["Distance", `${node.distance_km.toFixed(1)} km`] as [string,string]] : []),
-              ...(node.similarity_score != null ? [["Similarity", `${(node.similarity_score * 100).toFixed(1)}%`] as [string,string]] : []),
+              ...(node.similarity_score != null ? [["Similarity", `${(node.similarity_score > 1 ? node.similarity_score : node.similarity_score * 100).toFixed(1)}%`] as [string,string]] : []),
             ].filter((r) => r[1] !== "") as [string, string][]}
           />
         )}

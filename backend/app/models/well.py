@@ -31,6 +31,7 @@ class Well(Base):
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
     field = Column(String(100))
+    
     formation = Column(String(100))
     total_depth = Column(Float)           # meters
     well_type = Column(String(50))        # Exploratory, Development, etc.
