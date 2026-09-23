@@ -22,6 +22,7 @@ import { DocumentsTab } from "./components/tabs/DocumentsTab";
 import { MemoryGraphTab } from "./components/tabs/MemoryGraphTab";
 import { WellDossierModal } from "./components/WellDossierModal";
 import { AlertsModal } from "./components/AlertsModal";
+import { AlertEvidenceModal } from "./components/AlertEvidenceModal";
 import {
   DashboardData,
   Well,
@@ -40,6 +41,7 @@ function OperationsDashboard() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [selectedWellForDossier, setSelectedWellForDossier] = useState<Well | null>(null);
   const [isAlertsModalOpen, setIsAlertsModalOpen] = useState<boolean>(false);
+  const [alertForEvidence, setAlertForEvidence] = useState<Alert | null>(null);
   const [radiusKm, setRadiusKm] = useState<number>(20);
   const [selectedFormation, setSelectedFormation] = useState<string>("ALL");
 
@@ -193,6 +195,7 @@ function OperationsDashboard() {
         alerts={alerts}
         onAcknowledge={handleAcknowledgeAlert}
         onNavigateToOffset={() => setActiveTab("map")}
+        onExplainAlert={(a) => setAlertForEvidence(a)}
       />
 
       {/* Main View Area */}
@@ -210,6 +213,7 @@ function OperationsDashboard() {
               data={dashboardData}
               onSelectWell={handleSelectWell}
               onNavigateToTab={setActiveTab}
+              onExplainAlert={(a) => setAlertForEvidence(a)}
             />
           )}
 
@@ -273,6 +277,23 @@ function OperationsDashboard() {
           alerts={alerts}
           onClose={() => setIsAlertsModalOpen(false)}
           onAcknowledge={handleAcknowledgeAlert}
+          onExplainAlert={(a) => {
+            setIsAlertsModalOpen(false);
+            setAlertForEvidence(a);
+          }}
+        />
+      )}
+
+      {/* Why Am I Seeing This Alert? Evidence Modal */}
+      {alertForEvidence && (
+        <AlertEvidenceModal
+          alert={alertForEvidence}
+          currentFormation={activeWell?.formation || "Tipam"}
+          onClose={() => setAlertForEvidence(null)}
+          onAskNWIS={(_query) => {
+            setAlertForEvidence(null);
+            setActiveTab("ai");
+          }}
         />
       )}
     </div>

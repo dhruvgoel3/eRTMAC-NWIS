@@ -6,6 +6,7 @@ interface AlertsModalProps {
   alerts: Alert[];
   onClose: () => void;
   onAcknowledge: (id: number) => void;
+  onExplainAlert?: (alert: Alert) => void;
 }
 
 const SEV_BADGE: Record<string, string> = {
@@ -22,7 +23,7 @@ const SEV_LEFT: Record<string, string> = {
   LOW:      "#0d7a4e",
 };
 
-export const AlertsModal: React.FC<AlertsModalProps> = ({ alerts, onClose, onAcknowledge }) => {
+export const AlertsModal: React.FC<AlertsModalProps> = ({ alerts, onClose, onAcknowledge, onExplainAlert }) => {
   const unack = alerts.filter((a) => !a.acknowledged);
   const acked = alerts.filter((a) => a.acknowledged);
 
@@ -142,21 +143,39 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({ alerts, onClose, onAck
                   )}
                 </div>
 
-                {!a.acknowledged ? (
-                  <button
-                    className="btn-primary"
-                    onClick={() => onAcknowledge(a.id)}
-                    style={{ padding: "6px 12px", fontSize: 11, flexShrink: 0 }}
-                  >
-                    <Check size={13} />
-                    Acknowledge
-                  </button>
-                ) : (
-                  <span style={{ fontSize: 11, color: "#0d7a4e", display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
-                    <ShieldCheck size={14} />
-                    Acknowledged
-                  </span>
-                )}
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                  {onExplainAlert && (
+                    <button
+                      className="btn-secondary"
+                      onClick={() => onExplainAlert(a)}
+                      style={{
+                        padding: "5px 10px",
+                        fontSize: 11,
+                        background: "rgba(16,67,54,0.06)",
+                        borderColor: "var(--color-canopy)",
+                        color: "var(--color-canopy)",
+                        fontWeight: 600,
+                      }}
+                    >
+                      Why am I seeing this alert?
+                    </button>
+                  )}
+                  {!a.acknowledged ? (
+                    <button
+                      className="btn-primary"
+                      onClick={() => onAcknowledge(a.id)}
+                      style={{ padding: "6px 12px", fontSize: 11, flexShrink: 0 }}
+                    >
+                      <Check size={13} />
+                      Acknowledge
+                    </button>
+                  ) : (
+                    <span style={{ fontSize: 11, color: "#0d7a4e", display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+                      <ShieldCheck size={14} />
+                      Acknowledged
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>

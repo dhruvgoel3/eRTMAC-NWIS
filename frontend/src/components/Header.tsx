@@ -74,12 +74,54 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="brand-title">
             eRTMAC-NWIS
             <span className="oil-badge">Oil India Limited</span>
-            <span style={{ fontSize: 10, fontFamily: "var(--font-mono)", fontWeight: 700, letterSpacing: "0.06em", padding: "2px 8px", borderRadius: 9999, background: "rgba(16, 67, 54, 0.08)", color: "var(--color-canopy)" }}>
-              NWIS DEMO
+            <span
+              style={{
+                fontSize: 10,
+                fontFamily: "var(--font-mono)",
+                fontWeight: 800,
+                letterSpacing: "0.08em",
+                padding: "2px 8px",
+                borderRadius: 9999,
+                background: "rgba(0, 230, 153, 0.15)",
+                color: "var(--color-canopy)",
+                border: "1px solid rgba(0, 230, 153, 0.4)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
+              }}
+            >
+              <span
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: "var(--color-mint-pulse)",
+                  boxShadow: "0 0 8px var(--color-mint-pulse)",
+                }}
+              />
+              DEMO MODE
+            </span>
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 600,
+                letterSpacing: "0.02em",
+                padding: "2px 8px",
+                borderRadius: 4,
+                background: "rgba(245, 158, 11, 0.12)",
+                color: "#b45309",
+                border: "1px solid rgba(245, 158, 11, 0.3)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4,
+              }}
+              title="All drilling records, telemetry logs, and DDRs displayed in this system are synthetic demonstration data created for SIH evaluation."
+            >
+              ⚠️ Synthetic Demo Data — Not Real OIL Data
             </span>
           </div>
           <div className="brand-subtitle">
-            Nearby Wells Intelligence &amp; Decision Support
+            Nearby Wells Intelligence &amp; Decision Support · Real-Time Operations Control Room
           </div>
         </div>
       </div>

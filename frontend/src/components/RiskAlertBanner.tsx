@@ -6,6 +6,7 @@ interface RiskAlertBannerProps {
   alerts: Alert[];
   onAcknowledge: (id: number) => void;
   onNavigateToOffset: () => void;
+  onExplainAlert?: (alert: Alert) => void;
 }
 
 const SEVERITY_BG: Record<string, string> = {
@@ -40,6 +41,7 @@ export const RiskAlertBanner: React.FC<RiskAlertBannerProps> = ({
   alerts,
   onAcknowledge,
   onNavigateToOffset,
+  onExplainAlert,
 }) => {
   const unackAlerts = alerts.filter((a) => !a.acknowledged);
   if (unackAlerts.length === 0) return null;
@@ -104,6 +106,23 @@ export const RiskAlertBanner: React.FC<RiskAlertBannerProps> = ({
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+        {onExplainAlert && (
+          <button
+            className="btn-secondary"
+            onClick={() => onExplainAlert(topAlert)}
+            style={{
+              padding: "6px 12px",
+              fontSize: 12,
+              gap: 5,
+              background: "rgba(16,67,54,0.08)",
+              borderColor: "var(--color-canopy)",
+              color: "var(--color-canopy)",
+              fontWeight: 600,
+            }}
+          >
+            Why am I seeing this alert?
+          </button>
+        )}
         <button
           className="btn-secondary"
           onClick={onNavigateToOffset}

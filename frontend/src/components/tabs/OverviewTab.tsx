@@ -27,6 +27,7 @@ interface OverviewTabProps {
   data: DashboardData | null;
   onSelectWell: (well: Well | SimilarWellResult) => void;
   onNavigateToTab: (tab: string) => void;
+  onExplainAlert?: (alert?: any) => void;
 }
 
 const SEV_BADGE: Record<string, string> = {
@@ -47,6 +48,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   data,
   onSelectWell,
   onNavigateToTab,
+  onExplainAlert,
 }) => {
   if (!data) {
     return (
@@ -221,10 +223,41 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
             </div>
           </div>
 
-          <button className="btn-secondary" onClick={() => onNavigateToTab("map")} style={{ whiteSpace: "nowrap" }}>
-            Inspect on GIS Map
-            <ChevronRight size={14} />
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {onExplainAlert && (activeZone || nextZone) && (() => {
+              const tz = activeZone || nextZone;
+              if (!tz) return null;
+              return (
+                <button
+                  className="btn-secondary"
+                  onClick={() =>
+                    onExplainAlert({
+                      id: tz.id,
+                      depth: tz.depth_start,
+                      message: activeZone
+                        ? `Active ${getRiskLabel(tz)} Hazard (${tz.depth_start}m–${tz.depth_end}m)`
+                        : `Upcoming ${getRiskLabel(tz)} Risk (${tz.depth_start}m)`,
+                      severity: tz.severity,
+                      explanation: getExplanation(tz),
+                    })
+                  }
+                  style={{
+                    whiteSpace: "nowrap",
+                    background: "rgba(16, 67, 54, 0.08)",
+                    borderColor: "var(--color-canopy)",
+                    color: "var(--color-canopy)",
+                    fontWeight: 600,
+                  }}
+                >
+                  Why am I seeing this alert?
+                </button>
+              );
+            })()}
+            <button className="btn-secondary" onClick={() => onNavigateToTab("map")} style={{ whiteSpace: "nowrap" }}>
+              Inspect on GIS Map
+              <ChevronRight size={14} />
+            </button>
+          </div>
         </div>
       </div>
 
