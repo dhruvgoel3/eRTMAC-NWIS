@@ -15,8 +15,10 @@ import {
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
+import { api } from "../services/api";
 
 export const LoginPage: React.FC = () => {
+
   const navigate = useNavigate();
   const location = useLocation();
   const { login, isAuthenticated } = useAuth();
@@ -75,13 +77,6 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  // Quick Demo Account selection helper
-  const handleQuickDemo = (demoEmail: string) => {
-    setEmail(demoEmail);
-    setPassword("OIL_nwis_demo_2026!");
-    setErrorMessage(null);
-  };
-
   const handleSignUpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSignupError(null);
@@ -121,6 +116,21 @@ export const LoginPage: React.FC = () => {
       if (error) {
         setSignupError(error.message);
       } else {
+        // Ensure profile exists in NWIS database
+        try {
+          await api.registerUser({
+            email: signupEmail.trim().toLowerCase(),
+            full_name: signupFullName.trim(),
+            employee_id: signupEmployeeId.trim() || undefined,
+            department: signupDepartment.trim(),
+            designation: signupDesignation.trim(),
+            role: signupRole,
+            auth_user_id: data?.user?.id,
+          });
+        } catch (regErr) {
+          console.warn("Backend register notification:", regErr);
+        }
+
         setSignupSuccess(true);
         // Pre-populate sign-in fields
         setEmail(signupEmail);
@@ -132,6 +142,7 @@ export const LoginPage: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,18 +168,19 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="auth-viewport">
-      {/* Top Demo Environment Banner */}
-      <div className="auth-top-strip">
+      {/* Top Header Strip */}
+      <div className="auth-top-strip" style={{ opacity: 0.85, fontSize: 11 }}>
         <div className="status-badge">
           <span className="pulse-dot" />
-          <span style={{ letterSpacing: "0.08em", fontWeight: 700, color: "var(--color-mint-pulse)" }}>
-            DEMO ENVIRONMENT — SYNTHETIC DATA
+          <span style={{ letterSpacing: "0.05em", fontWeight: 600, color: "var(--color-pearl)" }}>
+            eRTMAC-NWIS
           </span>
           <span style={{ opacity: 0.35 }}>|</span>
-          <span style={{ opacity: 0.85 }}>SIH Problem Statement 121 Prototype</span>
+          <span style={{ opacity: 0.85 }}>Nearby Wells Intelligence & Decision Support System</span>
         </div>
-        <div style={{ letterSpacing: "0.08em", fontWeight: 700 }}>OIL INDIA LIMITED</div>
+        <div style={{ letterSpacing: "0.06em", fontWeight: 600, fontSize: 10 }}>OIL INDIA LIMITED</div>
       </div>
+
 
       {/* Main Login Frame */}
       <div className="auth-main-area">
@@ -297,51 +309,55 @@ export const LoginPage: React.FC = () => {
                 </button>
               </form>
 
-              {/* Quick Demo Persona Switcher */}
-              <div className="auth-demo-card">
-                <div className="auth-demo-title">
-                  <span>Quick Sign-In · Select Demo Persona</span>
-                  <span className="auth-badge-role">1-Click</span>
+              {/* Authorized Test Accounts Reference */}
+              <div
+                style={{
+                  marginTop: 20,
+                  padding: "16px 20px",
+                  background: "rgba(255, 255, 255, 0.02)",
+                  border: "1px solid var(--border-subtle)",
+                  borderRadius: "var(--radius-md)",
+                  fontSize: 12,
+                  color: "var(--color-muted-slate)",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginBottom: 10,
+                    fontWeight: 600,
+                    fontSize: 11,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    color: "var(--color-slate-light)",
+                  }}
+                >
+                  <span>Authorized Test Roles</span>
+                  <span style={{ fontSize: 10, opacity: 0.7 }}>Default Password: OIL_nwis_demo_2026!</span>
                 </div>
-                <div className="auth-demo-grid">
-                  <button
-                    type="button"
-                    onClick={() => handleQuickDemo("engineer@nwis.demo")}
-                    className="auth-demo-btn"
-                  >
-                    <div>
-                      <div className="auth-demo-role-name">Drilling Engineer</div>
-                      <div className="auth-demo-role-sub">engineer@nwis.demo</div>
-                    </div>
-                    <span className="auth-badge-role">Primary User</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleQuickDemo("supervisor@nwis.demo")}
-                    className="auth-demo-btn"
-                  >
-                    <div>
-                      <div className="auth-demo-role-name">Drilling Supervisor</div>
-                      <div className="auth-demo-role-sub">supervisor@nwis.demo</div>
-                    </div>
-                    <span className="auth-badge-role">Oversight & Escalate</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleQuickDemo("admin@nwis.demo")}
-                    className="auth-demo-btn"
-                  >
-                    <div>
-                      <div className="auth-demo-role-name">Knowledge Admin</div>
-                      <div className="auth-demo-role-sub">admin@nwis.demo</div>
-                    </div>
-                    <span className="auth-badge-role">User & RBAC Admin</span>
-                  </button>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px" }}>
+                  <div>
+                    <span style={{ fontWeight: 600, color: "var(--color-pearl)" }}>Drilling Engineer: </span>
+                    <span style={{ fontFamily: "monospace", fontSize: 11 }}>engineer@nwis.demo</span>
+                  </div>
+                  <div>
+                    <span style={{ fontWeight: 600, color: "var(--color-pearl)" }}>Drilling Supervisor: </span>
+                    <span style={{ fontFamily: "monospace", fontSize: 11 }}>supervisor@nwis.demo</span>
+                  </div>
+                  <div>
+                    <span style={{ fontWeight: 600, color: "var(--color-pearl)" }}>Knowledge Admin: </span>
+                    <span style={{ fontFamily: "monospace", fontSize: 11 }}>admin@nwis.demo</span>
+                  </div>
+                  <div>
+                    <span style={{ fontWeight: 600, color: "var(--color-pearl)" }}>Disabled Account: </span>
+                    <span style={{ fontFamily: "monospace", fontSize: 11 }}>disabled_operator@nwis.demo</span>
+                  </div>
                 </div>
               </div>
             </>
+
           )}
 
           {/* SIGN UP VIEW */}
@@ -478,8 +494,8 @@ export const LoginPage: React.FC = () => {
                       >
                         <option value="DRILLING_ENGINEER">Drilling Engineer (Operational View & Risk Analysis)</option>
                         <option value="DRILLING_SUPERVISOR">Drilling Supervisor (Supervisory & Escalations)</option>
-                        <option value="KNOWLEDGE_ADMIN">Knowledge Administrator (RBAC & Ingestion Admin)</option>
                       </select>
+
                     </div>
                   </div>
 

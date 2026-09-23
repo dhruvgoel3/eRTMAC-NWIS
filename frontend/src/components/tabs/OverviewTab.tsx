@@ -60,7 +60,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   }
 
   const sim = data.simulation;
-  const currentDepth = sim.current_depth;
+  const currentDepth = sim?.current_depth ?? data.current_depth ?? 3050;
   const riskZones = data.risk_zones || [];
   const topSimilar = data.top_similar_well;
   const [expandedZoneId, setExpandedZoneId] = useState<number | null>(null);
@@ -86,7 +86,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     { depth: (currentDepth - 30).toFixed(0), rop: 13.8, torque: 17.0 },
     { depth: (currentDepth - 20).toFixed(0), rop: 13.2, torque: 17.5 },
     { depth: (currentDepth - 10).toFixed(0), rop: 12.8, torque: 17.9 },
-    { depth: currentDepth.toFixed(0), rop: sim.current_rop, torque: sim.current_torque },
+    { depth: currentDepth.toFixed(0), rop: sim?.current_rop ?? 12.4, torque: sim?.current_torque ?? 18.2 },
   ];
 
   // KPI data

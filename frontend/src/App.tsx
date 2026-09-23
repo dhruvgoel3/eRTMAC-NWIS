@@ -154,22 +154,23 @@ function OperationsDashboard() {
 
   return (
     <div className="app-container">
-      {/* Demo Environment Banner */}
-      <div className="auth-top-strip">
+      {/* Platform Status Strip */}
+      <div className="auth-top-strip" style={{ opacity: 0.85, fontSize: 11 }}>
         <div className="status-badge">
           <span className="pulse-dot" />
-          <span style={{ fontWeight: 700, color: "var(--color-mint-pulse)" }}>
-            DEMO ENVIRONMENT — SYNTHETIC DATA
+          <span style={{ fontWeight: 600, color: "var(--color-pearl)" }}>
+            eRTMAC-NWIS
           </span>
           <span style={{ opacity: 0.35 }}>|</span>
           <span style={{ opacity: 0.85 }}>
-            Oil India Limited · SIH-121 Prototype
+            Oil India Limited · Operational Decision Support System
           </span>
         </div>
-        <div style={{ opacity: 0.75, letterSpacing: "0.06em" }}>
-          ROLE-BASED ACCESS CONTROL ACTIVE
+        <div style={{ opacity: 0.75, letterSpacing: "0.05em", fontSize: 10 }}>
+          ACTIVE TELEMETRY STREAM & RBAC ACTIVE
         </div>
       </div>
+
 
       {/* Header with Navigation & Simulation Pills */}
       <Header

@@ -83,38 +83,38 @@ def get_current_user_optional(
     if not token:
         return None
 
-    # Verify with Supabase Auth or test demo tokens
+    # Verify with Supabase Auth
     client = get_supabase_client()
+    if not client:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"success": False, "error": {"code": "CONFIG_ERROR", "message": "Authentication service is not configured."}},
+        )
+
     auth_user_id = None
     user_email = None
 
-    if token.startswith("demo_token_"):
-        role_type = token.replace("demo_token_", "").lower()
-        if role_type in ("engineer", "drilling_engineer"):
-            user_email = "engineer@nwis.demo"
-        elif role_type in ("supervisor", "drilling_supervisor"):
-            user_email = "supervisor@nwis.demo"
-        elif role_type in ("admin", "knowledge_admin"):
-            user_email = "admin@nwis.demo"
-        elif role_type in ("disabled", "disabled_operator"):
-            user_email = "disabled_operator@nwis.demo"
+    try:
+        # Validate token against Supabase Auth service
+        user_response = client.auth.get_user(token)
+        if user_response and getattr(user_response, "user", None):
+            auth_user_id = str(user_response.user.id)
+            user_email = user_response.user.email
+    except Exception as e:
+        # Token validation failed
+        print(f"[Auth Error] Supabase JWT validation failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"success": False, "error": {"code": "UNAUTHORIZED", "message": "Invalid or expired session token."}},
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
-    elif client:
-        try:
-            # Validate token against Supabase Auth service
-            user_response = client.auth.get_user(token)
-            if user_response and getattr(user_response, "user", None):
-
-                auth_user_id = str(user_response.user.id)
-                user_email = user_response.user.email
-        except Exception as e:
-            # Token validation failed
-            print(f"[Auth Error] Supabase JWT validation failed: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail={"success": False, "error": {"code": "UNAUTHORIZED", "message": "Invalid or expired session token."}},
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+    if not auth_user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"success": False, "error": {"code": "UNAUTHORIZED", "message": "Invalid or expired session token."}},
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
     # Query Profile from DB
     profile = None
@@ -126,12 +126,48 @@ def get_current_user_optional(
             profile.auth_user_id = auth_user_id
             db.commit()
 
+    if not profile and auth_user_id and user_email:
+        # Auto-provision profile from Supabase Auth identity
+        user_meta = getattr(user_response.user, "user_metadata", {}) or {}
+        full_name = user_meta.get("full_name") or user_email.split("@")[0].replace(".", " ").capitalize()
+        dept = user_meta.get("department") or "Drilling Operations"
+        designation = user_meta.get("designation") or "Drilling Engineer"
+        emp_id = user_meta.get("employee_id")
+
+        try:
+            profile = Profile(
+                auth_user_id=auth_user_id,
+                email=user_email,
+                full_name=full_name,
+                department=dept,
+                designation=designation,
+                employee_id=emp_id,
+                is_active=True,
+            )
+            db.add(profile)
+            db.flush()
+
+            role_req = (user_meta.get("role_request") or "").upper()
+            target_role_name = "DRILLING_SUPERVISOR" if role_req == "DRILLING_SUPERVISOR" else "DRILLING_ENGINEER"
+            role = db.query(Role).filter(Role.name == target_role_name).first()
+            if not role:
+                role = db.query(Role).filter(Role.name == "DRILLING_ENGINEER").first()
+            if role:
+                ur = UserRole(user_id=profile.id, role_id=role.id)
+                db.add(ur)
+            db.commit()
+            db.refresh(profile)
+        except Exception as e:
+            db.rollback()
+            print(f"[Auth Error] Failed to auto-provision profile: {e}")
+
     if not profile:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"success": False, "error": {"code": "UNAUTHORIZED", "message": "Session token verification failed or profile not found."}},
             headers={"WWW-Authenticate": "Bearer"},
         )
+
 
 
 

@@ -691,8 +691,9 @@ def get_ai_provider(db: Session):
     Otherwise uses the deterministic, DB-grounded DemoAIProvider.
     """
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
-    model = os.getenv("AI_MODEL", "gpt-4o-mini")
+    model = os.getenv("AI_MODEL") or os.getenv("OPENAI_MODEL") or "gpt-4o-mini"
 
     if api_key:
         return OpenAIProvider(db=db, api_key=api_key, model=model)
+
     return DemoAIProvider(db=db)

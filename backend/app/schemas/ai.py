@@ -12,6 +12,13 @@ class AIQueryRequest(BaseModel):
     well_id: Optional[str] = "OIL-X123"
 
 
+class AIDocQueryRequest(BaseModel):
+    question: str = Field(..., min_length=2, description="Query regarding document content")
+    doc_id: Optional[int] = None
+    well_id: Optional[str] = None
+
+
+
 class AICitationModel(BaseModel):
     document_id: str
     title: str
