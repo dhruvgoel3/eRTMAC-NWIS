@@ -16,7 +16,11 @@ from app.routers.routers import (
     simulation_router,
     events_router,
     datasets_router,
+    memory_graph_router,
 )
+from app.routers.auth import router as auth_router
+from app.routers.admin import router as admin_router
+
 
 
 @asynccontextmanager
@@ -33,6 +37,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
 # Allow CORS for dev frontend
 app.add_middleware(
     CORSMiddleware,
@@ -41,6 +48,22 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(StarletteHTTPException)
+async def custom_http_exception_handler(request, exc):
+    if isinstance(exc.detail, dict):
+        return JSONResponse(status_code=exc.status_code, content=exc.detail)
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "success": False,
+            "error": {
+                "code": "FORBIDDEN" if exc.status_code == 403 else ("UNAUTHORIZED" if exc.status_code == 401 else ("NOT_FOUND" if exc.status_code == 404 else "ERROR")),
+                "message": str(exc.detail),
+            },
+        },
+    )
+
 
 # Register all modular routers
 app.include_router(wells_router)
@@ -51,6 +74,10 @@ app.include_router(ai_router)
 app.include_router(simulation_router)
 app.include_router(events_router)
 app.include_router(datasets_router)
+app.include_router(memory_graph_router)
+app.include_router(auth_router)
+app.include_router(admin_router)
+
 
 
 from app.database import get_db_info

@@ -10,8 +10,10 @@ from app.models import Well, WellEvent, RiskZone, DrillingParameter
 from app.services.geo import haversine_km, find_nearby_wells
 from app.services.similarity import calculate_similarity, rank_similar_wells
 from app.services.risk_engine import get_risk_zones_for_depth
+from app.auth.dependencies import require_permission, AuthenticatedUser
 
 router = APIRouter(prefix="/api/wells", tags=["wells"])
+
 
 
 def well_to_dict(well: Well, distance_km: float = None) -> dict:
@@ -52,6 +54,7 @@ def get_all_wells(
     status: Optional[str] = None,
     source_dataset: Optional[str] = None,
     limit: int = Query(100, le=200),
+    user: AuthenticatedUser = Depends(require_permission("wells.view")),
     db: Session = Depends(get_db),
 ):
     """Get all wells with optional filters (including source_dataset)."""
@@ -67,7 +70,10 @@ def get_all_wells(
 
 
 @router.get("/active")
-def get_active_well(db: Session = Depends(get_db)):
+def get_active_well(
+    user: AuthenticatedUser = Depends(require_permission("wells.view")),
+    db: Session = Depends(get_db),
+):
     """Get the current active drilling well."""
     well = db.query(Well).filter(Well.is_active == True).first()
     if not well:
@@ -83,6 +89,7 @@ def get_nearby_wells(
     formation: Optional[str] = None,
     event_type: Optional[str] = None,
     severity: Optional[str] = None,
+    user: AuthenticatedUser = Depends(require_permission("wells.nearby")),
     db: Session = Depends(get_db),
 ):
     """
@@ -136,7 +143,11 @@ def get_nearby_wells(
 
 
 @router.get("/{well_id_str}")
-def get_well(well_id_str: str, db: Session = Depends(get_db)):
+def get_well(
+    well_id_str: str,
+    user: AuthenticatedUser = Depends(require_permission("wells.view")),
+    db: Session = Depends(get_db),
+):
     """Get a single well by well_id string (e.g. OIL-X104)."""
     well = db.query(Well).filter(Well.well_id == well_id_str).first()
     if not well:
@@ -179,6 +190,7 @@ def get_well_nearby(
     well_id_str: str,
     radius_km: float = Query(25.0, description="Search radius in km"),
     formation: Optional[str] = None,
+    user: AuthenticatedUser = Depends(require_permission("wells.nearby")),
     db: Session = Depends(get_db),
 ):
     """Get nearby wells relative to a specific well."""
@@ -206,6 +218,7 @@ def get_well_events(
     severity: Optional[str] = None,
     depth_min: Optional[float] = None,
     depth_max: Optional[float] = None,
+    user: AuthenticatedUser = Depends(require_permission("events.view")),
     db: Session = Depends(get_db),
 ):
     """Get all events for a specific well with optional filters."""
@@ -249,6 +262,7 @@ def get_similar_wells(
     well_id_str: str,
     radius_km: float = Query(50.0),
     top_n: int = Query(10, le=20),
+    user: AuthenticatedUser = Depends(require_permission("wells.compare")),
     db: Session = Depends(get_db),
 ):
     """Get the most similar offset wells to a given well."""
@@ -293,6 +307,7 @@ def get_similar_wells(
 def get_well_risk_zones(
     well_id_str: str,
     current_depth: float = Query(3050.0),
+    user: AuthenticatedUser = Depends(require_permission("risk.view")),
     db: Session = Depends(get_db),
 ):
     """Get risk zones for the active well at a given current depth."""
@@ -308,6 +323,7 @@ def get_well_risk_zones(
 def get_well_parameters(
     well_id_str: str,
     limit: int = Query(200, le=500),
+    user: AuthenticatedUser = Depends(require_permission("wells.view")),
     db: Session = Depends(get_db),
 ):
     """Get historical drilling parameters for a well."""

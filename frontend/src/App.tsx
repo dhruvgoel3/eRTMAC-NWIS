@@ -1,4 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { LoginPage } from "./pages/LoginPage";
+import { AccessDeniedPage } from "./pages/AccessDeniedPage";
+import { ProfilePage } from "./pages/ProfilePage";
+import { AdminUsersPage } from "./pages/admin/AdminUsersPage";
+import { AdminRolesPage } from "./pages/admin/AdminRolesPage";
+import { AdminAuditLogsPage } from "./pages/admin/AdminAuditLogsPage";
+
 import { Header } from "./components/Header";
 import { LiveTelemetryBar } from "./components/LiveTelemetryBar";
 import { RiskAlertBanner } from "./components/RiskAlertBanner";
@@ -8,6 +18,7 @@ import { SimilarityTab } from "./components/tabs/SimilarityTab";
 import { EventsKnowledgeTab } from "./components/tabs/EventsKnowledgeTab";
 import { AICopilotTab } from "./components/tabs/AICopilotTab";
 import { DocumentsTab } from "./components/tabs/DocumentsTab";
+import { MemoryGraphTab } from "./components/tabs/MemoryGraphTab";
 import { WellDossierModal } from "./components/WellDossierModal";
 import { AlertsModal } from "./components/AlertsModal";
 import {
@@ -19,7 +30,7 @@ import {
 } from "./types";
 import { api } from "./services/api";
 
-export function App() {
+function OperationsDashboard() {
   const [activeTab, setActiveTab] = useState<string>("overview");
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [allWells, setAllWells] = useState<Well[]>([]);
@@ -140,6 +151,23 @@ export function App() {
 
   return (
     <div className="app-container">
+      {/* Demo Environment Banner */}
+      <div className="bg-[#104336] text-[#0fff87] px-4 py-1.5 flex items-center justify-between text-[11px] font-mono border-b border-[#0fff87]/20">
+        <div className="flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#0fff87] animate-pulse" />
+          <span className="font-bold tracking-wider uppercase">
+            DEMO ENVIRONMENT — Synthetic Data
+          </span>
+          <span className="text-white/40">|</span>
+          <span className="text-white/80">
+            Oil India Limited · SIH-121 Prototype
+          </span>
+        </div>
+        <div className="text-white/60 tracking-wider hidden sm:block">
+          ROLE-BASED ACCESS CONTROL ACTIVE
+        </div>
+      </div>
+
       {/* Header with Navigation & Simulation Pills */}
       <Header
         activeTab={activeTab}
@@ -198,6 +226,8 @@ export function App() {
 
         {activeTab === "events" && <EventsKnowledgeTab />}
 
+        {activeTab === "memory" && <MemoryGraphTab />}
+
         {activeTab === "ai" && (
           <AICopilotTab
             simulation={simulation}
@@ -208,7 +238,7 @@ export function App() {
 
         {activeTab === "documents" && (
           <DocumentsTab
-            onAskAIAboutDoc={(docTitle) => {
+            onAskAIAboutDoc={(_docTitle) => {
               setActiveTab("ai");
             }}
           />
@@ -220,7 +250,7 @@ export function App() {
         <WellDossierModal
           well={selectedWellForDossier}
           onClose={() => setSelectedWellForDossier(null)}
-          onAskAIAboutWell={(wellId) => {
+          onAskAIAboutWell={(_wellId) => {
             setSelectedWellForDossier(null);
             setActiveTab("ai");
           }}
@@ -236,6 +266,70 @@ export function App() {
         />
       )}
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          {/* Public Authentication Routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/403" element={<AccessDeniedPage />} />
+
+          {/* Protected Main Operations Dashboard */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <OperationsDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/dashboard" element={<Navigate to="/" replace />} />
+
+          {/* Protected Operator Profile */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Protected Admin Routes */}
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute requiredPermission="users.view">
+                <AdminUsersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/roles"
+            element={
+              <ProtectedRoute requiredPermission="roles.view">
+                <AdminRolesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/audit-logs"
+            element={
+              <ProtectedRoute requiredPermission="audit.view">
+                <AdminAuditLogsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Catch-all */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { supabase } from "../lib/supabase";
 import {
   Well,
   WellEvent,
@@ -9,6 +10,10 @@ import {
   DocumentItem,
   AIQueryResponse,
   DashboardData,
+  UserProfile,
+  AdminUserItem,
+  RoleItem,
+  AuditLogItem,
 } from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
@@ -20,6 +25,44 @@ const client = axios.create({
   },
   timeout: 30000,
 });
+
+// Attach Supabase JWT Bearer token to all outgoing backend API requests
+client.interceptors.request.use(async (config) => {
+  try {
+    const { data } = await supabase.auth.getSession();
+    if (data?.session?.access_token) {
+      config.headers.Authorization = `Bearer ${data.session.access_token}`;
+    }
+  } catch (err) {
+    console.warn("[API Auth] Failed to retrieve session token:", err);
+  }
+  return config;
+});
+
+// Global 401 / 403 Response Interceptor
+client.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      // Attempt token refresh
+      try {
+        const { data, error: refreshError } = await supabase.auth.refreshSession();
+        if (data?.session?.access_token && error.config) {
+          error.config.headers.Authorization = `Bearer ${data.session.access_token}`;
+          return client.request(error.config);
+        }
+      } catch (e) {
+        // Refresh failed
+      }
+      // Redirect to login if on protected page
+      if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 
 export const api = {
   // Dashboard
@@ -176,4 +219,81 @@ export const api = {
     });
     return res.data;
   },
+
+  // Auth Context
+  getMe: async (): Promise<UserProfile> => {
+    const res = await client.get("/api/auth/me");
+    return res.data.data;
+  },
+
+  getPermissions: async (): Promise<{ user_permissions: string[]; all_permissions: any[] }> => {
+    const res = await client.get("/api/auth/permissions");
+    return res.data.data;
+  },
+
+  recordAudit: async (action: string, metadata?: Record<string, any>): Promise<void> => {
+    try {
+      await client.post("/api/auth/audit", { action, metadata });
+    } catch (e) {
+      // Non-blocking
+    }
+  },
+
+  // Admin Management
+  getAdminUsers: async (): Promise<AdminUserItem[]> => {
+    const res = await client.get("/api/admin/users");
+    return res.data.data;
+  },
+
+  createAdminUser: async (payload: {
+    email: string;
+    password: string;
+    full_name: string;
+    employee_id: string;
+    department?: string;
+    designation?: string;
+    role: string;
+  }): Promise<any> => {
+    const res = await client.post("/api/admin/users", payload);
+    return res.data.data;
+  },
+
+  updateAdminUser: async (
+    userId: string,
+    payload: {
+      is_active?: boolean;
+      role?: string;
+      department?: string;
+      designation?: string;
+      full_name?: string;
+    }
+  ): Promise<any> => {
+    const res = await client.patch(`/api/admin/users/${userId}`, payload);
+    return res.data.data;
+  },
+
+  getAdminRoles: async (): Promise<RoleItem[]> => {
+    const res = await client.get("/api/admin/roles");
+    return res.data.data;
+  },
+
+  getAuditLogs: async (limit: number = 50, action?: string): Promise<AuditLogItem[]> => {
+    const res = await client.get("/api/admin/audit-logs", {
+      params: { limit, action },
+    });
+    return res.data.data;
+  },
+
+  // Drilling Memory Graph
+  getMemoryGraph: async (
+    wellId: string = "OIL-X123",
+    radiusKm: number = 50,
+    topN: number = 8
+  ): Promise<import("../types").MemoryGraphData> => {
+    const res = await client.get(`/api/memory-graph/${wellId}`, {
+      params: { radius_km: radiusKm, top_n: topN },
+    });
+    return res.data;
+  },
 };
+

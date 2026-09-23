@@ -209,3 +209,133 @@ export interface DashboardData {
   high_risk_zone_count?: number;
   total_historical_events_nearby?: number;
 }
+
+// ─── Authentication & RBAC Types ─────────────────────────────────────────────
+export type UserRoleName = "DRILLING_ENGINEER" | "DRILLING_SUPERVISOR" | "KNOWLEDGE_ADMIN";
+
+export interface UserProfile {
+  id: string;
+  auth_user_id: string;
+  employee_id?: string;
+  full_name: string;
+  email: string;
+  department?: string;
+  designation?: string;
+  phone?: string;
+  is_active: boolean;
+  roles: UserRoleName[];
+  active_role: UserRoleName;
+  permissions: string[];
+}
+
+export interface AdminUserItem {
+  id: string;
+  auth_user_id: string;
+  employee_id?: string;
+  full_name: string;
+  email: string;
+  department?: string;
+  designation?: string;
+  phone?: string;
+  is_active: boolean;
+  roles: string[];
+  active_role: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface RoleItem {
+  id: string;
+  name: string;
+  description?: string;
+  user_count: number;
+  permissions: {
+    name: string;
+    description?: string;
+  }[];
+}
+
+export interface AuditLogItem {
+  id: string;
+  timestamp: string;
+  user_id?: string;
+  user_email: string;
+  user_name: string;
+  action: string;
+  resource_type?: string;
+  resource_id?: string;
+  ip_address?: string;
+  metadata?: Record<string, any>;
+}
+
+// ─── Drilling Memory Graph Types ──────────────────────────────────────────────
+export type MemoryNodeType =
+  | "ACTIVE_WELL"
+  | "OFFSET_WELL_TOP"
+  | "OFFSET_WELL"
+  | "FORMATION"
+  | "EVENT"
+  | "DEPTH_INTERVAL"
+  | "DOCUMENT";
+
+export interface MemoryGraphNode {
+  id: string;
+  type: MemoryNodeType;
+  label: string;
+  sublabel?: string;
+  description?: string;
+  // Well-specific
+  well_id?: string;
+  formation?: string;
+  total_depth?: number;
+  trajectory_type?: string;
+  latitude?: number;
+  longitude?: number;
+  status?: string;
+  similarity_score?: number;
+  distance_km?: number;
+  score_breakdown?: Record<string, number>;
+  // Event-specific
+  event_type?: string;
+  severity?: string;
+  depth_start?: number;
+  depth_end?: number;
+  npt_hours?: number;
+  root_cause?: string;
+  mitigation?: string;
+  event_date?: string;
+  // Document-specific
+  document_id?: string;
+  document_type?: string;
+  title?: string;
+  date?: string;
+  // Force graph runtime fields
+  x?: number;
+  y?: number;
+  vx?: number;
+  vy?: number;
+  fx?: number | null;
+  fy?: number | null;
+}
+
+export interface MemoryGraphEdge {
+  source: string | MemoryGraphNode;
+  target: string | MemoryGraphNode;
+  type: string;
+  label?: string;
+  weight?: number;
+  depth?: number;
+  severity?: string;
+}
+
+export interface MemoryGraphData {
+  anchor_well: string;
+  nodes: MemoryGraphNode[];
+  edges: MemoryGraphEdge[];
+  stats: {
+    total_nodes: number;
+    total_edges: number;
+    type_counts: Record<string, number>;
+    similar_wells_count: number;
+  };
+}

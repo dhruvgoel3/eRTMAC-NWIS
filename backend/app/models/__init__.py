@@ -9,6 +9,7 @@ from app.models.alert import Alert, RiskZone, DrillingParameter, SimulationState
 from app.models.well_log import WellLog
 from app.models.formation import Formation
 from app.models.similarity import SimilarityScore
+from app.models.auth import Profile, Role, Permission, UserRole, RolePermission, AuditLog
 
 __all__ = [
     "Well",
@@ -22,4 +23,10 @@ __all__ = [
     "WellLog",
     "Formation",
     "SimilarityScore",
+    "Profile",
+    "Role",
+    "Permission",
+    "UserRole",
+    "RolePermission",
+    "AuditLog",
 ]
