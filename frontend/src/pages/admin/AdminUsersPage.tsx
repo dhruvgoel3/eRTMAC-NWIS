@@ -2,43 +2,51 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Users,
-  UserPlus,
-  ShieldCheck,
-  Power,
-  Search,
+  Shield,
   ArrowLeft,
-  CheckCircle2,
-  AlertTriangle,
+  UserPlus,
   RefreshCw,
+  Search,
+  CheckCircle2,
+  XCircle,
+  Power,
+  KeyRound,
+  Edit2,
+  Mail,
+  AlertTriangle,
 } from "lucide-react";
 import { api } from "../../services/api";
-import { AdminUserItem } from "../../types";
-import { useAuth } from "../../contexts/AuthContext";
+import { AdminUserItem, RoleItem } from "../../types";
 
 export const AdminUsersPage: React.FC = () => {
-  const { profile } = useAuth();
   const [users, setUsers] = useState<AdminUserItem[]>([]);
-  const [search, setSearch] = useState<string>("");
+  const [roles, setRoles] = useState<RoleItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [search, setSearch] = useState<string>("");
   const [selectedRoleFilter, setSelectedRoleFilter] = useState<string>("ALL");
 
-  // Create User Modal State
+  // Create User modal state
   const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
   const [newEmail, setNewEmail] = useState<string>("");
-  const [newPassword, setNewPassword] = useState<string>("OIL_nwis_demo_2026!");
-  const [newName, setNewName] = useState<string>("");
-  const [newEmpId, setNewEmpId] = useState<string>("");
-  const [newDept, setNewDept] = useState<string>("Drilling Operations");
-  const [newDesig, setNewDesig] = useState<string>("Drilling Engineer");
+  const [newPassword, setNewPassword] = useState<string>("");
+  const [newFullName, setNewFullName] = useState<string>("");
+  const [newEmployeeId, setNewEmployeeId] = useState<string>("");
+  const [newDepartment, setNewDepartment] = useState<string>("Drilling Operations");
+  const [newDesignation, setNewDesignation] = useState<string>("Drilling Engineer");
   const [newRole, setNewRole] = useState<string>("DRILLING_ENGINEER");
   const [createError, setCreateError] = useState<string | null>(null);
   const [createSuccess, setCreateSuccess] = useState<boolean>(false);
 
-  // Status Confirmation Modal
+  // Edit Role modal state
+  const [editingUser, setEditingUser] = useState<AdminUserItem | null>(null);
+  const [editRoleSelection, setEditRoleSelection] = useState<string>("");
+
+  // Disable/Enable toggle confirm modal
   const [userToToggle, setUserToToggle] = useState<AdminUserItem | null>(null);
 
   useEffect(() => {
     loadUsers();
+    loadRoles();
   }, []);
 
   const loadUsers = async () => {
@@ -53,50 +61,67 @@ export const AdminUsersPage: React.FC = () => {
     }
   };
 
+  const loadRoles = async () => {
+    try {
+      const rolesData = await api.getAdminRoles();
+      setRoles(rolesData);
+    } catch (err) {
+      console.error("Failed to load roles list:", err);
+    }
+  };
+
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setCreateError(null);
+    setCreateSuccess(false);
+
     try {
       await api.createAdminUser({
-        email: newEmail,
+        email: newEmail.trim(),
         password: newPassword,
-        full_name: newName,
-        employee_id: newEmpId,
-        department: newDept,
-        designation: newDesig,
+        full_name: newFullName.trim(),
+        employee_id: newEmployeeId.trim() || undefined,
+        department: newDepartment.trim(),
+        designation: newDesignation.trim(),
         role: newRole,
       });
+
       setCreateSuccess(true);
       setTimeout(() => {
         setIsCreateOpen(false);
         setCreateSuccess(false);
         setNewEmail("");
-        setNewName("");
-        setNewEmpId("");
+        setNewPassword("");
+        setNewFullName("");
+        setNewEmployeeId("");
         loadUsers();
-      }, 1000);
+      }, 1500);
     } catch (err: any) {
-      setCreateError(err.response?.data?.error?.message || err.message || "Failed to create user.");
+      setCreateError(err.response?.data?.error?.message || err.message || "Failed to create user");
     }
   };
 
   const handleConfirmToggle = async () => {
     if (!userToToggle) return;
     try {
-      await api.updateAdminUser(userToToggle.id, {
-        is_active: !userToToggle.is_active,
-      });
+      if (userToToggle.is_active) {
+        await api.disableAdminUser(userToToggle.id);
+      } else {
+        await api.enableAdminUser(userToToggle.id);
+      }
       setUserToToggle(null);
-      await loadUsers();
+      loadUsers();
     } catch (err: any) {
-      alert(err.response?.data?.error?.message || "Failed to update user status");
+      alert(err.response?.data?.error?.message || "Action failed");
     }
   };
 
-  const handleChangeRole = async (userId: string, newRoleName: string) => {
+  const handleSaveRole = async () => {
+    if (!editingUser || !editRoleSelection) return;
     try {
-      await api.updateAdminUser(userId, { role: newRoleName });
-      await loadUsers();
+      await api.assignUserRole(editingUser.id, editRoleSelection);
+      setEditingUser(null);
+      loadUsers();
     } catch (err: any) {
       alert(err.response?.data?.error?.message || "Failed to update user role");
     }
@@ -113,69 +138,80 @@ export const AdminUsersPage: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen bg-[#f3f1ec] text-[#104336] p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="profile-viewport">
+      <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", flexDirection: "column", gap: 24 }}>
         {/* Navigation & Title */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <Link
               to="/"
-              className="p-2 rounded-xl bg-white border border-[#104336]/10 text-[#104336] hover:bg-[#104336]/5 transition-all"
+              className="profile-back-btn"
+              title="Return to Dashboard"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft style={{ width: 18, height: 18 }} />
             </Link>
             <div>
-              <div className="text-[11px] font-mono tracking-wider uppercase text-[#104336]/60">
+              <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-muted-slate)" }}>
                 Administration & Access Control
               </div>
-              <h1 className="text-2xl font-bold tracking-tight text-[#104336]">
+              <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.02em", color: "var(--color-bark)", margin: 0 }}>
                 User Management Directory
               </h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <button
               onClick={loadUsers}
-              className="px-3.5 py-2 rounded-xl bg-white border border-[#104336]/15 hover:border-[#104336] text-xs font-mono flex items-center gap-2"
+              className="btn-secondary"
+              style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 16px", fontSize: 12 }}
             >
-              <RefreshCw className="w-3.5 h-3.5" />
-              Sync
+              <RefreshCw style={{ width: 14, height: 14 }} />
+              <span>Refresh</span>
             </button>
             <button
               onClick={() => setIsCreateOpen(true)}
-              className="px-4 py-2 rounded-xl bg-[#104336] text-white hover:bg-[#0c3329] text-xs font-medium flex items-center gap-2 shadow-sm"
+              className="btn-primary"
+              style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 16px", fontSize: 12 }}
             >
-              <UserPlus className="w-4 h-4 text-[#0fff87]" />
-              Provision New User
+              <UserPlus style={{ width: 14, height: 14 }} />
+              <span>Provision User</span>
             </button>
           </div>
         </div>
 
-        {/* Filters Bar */}
-        <div className="bg-white rounded-2xl border border-[#104336]/10 p-4 flex flex-col sm:flex-row gap-3 items-center justify-between shadow-sm">
-          <div className="relative w-full sm:w-80">
-            <Search className="w-4 h-4 absolute left-3.5 top-3 text-[#104336]/40" />
+        {/* Filters */}
+        <div className="profile-card" style={{ padding: "14px 18px", display: "flex", flexDirection: "row", flexWrap: "wrap", gap: 16, alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ position: "relative", minWidth: 260, flex: "1 1 260px" }}>
+            <Search style={{ width: 15, height: 15, position: "absolute", left: 12, top: 12, color: "var(--color-muted-slate)" }} />
             <input
               type="text"
               placeholder="Search by name, email, or employee ID..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-[#f3f1ec]/50 border border-[#104336]/15 rounded-xl text-xs text-[#104336] focus:outline-none focus:border-[#104336]"
+              className="auth-input"
+              style={{ fontSize: 12, height: 38 }}
             />
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <span className="text-xs font-mono text-[#104336]/60">Role:</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--color-muted-slate)", textTransform: "uppercase" }}>Role:</span>
             {["ALL", "DRILLING_ENGINEER", "DRILLING_SUPERVISOR", "KNOWLEDGE_ADMIN"].map((r) => (
               <button
                 key={r}
                 onClick={() => setSelectedRoleFilter(r)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
-                  selectedRoleFilter === r
-                    ? "bg-[#104336] text-white"
-                    : "bg-[#f3f1ec]/60 text-[#104336]/70 hover:bg-[#104336]/10"
-                }`}
+                style={{
+                  padding: "5px 12px",
+                  borderRadius: 8,
+                  fontSize: 11,
+                  fontFamily: "var(--font-mono)",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  border: selectedRoleFilter === r ? "1px solid var(--color-canopy)" : "1px solid var(--color-sage-mist)",
+                  background: selectedRoleFilter === r ? "var(--color-canopy)" : "#ffffff",
+                  color: selectedRoleFilter === r ? "#ffffff" : "var(--color-slate)",
+                  transition: "all 0.15s ease",
+                }}
               >
                 {r === "ALL" ? "All Roles" : r.replace("_", " ")}
               </button>
@@ -184,91 +220,99 @@ export const AdminUsersPage: React.FC = () => {
         </div>
 
         {/* Users Table */}
-        <div className="bg-white rounded-2xl border border-[#104336]/10 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-[#f3f1ec]/80 border-b border-[#104336]/10 font-mono text-[#104336]/70 uppercase tracking-wider">
+        <div className="profile-card" style={{ padding: 0, overflow: "hidden" }}>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: 12 }}>
+              <thead style={{ background: "var(--bg-elevated)", borderBottom: "1px solid var(--color-sage-mist)", fontFamily: "var(--font-mono)", textTransform: "uppercase", fontSize: 11, color: "var(--color-muted-slate)" }}>
                 <tr>
-                  <th className="py-3 px-4">Employee</th>
-                  <th className="py-3 px-4">Employee ID</th>
-                  <th className="py-3 px-4">Department / Designation</th>
-                  <th className="py-3 px-4">Active Role</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th style={{ padding: "12px 16px" }}>Operator Identity</th>
+                  <th style={{ padding: "12px 16px" }}>Employee ID</th>
+                  <th style={{ padding: "12px 16px" }}>Department / Designation</th>
+                  <th style={{ padding: "12px 16px" }}>Assigned Role</th>
+                  <th style={{ padding: "12px 16px" }}>Status</th>
+                  <th style={{ padding: "12px 16px", textAlign: "right" }}>Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#104336]/5">
+              <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-xs text-[#104336]/60">
-                      Loading user directory...
+                    <td colSpan={6} style={{ padding: 36, textAlign: "center", color: "var(--color-muted-slate)" }}>
+                      Loading user accounts...
                     </td>
                   </tr>
                 ) : filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-xs text-[#104336]/60">
-                      No matching user accounts found.
+                    <td colSpan={6} style={{ padding: 36, textAlign: "center", color: "var(--color-muted-slate)" }}>
+                      No user accounts found matching current filters.
                     </td>
                   </tr>
                 ) : (
-                  filteredUsers.map((u) => {
-                    const isSelf = profile?.id === u.id;
+                  filteredUsers.map((u, idx) => {
+                    const primaryRole = u.roles[0] || "No Role";
                     return (
-                      <tr key={u.id} className="hover:bg-[#f3f1ec]/40 transition-colors">
-                        <td className="py-3.5 px-4">
-                          <div className="font-bold text-[#104336]">{u.full_name}</div>
-                          <div className="font-mono text-[#104336]/60 text-[11px]">{u.email}</div>
+                      <tr
+                        key={u.id}
+                        style={{
+                          borderBottom: "1px solid rgba(175, 196, 191, 0.25)",
+                          background: idx % 2 === 0 ? "#ffffff" : "var(--bg-elevated)",
+                        }}
+                      >
+                        <td style={{ padding: "12px 16px" }}>
+                          <div style={{ fontWeight: 700, color: "var(--color-bark)" }}>{u.full_name}</div>
+                          <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--color-muted-slate)" }}>{u.email}</div>
                         </td>
-                        <td className="py-3.5 px-4 font-mono font-semibold text-[#104336]">
+                        <td style={{ padding: "12px 16px", fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--color-slate)" }}>
                           {u.employee_id || "—"}
                         </td>
-                        <td className="py-3.5 px-4">
-                          <div className="text-[#104336]">{u.designation || "Staff"}</div>
-                          <div className="text-[11px] text-[#104336]/60">{u.department || "Operations"}</div>
+                        <td style={{ padding: "12px 16px" }}>
+                          <div style={{ color: "var(--color-bark)" }}>{u.department || "Operations"}</div>
+                          <div style={{ fontSize: 11, color: "var(--color-muted-slate)" }}>{u.designation || "Engineer"}</div>
                         </td>
-                        <td className="py-3.5 px-4">
-                          <select
-                            value={u.active_role}
-                            disabled={isSelf}
-                            onChange={(e) => handleChangeRole(u.id, e.target.value)}
-                            className="text-xs font-mono px-2 py-1 rounded-lg border border-[#104336]/20 bg-white text-[#104336] focus:outline-none focus:border-[#104336]"
-                          >
-                            <option value="DRILLING_ENGINEER">DRILLING_ENGINEER</option>
-                            <option value="DRILLING_SUPERVISOR">DRILLING_SUPERVISOR</option>
-                            <option value="KNOWLEDGE_ADMIN">KNOWLEDGE_ADMIN</option>
-                          </select>
+                        <td style={{ padding: "12px 16px" }}>
+                          <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 8px", borderRadius: 9999, background: "rgba(16, 67, 54, 0.08)", color: "var(--color-canopy)", fontSize: 10, fontFamily: "var(--font-mono)", fontWeight: 700 }}>
+                            <Shield style={{ width: 12, height: 12 }} />
+                            <span>{primaryRole}</span>
+                          </div>
                         </td>
-                        <td className="py-3.5 px-4">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold tracking-wider ${
-                              u.is_active
-                                ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                                : "bg-rose-50 text-rose-800 border border-rose-200"
-                            }`}
-                          >
-                            <span
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                u.is_active ? "bg-emerald-600" : "bg-rose-600"
-                              }`}
-                            />
-                            {u.is_active ? "ACTIVE" : "DISABLED"}
-                          </span>
+                        <td style={{ padding: "12px 16px" }}>
+                          {u.is_active ? (
+                            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 8px", borderRadius: 6, background: "rgba(13, 122, 78, 0.1)", color: "#0d7a4e", fontSize: 10, fontFamily: "var(--font-mono)", fontWeight: 700 }}>
+                              <CheckCircle2 style={{ width: 12, height: 12 }} /> ACTIVE
+                            </span>
+                          ) : (
+                            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 8px", borderRadius: 6, background: "rgba(185, 28, 66, 0.1)", color: "#b91c42", fontSize: 10, fontFamily: "var(--font-mono)", fontWeight: 700 }}>
+                              <XCircle style={{ width: 12, height: 12 }} /> DISABLED
+                            </span>
+                          )}
                         </td>
-                        <td className="py-3.5 px-4 text-right">
-                          <button
-                            type="button"
-                            disabled={isSelf}
-                            onClick={() => setUserToToggle(u)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
-                              isSelf
-                                ? "opacity-30 cursor-not-allowed text-[#104336]/40"
-                                : u.is_active
-                                ? "border border-rose-200 text-rose-700 hover:bg-rose-50"
-                                : "border border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-                            }`}
-                          >
-                            {u.is_active ? "Disable" : "Enable"}
-                          </button>
+                        <td style={{ padding: "12px 16px", textAlign: "right" }}>
+                          <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                            <button
+                              onClick={() => {
+                                setEditingUser(u);
+                                setEditRoleSelection(u.roles[0] || "DRILLING_ENGINEER");
+                              }}
+                              style={{ padding: "5px 10px", borderRadius: 8, border: "1px solid var(--color-sage-mist)", background: "#ffffff", fontSize: 11, cursor: "pointer", color: "var(--color-canopy)" }}
+                              title="Modify Role"
+                            >
+                              <Edit2 style={{ width: 12, height: 12 }} />
+                            </button>
+                            <button
+                              onClick={() => setUserToToggle(u)}
+                              style={{
+                                padding: "5px 10px",
+                                borderRadius: 8,
+                                border: "none",
+                                fontSize: 11,
+                                cursor: "pointer",
+                                background: u.is_active ? "rgba(185, 28, 66, 0.1)" : "rgba(13, 122, 78, 0.1)",
+                                color: u.is_active ? "#b91c42" : "#0d7a4e",
+                                fontWeight: 600,
+                              }}
+                            >
+                              {u.is_active ? "Disable" : "Enable"}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -282,37 +326,44 @@ export const AdminUsersPage: React.FC = () => {
 
       {/* Confirmation Modal */}
       {userToToggle && (
-        <div className="fixed inset-0 z-50 bg-[#104336]/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-[#104336]/10 p-6 max-w-sm w-full shadow-lg">
-            <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-4">
-              <Power className="w-6 h-6" />
+        <div className="auth-modal-backdrop">
+          <div className="auth-modal-dialog" style={{ maxWidth: 380, textAlign: "center" }}>
+            <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(185, 28, 66, 0.1)", color: "#b91c42", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+              <Power style={{ width: 24, height: 24 }} />
             </div>
-            <h3 className="text-base font-bold text-center text-[#104336] mb-2">
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--color-bark)", margin: "0 0 8px" }}>
               {userToToggle.is_active ? "Disable User Account?" : "Enable User Account?"}
             </h3>
-            <p className="text-xs text-[#104336]/70 text-center mb-6">
+            <p style={{ fontSize: 12, color: "var(--color-slate)", margin: "0 0 20px", lineHeight: 1.5 }}>
               Are you sure you want to {userToToggle.is_active ? "disable" : "reactivate"}{" "}
-              <strong className="text-[#104336]">{userToToggle.email}</strong>?{" "}
+              <strong style={{ color: "var(--color-bark)" }}>{userToToggle.email}</strong>?{" "}
               {userToToggle.is_active
                 ? "The user will immediately be blocked from accessing protected NWIS operations."
                 : "The user will regain access to authorized resources."}
             </p>
-            <div className="flex gap-2">
+            <div style={{ display: "flex", gap: 10 }}>
               <button
                 type="button"
                 onClick={() => setUserToToggle(null)}
-                className="flex-1 py-2.5 rounded-xl border border-[#104336]/20 text-xs font-medium hover:bg-[#f3f1ec]"
+                className="btn-secondary"
+                style={{ flex: 1, padding: "8px 16px", fontSize: 12 }}
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleConfirmToggle}
-                className={`flex-1 py-2.5 rounded-xl text-white text-xs font-medium ${
-                  userToToggle.is_active
-                    ? "bg-rose-600 hover:bg-rose-700"
-                    : "bg-emerald-700 hover:bg-emerald-800"
-                }`}
+                style={{
+                  flex: 1,
+                  padding: "8px 16px",
+                  borderRadius: 10,
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  background: userToToggle.is_active ? "#b91c42" : "#0d7a4e",
+                  color: "#ffffff",
+                }}
               >
                 Confirm
               </button>
@@ -323,140 +374,160 @@ export const AdminUsersPage: React.FC = () => {
 
       {/* Create User Modal */}
       {isCreateOpen && (
-        <div className="fixed inset-0 z-50 bg-[#104336]/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-[#104336]/10 p-6 max-w-md w-full shadow-xl">
-            <h3 className="text-lg font-bold text-[#104336] mb-1">
+        <div className="auth-modal-backdrop">
+          <div className="auth-modal-dialog" style={{ maxWidth: 440 }}>
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: "var(--color-bark)", margin: "0 0 4px" }}>
               Provision Platform Account
             </h3>
-            <p className="text-xs text-[#104336]/70 mb-4">
+            <p style={{ fontSize: 12, color: "var(--color-slate)", margin: "0 0 16px", lineHeight: 1.5 }}>
               Creates a verified Supabase identity, employee profile, and RBAC mapping.
             </p>
 
             {createSuccess ? (
-              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 mb-4">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                User account provisioned successfully!
+              <div className="auth-alert-success" style={{ marginBottom: 16 }}>
+                <CheckCircle2 style={{ width: 16, height: 16 }} />
+                <span>User account provisioned successfully!</span>
               </div>
             ) : (
-              <form onSubmit={handleCreateUser} className="space-y-3">
+              <form onSubmit={handleCreateUser} className="auth-form" style={{ gap: 12 }}>
                 {createError && (
-                  <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs">
-                    {createError}
+                  <div className="auth-alert-error" style={{ marginBottom: 4 }}>
+                    <AlertTriangle style={{ width: 16, height: 16 }} />
+                    <span>{createError}</span>
                   </div>
                 )}
-                <div>
-                  <label className="block text-[11px] font-mono text-[#104336]/70 uppercase mb-1">
-                    Full Name
-                  </label>
+                <div className="auth-field">
+                  <label className="auth-label">Full Name</label>
                   <input
                     type="text"
                     required
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    placeholder="e.g. Bhaskar Hazarika"
-                    className="w-full px-3 py-2 bg-[#f3f1ec]/50 border border-[#104336]/20 rounded-xl text-xs focus:outline-none focus:border-[#104336]"
+                    placeholder="e.g. Priya Das"
+                    value={newFullName}
+                    onChange={(e) => setNewFullName(e.target.value)}
+                    className="auth-input"
+                    style={{ paddingLeft: 12 }}
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[11px] font-mono text-[#104336]/70 uppercase mb-1">
-                      Employee ID
-                    </label>
+                <div className="auth-form-row">
+                  <div className="auth-field">
+                    <label className="auth-label">Official Email</label>
                     <input
-                      type="text"
+                      type="email"
                       required
-                      value={newEmpId}
-                      onChange={(e) => setNewEmpId(e.target.value)}
-                      placeholder="OIL-ENG-2044"
-                      className="w-full px-3 py-2 bg-[#f3f1ec]/50 border border-[#104336]/20 rounded-xl text-xs font-mono focus:outline-none focus:border-[#104336]"
+                      placeholder="user@oilindia.in"
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      className="auth-input"
+                      style={{ paddingLeft: 12 }}
                     />
                   </div>
-                  <div>
-                    <label className="block text-[11px] font-mono text-[#104336]/70 uppercase mb-1">
-                      Role
-                    </label>
-                    <select
-                      value={newRole}
-                      onChange={(e) => setNewRole(e.target.value)}
-                      className="w-full px-3 py-2 bg-[#f3f1ec]/50 border border-[#104336]/20 rounded-xl text-xs font-mono focus:outline-none focus:border-[#104336]"
-                    >
-                      <option value="DRILLING_ENGINEER">DRILLING_ENGINEER</option>
-                      <option value="DRILLING_SUPERVISOR">DRILLING_SUPERVISOR</option>
-                      <option value="KNOWLEDGE_ADMIN">KNOWLEDGE_ADMIN</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-mono text-[#104336]/70 uppercase mb-1">
-                    Work Email
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={newEmail}
-                    onChange={(e) => setNewEmail(e.target.value)}
-                    placeholder="user@nwis.demo"
-                    className="w-full px-3 py-2 bg-[#f3f1ec]/50 border border-[#104336]/20 rounded-xl text-xs font-mono focus:outline-none focus:border-[#104336]"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[11px] font-mono text-[#104336]/70 uppercase mb-1">
-                      Department
-                    </label>
+                  <div className="auth-field">
+                    <label className="auth-label">Employee ID</label>
                     <input
                       type="text"
-                      value={newDept}
-                      onChange={(e) => setNewDept(e.target.value)}
-                      className="w-full px-3 py-2 bg-[#f3f1ec]/50 border border-[#104336]/20 rounded-xl text-xs focus:outline-none focus:border-[#104336]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-mono text-[#104336]/70 uppercase mb-1">
-                      Designation
-                    </label>
-                    <input
-                      type="text"
-                      value={newDesig}
-                      onChange={(e) => setNewDesig(e.target.value)}
-                      className="w-full px-3 py-2 bg-[#f3f1ec]/50 border border-[#104336]/20 rounded-xl text-xs focus:outline-none focus:border-[#104336]"
+                      placeholder="OIL-4809"
+                      value={newEmployeeId}
+                      onChange={(e) => setNewEmployeeId(e.target.value)}
+                      className="auth-input"
+                      style={{ paddingLeft: 12 }}
                     />
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-[11px] font-mono text-[#104336]/70 uppercase mb-1">
-                    Temporary Password
-                  </label>
+                <div className="auth-field">
+                  <label className="auth-label">Initial Password</label>
                   <input
-                    type="text"
+                    type="password"
                     required
+                    placeholder="Min 6 characters"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#f3f1ec]/50 border border-[#104336]/20 rounded-xl text-xs font-mono focus:outline-none focus:border-[#104336]"
+                    className="auth-input"
+                    style={{ paddingLeft: 12 }}
                   />
                 </div>
 
-                <div className="flex gap-2 pt-2">
+                <div className="auth-field">
+                  <label className="auth-label">Assigned Role</label>
+                  <select
+                    value={newRole}
+                    onChange={(e) => setNewRole(e.target.value)}
+                    className="auth-select"
+                    style={{ paddingLeft: 12 }}
+                  >
+                    <option value="DRILLING_ENGINEER">Drilling Engineer (Operational View)</option>
+                    <option value="DRILLING_SUPERVISOR">Drilling Supervisor (Supervisory)</option>
+                    <option value="KNOWLEDGE_ADMIN">Knowledge Administrator (Admin)</option>
+                  </select>
+                </div>
+
+                <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
                   <button
                     type="button"
                     onClick={() => setIsCreateOpen(false)}
-                    className="flex-1 py-2.5 rounded-xl border border-[#104336]/20 text-xs font-medium hover:bg-[#f3f1ec]"
+                    className="btn-secondary"
+                    style={{ flex: 1, padding: "9px 16px", fontSize: 12 }}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 py-2.5 rounded-xl bg-[#104336] text-white text-xs font-medium hover:bg-[#0c3329]"
+                    className="btn-primary"
+                    style={{ flex: 1, padding: "9px 16px", fontSize: 12 }}
                   >
-                    Create User
+                    Provision Account
                   </button>
                 </div>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Edit Role Modal */}
+      {editingUser && (
+        <div className="auth-modal-backdrop">
+          <div className="auth-modal-dialog" style={{ maxWidth: 380 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--color-bark)", margin: "0 0 4px" }}>
+              Modify User Role Assignment
+            </h3>
+            <p style={{ fontSize: 12, color: "var(--color-slate)", margin: "0 0 16px" }}>
+              Update access tier for <strong style={{ color: "var(--color-bark)" }}>{editingUser.email}</strong>.
+            </p>
+
+            <div className="auth-field" style={{ marginBottom: 20 }}>
+              <label className="auth-label">Select Active Role</label>
+              <select
+                value={editRoleSelection}
+                onChange={(e) => setEditRoleSelection(e.target.value)}
+                className="auth-select"
+                style={{ paddingLeft: 12 }}
+              >
+                <option value="DRILLING_ENGINEER">Drilling Engineer</option>
+                <option value="DRILLING_SUPERVISOR">Drilling Supervisor</option>
+                <option value="KNOWLEDGE_ADMIN">Knowledge Administrator</option>
+              </select>
+            </div>
+
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                type="button"
+                onClick={() => setEditingUser(null)}
+                className="btn-secondary"
+                style={{ flex: 1, padding: "8px 16px", fontSize: 12 }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveRole}
+                className="btn-primary"
+                style={{ flex: 1, padding: "8px 16px", fontSize: 12 }}
+              >
+                Save Role
+              </button>
+            </div>
           </div>
         </div>
       )}

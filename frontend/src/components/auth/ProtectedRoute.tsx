@@ -18,9 +18,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#f3f1ec] text-[#104336]">
-        <div className="w-12 h-12 rounded-full border-4 border-[#104336]/20 border-t-[#0fff87] animate-spin mb-4" />
-        <div className="font-mono text-xs tracking-widest uppercase text-[#104336]/70">
+      <div className="auth-viewport" style={{ alignItems: "center", justifyContent: "center" }}>
+        <div className="loading-spinner" style={{ width: 40, height: 40, borderWidth: 3, marginBottom: 16 }} />
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-muted-slate)" }}>
           eRTMAC-NWIS · Initializing Operational Session
         </div>
       </div>

@@ -6,21 +6,11 @@ import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import engine, Base
-from app.routers.wells import router as wells_router
-from app.routers.routers import (
-    dashboard_router,
-    documents_router,
-    alerts_router,
-    ai_router,
-    simulation_router,
-    events_router,
-    datasets_router,
-    memory_graph_router,
-)
-from app.routers.auth import router as auth_router
-from app.routers.admin import router as admin_router
-
+from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from app.database import engine, Base, get_db_info
+from app.services.supabase_service import get_supabase_status
+from app.routers import all_routers
 
 
 @asynccontextmanager
@@ -37,9 +27,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-from fastapi.responses import JSONResponse
-from starlette.exceptions import HTTPException as StarletteHTTPException
-
 # Allow CORS for dev frontend
 app.add_middleware(
     CORSMiddleware,
@@ -48,6 +35,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.exception_handler(StarletteHTTPException)
 async def custom_http_exception_handler(request, exc):
@@ -65,23 +53,10 @@ async def custom_http_exception_handler(request, exc):
     )
 
 
-# Register all modular routers
-app.include_router(wells_router)
-app.include_router(dashboard_router)
-app.include_router(documents_router)
-app.include_router(alerts_router)
-app.include_router(ai_router)
-app.include_router(simulation_router)
-app.include_router(events_router)
-app.include_router(datasets_router)
-app.include_router(memory_graph_router)
-app.include_router(auth_router)
-app.include_router(admin_router)
+# Register all modular domain routers
+for r in all_routers:
+    app.include_router(r)
 
-
-
-from app.database import get_db_info
-from app.services.supabase_service import get_supabase_status
 
 @app.get("/")
 def root():

@@ -249,7 +249,7 @@ export const api = {
     email: string;
     password: string;
     full_name: string;
-    employee_id: string;
+    employee_id?: string;
     department?: string;
     designation?: string;
     role: string;
@@ -272,9 +272,26 @@ export const api = {
     return res.data.data;
   },
 
+  disableAdminUser: async (userId: string): Promise<any> => {
+    return api.updateAdminUser(userId, { is_active: false });
+  },
+
+  enableAdminUser: async (userId: string): Promise<any> => {
+    return api.updateAdminUser(userId, { is_active: true });
+  },
+
+  assignUserRole: async (userId: string, role: string): Promise<any> => {
+    return api.updateAdminUser(userId, { role });
+  },
+
   getAdminRoles: async (): Promise<RoleItem[]> => {
     const res = await client.get("/api/admin/roles");
     return res.data.data;
+  },
+
+  getAdminPermissions: async (): Promise<any[]> => {
+    const res = await client.get("/api/auth/permissions");
+    return res.data.data?.all_permissions || [];
   },
 
   getAuditLogs: async (limit: number = 50, action?: string): Promise<AuditLogItem[]> => {

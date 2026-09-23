@@ -133,6 +133,15 @@ export interface SimilarWellResult {
   event_count: number;
   total_npt: number;
   events?: WellEvent[];
+  factors?: {
+    distance?: number;
+    formation?: number;
+    depth?: number;
+    trajectory?: number;
+    parameters?: number;
+    [key: string]: number | undefined;
+  };
+  factor_explanations?: Record<string, string>;
 }
 
 export interface DocumentItem {
@@ -157,9 +166,14 @@ export interface AICitation {
 }
 
 export interface AIQueryResponse {
+  summary?: string;
+  historical_evidence?: Array<Record<string, any>>;
+  similar_wells?: string[];
+  risk_interpretation?: string;
+  sources?: string[];
   answer: string;
   provider: string;
-  model: string;
+  model?: string;
   citations: AICitation[];
   query_context?: {
     active_well: string;
@@ -258,6 +272,7 @@ export interface RoleItem {
 export interface AuditLogItem {
   id: string;
   timestamp: string;
+  created_at?: string;
   user_id?: string;
   user_email: string;
   user_name: string;
@@ -314,8 +329,8 @@ export interface MemoryGraphNode {
   y?: number;
   vx?: number;
   vy?: number;
-  fx?: number | null;
-  fy?: number | null;
+  fx?: number;
+  fy?: number;
 }
 
 export interface MemoryGraphEdge {

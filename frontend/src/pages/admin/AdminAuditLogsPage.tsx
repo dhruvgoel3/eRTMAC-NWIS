@@ -26,26 +26,26 @@ export const AdminAuditLogsPage: React.FC = () => {
     }
   };
 
-  const getActionBadgeColor = (action: string) => {
+  const getActionBadgeStyle = (action: string) => {
     switch (action.toUpperCase()) {
       case "LOGIN":
       case "LOGOUT":
-        return "bg-blue-50 text-blue-700 border-blue-200";
+        return { background: "rgba(37, 99, 235, 0.1)", color: "#1d4ed8", border: "1px solid rgba(37, 99, 235, 0.25)" };
       case "USER_CREATED":
       case "USER_ENABLED":
-        return "bg-emerald-50 text-emerald-800 border-emerald-200";
+        return { background: "rgba(13, 122, 78, 0.1)", color: "#0d7a4e", border: "1px solid rgba(13, 122, 78, 0.25)" };
       case "USER_DISABLED":
-        return "bg-rose-50 text-rose-800 border-rose-200";
+        return { background: "rgba(185, 28, 66, 0.1)", color: "#b91c42", border: "1px solid rgba(185, 28, 66, 0.25)" };
       case "ROLE_ASSIGNED":
       case "ROLE_CHANGED":
-        return "bg-purple-50 text-purple-700 border-purple-200";
+        return { background: "rgba(124, 58, 237, 0.1)", color: "#6d28d9", border: "1px solid rgba(124, 58, 237, 0.25)" };
       case "AI_QUERY":
-        return "bg-[#104336]/10 text-[#104336] border-[#104336]/20";
+        return { background: "rgba(16, 67, 54, 0.1)", color: "var(--color-canopy)", border: "1px solid rgba(16, 67, 54, 0.25)" };
       case "ALERT_ACKNOWLEDGED":
       case "ALERT_ESCALATED":
-        return "bg-amber-50 text-amber-800 border-amber-200";
+        return { background: "rgba(217, 119, 6, 0.1)", color: "#b45309", border: "1px solid rgba(217, 119, 6, 0.25)" };
       default:
-        return "bg-[#f3f1ec] text-[#104336] border-[#104336]/10";
+        return { background: "var(--bg-elevated)", color: "var(--color-bark)", border: "1px solid var(--color-sage-mist)" };
     }
   };
 
@@ -58,22 +58,23 @@ export const AdminAuditLogsPage: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen bg-[#f3f1ec] text-[#104336] p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="profile-viewport">
+      <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", flexDirection: "column", gap: 24 }}>
         {/* Navigation & Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <Link
               to="/"
-              className="p-2 rounded-xl bg-white border border-[#104336]/10 text-[#104336] hover:bg-[#104336]/5 transition-all"
+              className="profile-back-btn"
+              title="Return to Dashboard"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft style={{ width: 18, height: 18 }} />
             </Link>
             <div>
-              <div className="text-[11px] font-mono tracking-wider uppercase text-[#104336]/60">
+              <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-muted-slate)" }}>
                 Compliance & Traceability
               </div>
-              <h1 className="text-2xl font-bold tracking-tight text-[#104336]">
+              <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.02em", color: "var(--color-bark)", margin: 0 }}>
                 System Security & Activity Audit Trail
               </h1>
             </div>
@@ -81,117 +82,113 @@ export const AdminAuditLogsPage: React.FC = () => {
 
           <button
             onClick={loadLogs}
-            className="px-3.5 py-2 rounded-xl bg-white border border-[#104336]/15 hover:border-[#104336] text-xs font-mono flex items-center gap-2"
+            className="btn-secondary"
+            style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 16px", fontSize: 12 }}
           >
-            <RefreshCw className="w-3.5 h-3.5" />
-            Refresh Logs
+            <RefreshCw style={{ width: 14, height: 14 }} />
+            <span>Refresh Logs</span>
           </button>
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-2xl border border-[#104336]/10 p-4 flex flex-col sm:flex-row gap-3 items-center justify-between shadow-sm">
-          <div className="relative w-full sm:w-80">
-            <Search className="w-4 h-4 absolute left-3.5 top-3 text-[#104336]/40" />
+        <div className="profile-card" style={{ padding: "14px 18px", display: "flex", flexDirection: "row", flexWrap: "wrap", gap: 16, alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ position: "relative", minWidth: 260, flex: "1 1 260px" }}>
+            <Search style={{ width: 15, height: 15, position: "absolute", left: 12, top: 12, color: "var(--color-muted-slate)" }} />
             <input
               type="text"
               placeholder="Search by action, user, or resource..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-[#f3f1ec]/50 border border-[#104336]/15 rounded-xl text-xs text-[#104336] focus:outline-none focus:border-[#104336]"
+              className="auth-input"
+              style={{ fontSize: 12, height: 38 }}
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
-            {[
-              "ALL",
-              "LOGIN",
-              "USER_CREATED",
-              "ROLE_ASSIGNED",
-              "AI_QUERY",
-              "ALERT_ACKNOWLEDGED",
-            ].map((act) => (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--color-muted-slate)", textTransform: "uppercase" }}>Filter:</span>
+            {["ALL", "LOGIN", "USER_CREATED", "AI_QUERY", "ALERT_ACKNOWLEDGED"].map((act) => (
               <button
                 key={act}
                 onClick={() => setActionFilter(act)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
-                  actionFilter === act
-                    ? "bg-[#104336] text-white"
-                    : "bg-[#f3f1ec]/60 text-[#104336]/70 hover:bg-[#104336]/10"
-                }`}
+                style={{
+                  padding: "5px 12px",
+                  borderRadius: 8,
+                  fontSize: 11,
+                  fontFamily: "var(--font-mono)",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  border: actionFilter === act ? "1px solid var(--color-canopy)" : "1px solid var(--color-sage-mist)",
+                  background: actionFilter === act ? "var(--color-canopy)" : "#ffffff",
+                  color: actionFilter === act ? "#ffffff" : "var(--color-slate)",
+                  transition: "all 0.15s ease",
+                }}
               >
-                {act === "ALL" ? "All Actions" : act}
+                {act}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Audit Log Table */}
-        <div className="bg-white rounded-2xl border border-[#104336]/10 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-[#f3f1ec]/80 border-b border-[#104336]/10 font-mono text-[#104336]/70 uppercase tracking-wider">
+        {/* Logs Table */}
+        <div className="profile-card" style={{ padding: 0, overflow: "hidden" }}>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: 12 }}>
+              <thead style={{ background: "var(--bg-elevated)", borderBottom: "1px solid var(--color-sage-mist)", fontFamily: "var(--font-mono)", textTransform: "uppercase", fontSize: 11, color: "var(--color-muted-slate)" }}>
                 <tr>
-                  <th className="py-3 px-4">Timestamp</th>
-                  <th className="py-3 px-4">User / Actor</th>
-                  <th className="py-3 px-4">Action</th>
-                  <th className="py-3 px-4">Resource</th>
-                  <th className="py-3 px-4">IP Address</th>
-                  <th className="py-3 px-4">Details / Metadata</th>
+                  <th style={{ padding: "12px 16px" }}>Timestamp</th>
+                  <th style={{ padding: "12px 16px" }}>Action</th>
+                  <th style={{ padding: "12px 16px" }}>User</th>
+                  <th style={{ padding: "12px 16px" }}>Target Resource</th>
+                  <th style={{ padding: "12px 16px" }}>Metadata</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#104336]/5">
+              <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-[#104336]/60">
+                    <td colSpan={5} style={{ padding: 36, textAlign: "center", color: "var(--color-muted-slate)" }}>
                       Loading audit events...
                     </td>
                   </tr>
                 ) : filteredLogs.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-[#104336]/60">
-                      No audit log records found.
+                    <td colSpan={5} style={{ padding: 36, textAlign: "center", color: "var(--color-muted-slate)" }}>
+                      No audit events recorded matching current criteria.
                     </td>
                   </tr>
                 ) : (
-                  filteredLogs.map((log) => (
-                    <tr key={log.id} className="hover:bg-[#f3f1ec]/40 transition-colors">
-                      <td className="py-3.5 px-4 font-mono text-[#104336]/70 whitespace-nowrap">
-                        {log.timestamp
-                          ? new Date(log.timestamp).toLocaleString("en-IN", {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              second: "2-digit",
-                            })
-                          : "—"}
+                  filteredLogs.map((log, idx) => (
+                    <tr
+                      key={log.id}
+                      style={{
+                        borderBottom: "1px solid rgba(175, 196, 191, 0.25)",
+                        background: idx % 2 === 0 ? "#ffffff" : "var(--bg-elevated)",
+                      }}
+                    >
+                      <td style={{ padding: "10px 16px", fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--color-muted-slate)", whiteSpace: "nowrap" }}>
+                        {new Date(log.created_at || log.timestamp).toLocaleString()}
                       </td>
-                      <td className="py-3.5 px-4">
-                        <div className="font-semibold text-[#104336]">{log.user_name}</div>
-                        <div className="font-mono text-[11px] text-[#104336]/60">
-                          {log.user_email}
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4">
+                      <td style={{ padding: "10px 16px" }}>
                         <span
-                          className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider border ${getActionBadgeColor(
-                            log.action
-                          )}`}
+                          style={{
+                            ...getActionBadgeStyle(log.action),
+                            padding: "3px 8px",
+                            borderRadius: 6,
+                            fontSize: 10,
+                            fontFamily: "var(--font-mono)",
+                            fontWeight: 700,
+                            display: "inline-block",
+                          }}
                         >
                           {log.action}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-[#104336]">
-                        {log.resource_type ? (
-                          <span className="text-[#104336]/60">{log.resource_type}: </span>
-                        ) : null}
-                        <span className="font-semibold">{log.resource_id || "—"}</span>
+                      <td style={{ padding: "10px 16px", fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--color-bark)" }}>
+                        {log.user_email}
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-[11px] text-[#104336]/70">
-                        {log.ip_address || "127.0.0.1"}
+                      <td style={{ padding: "10px 16px", fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--color-slate)" }}>
+                        {log.resource_type ? `${log.resource_type}: ${log.resource_id || "—"}` : "—"}
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-[11px] text-[#104336]/70 max-w-xs truncate">
+                      <td style={{ padding: "10px 16px", fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--color-muted-slate)", maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {log.metadata ? JSON.stringify(log.metadata) : "—"}
                       </td>
                     </tr>

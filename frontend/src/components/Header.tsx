@@ -40,7 +40,7 @@ const NAV_TABS = [
   { id: "similarity", icon: <Layers size={15} />,     label: "Similarity Matrix" },
   { id: "events",     icon: <FileText size={15} />,   label: "Drilling Events" },
   { id: "memory",     icon: <Share2 size={15} />,     label: "Memory Graph" },
-  { id: "ai",         icon: <Bot size={15} />,        label: "OIL AI Copilot" },
+  { id: "ai",         icon: <Bot size={15} />,        label: "Ask NWIS" },
   { id: "documents",  icon: <Sparkles size={15} />,   label: "Documents & DDR" },
 ];
 
@@ -74,7 +74,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="brand-title">
             eRTMAC-NWIS
             <span className="oil-badge">Oil India Limited</span>
-            <span className="text-[10px] font-mono tracking-wider px-2 py-0.5 rounded-full bg-[#104336]/10 text-[#104336] font-bold">
+            <span style={{ fontSize: 10, fontFamily: "var(--font-mono)", fontWeight: 700, letterSpacing: "0.06em", padding: "2px 8px", borderRadius: 9999, background: "rgba(16, 67, 54, 0.08)", color: "var(--color-canopy)" }}>
               NWIS DEMO
             </span>
           </div>
@@ -161,88 +161,121 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
 
         {/* User Identity & Role Badge */}
-        <div className="relative">
+        <div style={{ position: "relative" }}>
           <button
             onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-            className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl border border-[#104336]/15 hover:border-[#104336] bg-white transition-all text-left shadow-sm"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "5px 12px 5px 6px",
+              borderRadius: 12,
+              border: "1px solid var(--color-sage-mist)",
+              background: "#ffffff",
+              cursor: "pointer",
+              textAlign: "left",
+              transition: "all 0.15s ease",
+            }}
           >
-            <div className="w-7 h-7 rounded-lg bg-[#104336] text-[#0fff87] font-bold text-xs flex items-center justify-center">
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: "var(--color-canopy)", color: "var(--color-mint-pulse)", fontWeight: 700, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
               {profile?.full_name ? profile.full_name.charAt(0).toUpperCase() : "O"}
             </div>
-            <div className="hidden sm:block text-left">
-              <div className="text-xs font-bold text-[#104336] leading-tight">
+            <div style={{ textAlign: "left" }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--color-bark)", lineHeight: 1.2 }}>
                 {profile?.full_name || "Operator"}
               </div>
-              <div className="text-[10px] font-mono tracking-wider font-semibold text-[#104336]/70 leading-none">
+              <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--color-slate)", letterSpacing: "0.04em" }}>
                 {activeRole || "DRILLING_ENGINEER"}
               </div>
             </div>
-            <ChevronDown className="w-3.5 h-3.5 text-[#104336]/50" />
+            <ChevronDown size={14} style={{ color: "var(--color-muted-slate)", marginLeft: 2 }} />
           </button>
 
           {/* User Menu Dropdown */}
           {userDropdownOpen && (
             <div
-              className="absolute right-0 mt-2 w-56 bg-white rounded-2xl border border-[#104336]/10 shadow-lg py-2 z-50 text-xs"
+              style={{
+                position: "absolute",
+                right: 0,
+                marginTop: 6,
+                width: 220,
+                background: "#ffffff",
+                borderRadius: 14,
+                border: "1px solid var(--color-sage-mist)",
+                boxShadow: "0 10px 30px rgba(16, 67, 54, 0.12)",
+                padding: "8px 0",
+                zIndex: 100,
+                fontSize: 12,
+              }}
               onClick={() => setUserDropdownOpen(false)}
             >
-              <div className="px-4 py-2 border-b border-[#104336]/10">
-                <div className="font-bold text-[#104336]">{profile?.full_name}</div>
-                <div className="text-[11px] font-mono text-[#104336]/60 truncate">
+              <div style={{ padding: "8px 16px 10px", borderBottom: "1px solid var(--color-sage-mist)" }}>
+                <div style={{ fontWeight: 700, color: "var(--color-bark)" }}>{profile?.full_name}</div>
+                <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--color-muted-slate)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {profile?.email}
                 </div>
-                <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#104336]/10 text-[10px] font-mono font-bold text-[#104336]">
-                  <Shield className="w-3 h-3 text-[#0fff87]" />
+                <div style={{ marginTop: 6, display: "inline-flex", alignItems: "center", gap: 5, padding: "2px 8px", borderRadius: 9999, background: "rgba(16, 67, 54, 0.08)", fontSize: 10, fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--color-canopy)" }}>
+                  <Shield size={12} color="var(--color-canopy)" />
                   {activeRole}
                 </div>
               </div>
 
               <Link
                 to="/profile"
-                className="flex items-center gap-2.5 px-4 py-2 text-[#104336] hover:bg-[#f3f1ec] transition-colors"
+                style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 16px", color: "var(--color-bark)", textDecoration: "none", transition: "background 0.15s ease" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-elevated)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               >
-                <User className="w-3.5 h-3.5" />
+                <User size={14} />
                 <span>My Profile & Capabilities</span>
               </Link>
 
               {canViewAdmin && (
                 <>
-                  <div className="my-1 border-t border-[#104336]/5" />
-                  <div className="px-4 py-1 text-[10px] font-mono uppercase text-[#104336]/50 tracking-wider">
+                  <div style={{ height: 1, background: "var(--color-sage-mist)", margin: "4px 0" }} />
+                  <div style={{ padding: "4px 16px", fontSize: 10, fontFamily: "var(--font-mono)", textTransform: "uppercase", color: "var(--color-muted-slate)", letterSpacing: "0.06em" }}>
                     Administration
                   </div>
                   <Link
                     to="/admin/users"
-                    className="flex items-center gap-2.5 px-4 py-2 text-[#104336] hover:bg-[#f3f1ec] transition-colors"
+                    style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 16px", color: "var(--color-bark)", textDecoration: "none" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-elevated)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                   >
-                    <Settings className="w-3.5 h-3.5" />
+                    <Settings size={14} />
                     <span>User Management</span>
                   </Link>
                   <Link
                     to="/admin/roles"
-                    className="flex items-center gap-2.5 px-4 py-2 text-[#104336] hover:bg-[#f3f1ec] transition-colors"
+                    style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 16px", color: "var(--color-bark)", textDecoration: "none" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-elevated)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                   >
-                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <ShieldCheck size={14} />
                     <span>Role & Permissions Matrix</span>
                   </Link>
                   <Link
                     to="/admin/audit-logs"
-                    className="flex items-center gap-2.5 px-4 py-2 text-[#104336] hover:bg-[#f3f1ec] transition-colors"
+                    style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 16px", color: "var(--color-bark)", textDecoration: "none" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-elevated)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                   >
-                    <FileText className="w-3.5 h-3.5" />
+                    <FileText size={14} />
                     <span>Audit Logs</span>
                   </Link>
                 </>
               )}
 
-              <div className="my-1 border-t border-[#104336]/10" />
+              <div style={{ height: 1, background: "var(--color-sage-mist)", margin: "4px 0" }} />
 
               <button
                 type="button"
                 onClick={logout}
-                className="w-full flex items-center gap-2.5 px-4 py-2 text-rose-700 hover:bg-rose-50 transition-colors text-left"
+                style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "8px 16px", color: "#b91c42", background: "none", border: "none", cursor: "pointer", textAlign: "left", fontSize: 12 }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(185, 28, 66, 0.08)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               >
-                <LogOut className="w-3.5 h-3.5" />
+                <LogOut size={14} />
                 <span>Sign Out</span>
               </button>
             </div>

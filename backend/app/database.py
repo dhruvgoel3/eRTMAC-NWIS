@@ -7,8 +7,7 @@ import os
 import urllib.parse
 from pathlib import Path
 from sqlalchemy import create_engine, text
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from dotenv import load_dotenv
 
 # Try loading from backend/.env or root .env
@@ -52,7 +51,10 @@ if not raw_db_url:
     raise RuntimeError("[Supabase DB Error] DATABASE_URL is not set in backend/.env. Supabase is the mandatory database.")
 
 DATABASE_URL = sanitize_db_url(raw_db_url)
-Base = declarative_base()
+
+
+class Base(DeclarativeBase):
+    pass
 
 # Connect to Supabase PostgreSQL with offline SQLite fallback
 try:

@@ -8,6 +8,7 @@ import { ProfilePage } from "./pages/ProfilePage";
 import { AdminUsersPage } from "./pages/admin/AdminUsersPage";
 import { AdminRolesPage } from "./pages/admin/AdminRolesPage";
 import { AdminAuditLogsPage } from "./pages/admin/AdminAuditLogsPage";
+import { ErrorBoundary } from "./components/common/ErrorBoundary";
 
 import { Header } from "./components/Header";
 import { LiveTelemetryBar } from "./components/LiveTelemetryBar";
@@ -152,18 +153,18 @@ function OperationsDashboard() {
   return (
     <div className="app-container">
       {/* Demo Environment Banner */}
-      <div className="bg-[#104336] text-[#0fff87] px-4 py-1.5 flex items-center justify-between text-[11px] font-mono border-b border-[#0fff87]/20">
-        <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#0fff87] animate-pulse" />
-          <span className="font-bold tracking-wider uppercase">
-            DEMO ENVIRONMENT — Synthetic Data
+      <div className="auth-top-strip">
+        <div className="status-badge">
+          <span className="pulse-dot" />
+          <span style={{ fontWeight: 700, color: "var(--color-mint-pulse)" }}>
+            DEMO ENVIRONMENT — SYNTHETIC DATA
           </span>
-          <span className="text-white/40">|</span>
-          <span className="text-white/80">
+          <span style={{ opacity: 0.35 }}>|</span>
+          <span style={{ opacity: 0.85 }}>
             Oil India Limited · SIH-121 Prototype
           </span>
         </div>
-        <div className="text-white/60 tracking-wider hidden sm:block">
+        <div style={{ opacity: 0.75, letterSpacing: "0.06em" }}>
           ROLE-BASED ACCESS CONTROL ACTIVE
         </div>
       </div>
@@ -195,62 +196,64 @@ function OperationsDashboard() {
       />
 
       {/* Main View Area */}
-      <main
-        className={activeTab === "memory" ? "main-content--fullbleed" : "main-content"}
-        style={{
-          flex: 1,
-          minHeight: 0,
-          overflowY: activeTab === "memory" ? "hidden" : "auto",
-        }}
-      >
-        {activeTab === "overview" && (
-          <OverviewTab
-            data={dashboardData}
-            onSelectWell={handleSelectWell}
-            onNavigateToTab={setActiveTab}
-          />
-        )}
+      <ErrorBoundary fallbackTitle="Unable to display this operational tab view">
+        <main
+          className={activeTab === "memory" ? "main-content--fullbleed" : "main-content"}
+          style={{
+            flex: 1,
+            minHeight: 0,
+            overflowY: activeTab === "memory" ? "hidden" : "auto",
+          }}
+        >
+          {activeTab === "overview" && (
+            <OverviewTab
+              data={dashboardData}
+              onSelectWell={handleSelectWell}
+              onNavigateToTab={setActiveTab}
+            />
+          )}
 
-        {activeTab === "map" && (
-          <GISMapTab
-            wells={allWells}
-            activeWell={activeWell}
-            onSelectWell={handleSelectWell}
-            radiusKm={radiusKm}
-            setRadiusKm={setRadiusKm}
-            selectedFormation={selectedFormation}
-            setSelectedFormation={setSelectedFormation}
-          />
-        )}
+          {activeTab === "map" && (
+            <GISMapTab
+              wells={allWells}
+              activeWell={activeWell}
+              onSelectWell={handleSelectWell}
+              radiusKm={radiusKm}
+              setRadiusKm={setRadiusKm}
+              selectedFormation={selectedFormation}
+              setSelectedFormation={setSelectedFormation}
+            />
+          )}
 
-        {activeTab === "similarity" && (
-          <SimilarityTab
-            similarWells={similarWells}
-            activeWell={activeWell}
-            onSelectWell={handleSelectWell}
-          />
-        )}
+          {activeTab === "similarity" && (
+            <SimilarityTab
+              similarWells={similarWells}
+              activeWell={activeWell}
+              onSelectWell={handleSelectWell}
+            />
+          )}
 
-        {activeTab === "events" && <EventsKnowledgeTab />}
+          {activeTab === "events" && <EventsKnowledgeTab />}
 
-        {activeTab === "memory" && <MemoryGraphTab />}
+          {activeTab === "memory" && <MemoryGraphTab />}
 
-        {activeTab === "ai" && (
-          <AICopilotTab
-            simulation={simulation}
-            activeWellId={activeWell?.well_id || "OIL-X123"}
-            formation={activeWell?.formation || "Tipam"}
-          />
-        )}
+          {activeTab === "ai" && (
+            <AICopilotTab
+              simulation={simulation}
+              activeWellId={activeWell?.well_id || "OIL-X123"}
+              formation={activeWell?.formation || "Tipam"}
+            />
+          )}
 
-        {activeTab === "documents" && (
-          <DocumentsTab
-            onAskAIAboutDoc={(_docTitle) => {
-              setActiveTab("ai");
-            }}
-          />
-        )}
-      </main>
+          {activeTab === "documents" && (
+            <DocumentsTab
+              onAskAIAboutDoc={(_docTitle) => {
+                setActiveTab("ai");
+              }}
+            />
+          )}
+        </main>
+      </ErrorBoundary>
 
       {/* Well Dossier Modal */}
       {selectedWellForDossier && (

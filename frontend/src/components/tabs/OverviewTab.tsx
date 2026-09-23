@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -61,6 +61,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   const currentDepth = sim.current_depth;
   const riskZones = data.risk_zones || [];
   const topSimilar = data.top_similar_well;
+  const [expandedZoneId, setExpandedZoneId] = useState<number | null>(null);
 
   const getRiskLabel = (z: any) =>
     ((z.risk_type || z.event_type || "UNKNOWN") as string).replace(/_/g, " ");
@@ -319,40 +320,77 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                 const isPassed = currentDepth > z.depth_end;
                 const isCurrent = currentDepth >= z.depth_start && currentDepth <= z.depth_end;
                 const isUpcoming = currentDepth < z.depth_start;
+                const isExpanded = expandedZoneId === z.id;
                 return (
                   <div
                     key={z.id}
+                    onClick={() => setExpandedZoneId(isExpanded ? null : z.id)}
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "10px 14px",
                       borderRadius: 8,
                       background: isCurrent ? "rgba(185,28,66,0.06)" : "var(--bg-elevated)",
                       border: `1px solid ${isCurrent ? "rgba(185,28,66,0.22)" : "var(--color-sage-mist)"}`,
                       borderLeft: `3px solid ${SEV_LEFT[z.severity] || "#afc4bf"}`,
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                      overflow: "hidden",
                     }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <span className={`badge ${SEV_BADGE[z.severity] || "badge-canopy"}`}>
-                        {z.severity}
-                      </span>
-                      <div>
-                        <div style={{ fontWeight: 600, fontSize: 13, color: "var(--color-bark)" }}>
-                          {z.depth_start}m – {z.depth_end}m: {getRiskLabel(z)}
-                        </div>
-                        <div style={{ fontSize: 11, color: "var(--color-muted-slate)" }}>
-                          Source: {getSourceWells(z).join(", ")}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "10px 14px",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <span className={`badge ${SEV_BADGE[z.severity] || "badge-canopy"}`}>
+                          {z.severity}
+                        </span>
+                        <div>
+                          <div style={{ fontWeight: 600, fontSize: 13, color: "var(--color-bark)" }}>
+                            {z.depth_start}m – {z.depth_end}m: {getRiskLabel(z)}
+                          </div>
+                          <div style={{ fontSize: 11, color: "var(--color-muted-slate)" }}>
+                            Source: {getSourceWells(z).join(", ")}
+                          </div>
                         </div>
                       </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <span style={{
+                          fontSize: 11,
+                          fontWeight: 700,
+                          color: isCurrent ? "#b91c42" : isUpcoming ? "#c47d0e" : "var(--color-muted-slate)",
+                        }}>
+                          {isCurrent ? "● ACTIVE" : isUpcoming ? `▲ In ${(z.depth_start - currentDepth).toFixed(0)}m` : "✓ PASSED"}
+                        </span>
+                        <ChevronRight
+                          size={14}
+                          color="var(--color-muted-slate)"
+                          style={{
+                            transform: isExpanded ? "rotate(90deg)" : "none",
+                            transition: "transform 0.15s ease",
+                          }}
+                        />
+                      </div>
                     </div>
-                    <span style={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                      color: isCurrent ? "#b91c42" : isUpcoming ? "#c47d0e" : "var(--color-muted-slate)",
-                    }}>
-                      {isCurrent ? "● ACTIVE" : isUpcoming ? `▲ In ${(z.depth_start - currentDepth).toFixed(0)}m` : "✓ PASSED"}
-                    </span>
+
+                    {/* Expandable Explanation & Reason Breakdown */}
+                    {isExpanded && (
+                      <div
+                        style={{
+                          padding: "12px 14px 14px",
+                          borderTop: "1px solid var(--color-sage-mist)",
+                          background: "#fff",
+                          fontSize: 12,
+                          lineHeight: 1.6,
+                        }}
+                      >
+                        <div style={{ whiteSpace: "pre-line", color: "var(--color-bark)", fontFamily: "inherit" }}>
+                          {z.explanation || `${z.severity} HISTORICAL RISK\nReason:\n• Historical offset events detected in ${z.formation} at this depth interval.`}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
