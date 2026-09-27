@@ -18,8 +18,10 @@ router = APIRouter(prefix="/api/map", tags=["map"])
 
 def get_carto_url(subpath: str) -> str:
     key = os.getenv("CARTO_API_KEY", "").strip()
-    suffix = f"?api_key={key}" if key else ""
-    return f"https://{{s}}.basemaps.cartocdn.com/{subpath}/{{z}}/{{x}}/{{y}}{{r}}.png{suffix}"
+    if key:
+        return f"https://{{s}}.basemaps.cartocdn.com/{subpath}/{{z}}/{{x}}/{{y}}{{r}}.png?api_key={key}"
+    # Seamless fallback to clean dark canvas without watermark when no valid key is provided
+    return "https://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
 
 
 def get_basemap_providers() -> Dict[str, Any]:
@@ -120,8 +122,8 @@ def get_map_config():
     """Returns active map basemap configurations, Carto tile URLs with API key, and GIS defaults."""
     providers = get_basemap_providers()
     has_key = bool(os.getenv("CARTO_API_KEY", "").strip())
-    # If CARTO_API_KEY is present, default to carto-dark, otherwise use clean esri-dark
-    default_p = "carto-dark" if has_key else "esri-dark"
+    # Default to clean esri-dark canvas to guarantee no watermarks
+    default_p = "esri-dark"
     cfg = dict(MAP_CONFIG)
     cfg["default_provider"] = default_p
     cfg["providers"] = providers
@@ -423,7 +425,8 @@ def get_map_tile(provider: str, z: int, x: int, y: int):
     Tile endpoint providing direct redirection or proxying to the configured CartoDB basemap.
     Supports carto-dark, carto-light, carto-voyager, and osm.
     """
-    prov = BASEMAP_PROVIDERS.get(provider) or BASEMAP_PROVIDERS["carto-dark"]
+    providers = get_basemap_providers()
+    prov = providers.get(provider) or providers["esri-dark"]
     sub = "a"
     if "{s}" in prov["url"]:
         subdomain_url = prov["url"].replace("{s}", sub).replace("{z}", str(z)).replace("{x}", str(x)).replace("{y}", str(y)).replace("{r}", "")

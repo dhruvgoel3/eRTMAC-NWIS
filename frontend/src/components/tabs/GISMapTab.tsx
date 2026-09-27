@@ -270,7 +270,7 @@ export const GISMapTab: React.FC<GISMapTabProps> = ({
   // Map API State (Carto basemaps & GIS layers)
   const [mapConfig, setMapConfig] = useState<any>(null);
   const [mapLayers, setMapLayers] = useState<any>(null);
-  const [selectedBasemap, setSelectedBasemap] = useState<string>("carto-dark");
+  const [selectedBasemap, setSelectedBasemap] = useState<string>("esri-dark");
   const [showFields, setShowFields] = useState<boolean>(true);
   const [showFaults, setShowFaults] = useState<boolean>(true);
 
@@ -592,18 +592,14 @@ export const GISMapTab: React.FC<GISMapTabProps> = ({
                 '&copy; <a href="https://www.esri.com/">Esri</a>, CartoDB'
               }
               url={
-                mapConfig?.providers?.[selectedBasemap]?.url ||
-                (selectedBasemap === "carto-dark"
-                  ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                  : selectedBasemap === "carto-light"
-                  ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                  : selectedBasemap === "carto-voyager"
-                  ? "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                selectedBasemap === "esri-dark"
+                  ? "https://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
                   : selectedBasemap === "satellite"
                   ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
                   : selectedBasemap === "osm"
                   ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  : "https://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}")
+                  : mapConfig?.providers?.[selectedBasemap]?.url ||
+                    "https://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
               }
             />
 
