@@ -16,16 +16,30 @@ router = APIRouter(prefix="/api/map", tags=["map"])
 
 # ─── Carto and Basemap Configuration ──────────────────────────────────────────
 
-def get_carto_url(subpath: str) -> str:
+def get_carto_key() -> str:
     key = os.getenv("CARTO_API_KEY", "").strip()
+    if not key:
+        from pathlib import Path
+        from dotenv import load_dotenv
+        env_file = Path(__file__).resolve().parent.parent.parent / ".env"
+        if env_file.is_file():
+            load_dotenv(env_file, override=True)
+            key = os.getenv("CARTO_API_KEY", "").strip()
+    return key
+
+
+def get_carto_url(subpath: str) -> str:
+    key = get_carto_key()
     if key:
-        return f"https://{{s}}.basemaps.cartocdn.com/{subpath}/{{z}}/{{x}}/{{y}}{{r}}.png?api_key={key}"
+        # Carto basemaps require ?key= parameter (not ?api_key=) and rastertiles path
+        formatted_sub = subpath if subpath.startswith("rastertiles/") else f"rastertiles/{subpath}"
+        return f"https://{{s}}.basemaps.cartocdn.com/{formatted_sub}/{{z}}/{{x}}/{{y}}{{r}}.png?key={key}"
     # Seamless fallback to clean dark canvas without watermark when no valid key is provided
     return "https://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
 
 
 def get_basemap_providers() -> Dict[str, Any]:
-    key = os.getenv("CARTO_API_KEY", "").strip()
+    key = get_carto_key()
     return {
         "esri-dark": {
             "id": "esri-dark",
@@ -121,9 +135,9 @@ MAP_CONFIG = {
 def get_map_config():
     """Returns active map basemap configurations, Carto tile URLs with API key, and GIS defaults."""
     providers = get_basemap_providers()
-    has_key = bool(os.getenv("CARTO_API_KEY", "").strip())
-    # Default to clean esri-dark canvas to guarantee no watermarks
-    default_p = "esri-dark"
+    key = get_carto_key()
+    has_key = bool(key)
+    default_p = "carto-dark" if has_key else "esri-dark"
     cfg = dict(MAP_CONFIG)
     cfg["default_provider"] = default_p
     cfg["providers"] = providers

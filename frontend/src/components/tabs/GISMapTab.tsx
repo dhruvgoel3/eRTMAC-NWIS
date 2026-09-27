@@ -516,16 +516,10 @@ export const GISMapTab: React.FC<GISMapTabProps> = ({
               cursor: "pointer",
             }}
           >
-            <option value="esri-dark">Dark Canvas (Clean / No Watermark)</option>
-            <option value="carto-dark">
-              Carto Dark Matter {mapConfig?.carto_api_key_configured ? "✓" : "(API Key Required)"}
-            </option>
-            <option value="carto-light">
-              Carto Positron {mapConfig?.carto_api_key_configured ? "✓" : "(API Key Required)"}
-            </option>
-            <option value="carto-voyager">
-              Carto Voyager {mapConfig?.carto_api_key_configured ? "✓" : "(API Key Required)"}
-            </option>
+            <option value="carto-dark">Carto Dark Matter (Dark)</option>
+            <option value="esri-dark">Dark Canvas (Esri)</option>
+            <option value="carto-light">Carto Positron (Light)</option>
+            <option value="carto-voyager">Carto Voyager (Streets)</option>
             <option value="satellite">Esri Satellite</option>
             <option value="osm">OpenStreetMap</option>
           </select>

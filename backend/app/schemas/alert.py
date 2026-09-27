@@ -1,7 +1,7 @@
 """
 Pydantic schemas for Alerts and Notifications.
 """
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Union
 from pydantic import BaseModel, Field, ConfigDict
 
 
@@ -15,7 +15,7 @@ class AlertResponse(BaseModel):
     depth: float
     message: str
     explanation: Optional[str] = None
-    evidence: Optional[Dict[str, Any]] = None
+    evidence: Optional[Union[Dict[str, Any], List[Any]]] = None
     acknowledged: bool = False
     created_at: str
 

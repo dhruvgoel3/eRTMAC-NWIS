@@ -37,7 +37,6 @@ class RiskZoneResponse(BaseModel):
 
 
 class OverallRiskResponse(BaseModel):
-<<<<<<< HEAD
     level: Optional[str] = "LOW"
     score: Optional[float] = 0.0
     severity: Optional[str] = "LOW"
@@ -54,18 +53,3 @@ class OverallRiskResponse(BaseModel):
 
     class Config:
         extra = "allow"
-=======
-    score: Optional[float] = None
-    severity: Optional[str] = "LOW"
-    message: Optional[str] = "Normal drilling operations"
-    active_zones: Optional[Any] = 0
-    active_event_types: Optional[List[str]] = None
-    level: Optional[str] = None
-    highest_severity: Optional[str] = "LOW"
-    active_zone_count: Optional[int] = 0
-    approaching_count: Optional[int] = 0
-    approaching_zones: Optional[List[RiskZoneResponse]] = None
-    summary: Optional[str] = None
-    disclaimer: Optional[str] = None
-
->>>>>>> upstream/main
