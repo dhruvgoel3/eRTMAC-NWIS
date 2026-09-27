@@ -16,17 +16,18 @@ class RiskZoneResponse(BaseModel):
     severity: str = Field("LOW", description="LOW | MEDIUM | HIGH | CRITICAL")
     risk_score: Optional[float] = 0.0
     evidence_count: Optional[int] = 0
-    source_well_ids: Optional[List[int]] = []
-    source_wells: Optional[List[str]] = []
-    distance_ahead: Optional[float] = None
-    proximity_score: Optional[float] = None
     description: Optional[str] = None
     mitigation_recommendation: Optional[str] = None
+    recommended_action: Optional[str] = None
     historical_event_count: Optional[int] = 0
     confidence_score: Optional[float] = 0.85
     explanation: Optional[str] = None
-    status: Optional[str] = Field("INACTIVE", description="ACTIVE | APPROACHING | PASSED | INACTIVE | ENTERED | FAR")
+    source_well_ids: Optional[List[int]] = []
+    source_wells: Optional[List[str]] = []
+    status: Optional[str] = Field("INACTIVE", description="ACTIVE | APPROACHING | ENTERED | PAST | INACTIVE | FAR")
+    distance_ahead: Optional[float] = None
     distance_to_bit: Optional[float] = None
+    proximity_score: Optional[float] = None
     is_active: Optional[bool] = False
     is_approaching: Optional[bool] = False
     disclaimer: Optional[str] = None
@@ -36,6 +37,7 @@ class RiskZoneResponse(BaseModel):
 
 
 class OverallRiskResponse(BaseModel):
+<<<<<<< HEAD
     level: Optional[str] = "LOW"
     score: Optional[float] = 0.0
     severity: Optional[str] = "LOW"
@@ -52,3 +54,18 @@ class OverallRiskResponse(BaseModel):
 
     class Config:
         extra = "allow"
+=======
+    score: Optional[float] = None
+    severity: Optional[str] = "LOW"
+    message: Optional[str] = "Normal drilling operations"
+    active_zones: Optional[Any] = 0
+    active_event_types: Optional[List[str]] = None
+    level: Optional[str] = None
+    highest_severity: Optional[str] = "LOW"
+    active_zone_count: Optional[int] = 0
+    approaching_count: Optional[int] = 0
+    approaching_zones: Optional[List[RiskZoneResponse]] = None
+    summary: Optional[str] = None
+    disclaimer: Optional[str] = None
+
+>>>>>>> upstream/main

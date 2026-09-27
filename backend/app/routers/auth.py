@@ -2,15 +2,111 @@
 Authentication API Router
 Endpoints for user session context, permissions, and client-reported audit events.
 """
+import uuid
 from typing import Dict, Any, Optional
-from fastapi import APIRouter, Depends, Request, Body
+from pydantic import BaseModel, Field, EmailStr
+from fastapi import APIRouter, Depends, Request, Body, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.auth.dependencies import get_current_user, AuthenticatedUser
-from app.models.auth import Permission
+from app.models.auth import Profile, Role, UserRole, Permission
+from app.services.supabase_service import get_supabase_client
 from app.services.audit_service import log_audit_event
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+
+class RegisterPayload(BaseModel):
+    email: str
+    password: Optional[str] = None
+    full_name: str
+    employee_id: Optional[str] = None
+    department: Optional[str] = "Drilling Operations"
+    designation: Optional[str] = "Drilling Engineer"
+    role: Optional[str] = "DRILLING_ENGINEER"
+    auth_user_id: Optional[str] = None
+
+
+@router.post("/register")
+def register_user(
+    payload: RegisterPayload,
+    db: Session = Depends(get_db),
+):
+    """
+    Registers or provisions an NWIS user profile and assigns role.
+    Integrates with Supabase Auth identities.
+    """
+    email = payload.email.strip().lower()
+    existing_profile = db.query(Profile).filter(Profile.email == email).first()
+    if existing_profile:
+        return {
+            "success": True,
+            "message": "User profile already registered.",
+            "profile_id": str(existing_profile.id),
+        }
+
+    auth_uid = payload.auth_user_id
+    # If auth_user_id was not directly passed, attempt lookup in Supabase
+    client = get_supabase_client()
+    if not auth_uid and client and payload.password:
+        try:
+            signup_res = client.auth.sign_up({
+                "email": email,
+                "password": payload.password,
+                "options": {
+                    "data": {
+                        "full_name": payload.full_name,
+                        "department": payload.department,
+                        "designation": payload.designation,
+                        "employee_id": payload.employee_id,
+                    }
+                }
+            })
+            if signup_res and getattr(signup_res, "user", None):
+                auth_uid = str(signup_res.user.id)
+        except Exception as e:
+            # If user already registered in Supabase auth
+            print(f"[Register] Supabase sign_up notice: {e}")
+
+    if not auth_uid:
+        # Generate stable placeholder if Supabase user is not immediately fetched
+        auth_uid = str(uuid.uuid4())
+
+    target_role_name = (payload.role or "DRILLING_ENGINEER").upper()
+    # Knowledge Admin role cannot be self-requested
+    if target_role_name not in ("DRILLING_ENGINEER", "DRILLING_SUPERVISOR"):
+        target_role_name = "DRILLING_ENGINEER"
+
+    role = db.query(Role).filter(Role.name == target_role_name).first()
+    if not role:
+        role = db.query(Role).filter(Role.name == "DRILLING_ENGINEER").first()
+
+    profile = Profile(
+        auth_user_id=auth_uid,
+        email=email,
+        full_name=payload.full_name.strip(),
+        department=payload.department,
+        designation=payload.designation,
+        employee_id=payload.employee_id,
+        is_active=True,
+    )
+    db.add(profile)
+    db.flush()
+
+    if role:
+        ur = UserRole(user_id=profile.id, role_id=role.id)
+        db.add(ur)
+
+    db.commit()
+    db.refresh(profile)
+
+    return {
+        "success": True,
+        "message": "User profile successfully registered.",
+        "profile_id": str(profile.id),
+        "role": target_role_name,
+    }
+
 
 
 @router.get("/me")

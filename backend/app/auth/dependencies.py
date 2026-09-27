@@ -85,8 +85,14 @@ def get_current_user_optional(
     if not token:
         return None
 
-    # Verify with Supabase Auth or test demo tokens
+    # Verify with Supabase Auth
     client = get_supabase_client()
+    if not client:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"success": False, "error": {"code": "CONFIG_ERROR", "message": "Authentication service is not configured."}},
+        )
+
     auth_user_id = None
     user_email = None
     user_full_name = None
@@ -109,9 +115,10 @@ def get_current_user_optional(
             if user_response and getattr(user_response, "user", None):
                 auth_user_id = str(user_response.user.id)
                 user_email = user_response.user.email
-                user_full_name = (user_response.user.user_metadata or {}).get("full_name")
-        except Exception as e:
-            # Token validation via client failed, fallback to PyJWT decoding
+                user_meta = user_response.user.user_metadata or {}
+                user_full_name = user_meta.get("full_name")
+        except Exception:
+            # Fallback to PyJWT decode if Supabase client threw an error
             pass
 
     # If auth_user_id/user_email still not resolved, try PyJWT decode
@@ -125,6 +132,13 @@ def get_current_user_optional(
         except Exception:
             pass
 
+    if not auth_user_id and not user_email:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"success": False, "error": {"code": "UNAUTHORIZED", "message": "Invalid or expired session token."}},
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     # Query Profile from DB
     profile = None
     if auth_user_id:
@@ -136,19 +150,23 @@ def get_current_user_optional(
             db.commit()
 
     # Auto-provision profile for valid authenticated user if not yet in database
-    if not profile and user_email:
+    if not profile and (user_email or auth_user_id):
         try:
+            email_lower = (user_email or "").lower()
             role_name = (
-                "KNOWLEDGE_ADMIN" if "admin" in user_email.lower()
-                else ("DRILLING_SUPERVISOR" if "supervisor" in user_email.lower() else "DRILLING_ENGINEER")
+                "KNOWLEDGE_ADMIN" if "admin" in email_lower
+                else ("DRILLING_SUPERVISOR" if "supervisor" in email_lower else "DRILLING_ENGINEER")
             )
             target_role = db.query(Role).filter(Role.name == role_name).first()
+            if not target_role:
+                target_role = db.query(Role).filter(Role.name == "DRILLING_ENGINEER").first()
+
             new_id = str(uuid.uuid4())
             profile = Profile(
                 id=new_id,
                 auth_user_id=auth_user_id or new_id,
-                email=user_email,
-                full_name=user_full_name or user_email.split("@")[0].replace(".", " ").title(),
+                email=user_email or f"{new_id[:8]}@oilindia.in",
+                full_name=user_full_name or (user_email.split("@")[0].replace(".", " ").title() if user_email else "Drilling Operator"),
                 employee_id="OIL-OP-" + new_id[:4].upper(),
                 department="Drilling Operations",
                 designation="Drilling Engineer" if role_name == "DRILLING_ENGINEER" else role_name.replace("_", " ").title(),
@@ -162,6 +180,7 @@ def get_current_user_optional(
             db.refresh(profile)
         except Exception as e:
             db.rollback()
+            print(f"[Auth Error] Failed to auto-provision profile: {e}")
             profile = None
 
     if not profile:
@@ -170,6 +189,7 @@ def get_current_user_optional(
             detail={"success": False, "error": {"code": "UNAUTHORIZED", "message": "Session token verification failed or profile not found."}},
             headers={"WWW-Authenticate": "Bearer"},
         )
+
 
 
 

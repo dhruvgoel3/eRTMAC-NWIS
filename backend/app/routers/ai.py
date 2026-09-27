@@ -6,10 +6,12 @@ import os
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
+from app.models import Document
 from app.services.ai_service import get_ai_provider
 from app.auth.dependencies import require_permission, AuthenticatedUser
 from app.services.audit_service import log_audit_event
-from app.schemas.ai import AIQueryRequest, AIQueryResponse, AIHealthResponse
+from app.schemas.ai import AIQueryRequest, AIDocQueryRequest, AIQueryResponse, AIHealthResponse
+
 
 router = APIRouter(prefix="/api/ai", tags=["ai"])
 
@@ -49,6 +51,49 @@ def ai_query(
     return response
 
 
+@router.post("/ask-doc", response_model=AIQueryResponse)
+def ai_ask_doc(
+    payload: AIDocQueryRequest,
+    user: AuthenticatedUser = Depends(require_permission("ai.query")),
+    db: Session = Depends(get_db),
+):
+    """
+    Query the AI Copilot specifically regarding a document or well's documentation context.
+    """
+    question = payload.question.strip()
+    if not question:
+        raise HTTPException(status_code=400, detail="Query question cannot be empty")
+
+    provider = get_ai_provider(db)
+
+    doc_context = ""
+    if payload.doc_id:
+        doc = db.query(Document).filter(Document.id == payload.doc_id).first()
+        if doc:
+            doc_context = f"\n[Document Focus: {doc.title} ({doc.file_name}) - Type: {doc.doc_type}]\nSummary: {doc.summary or ''}\nKey Findings: {doc.key_findings or ''}"
+
+    augmented_question = f"{question}{doc_context}" if doc_context else question
+    response = provider.query(
+        question=augmented_question,
+        active_well_id=payload.well_id or "OIL-X123",
+        current_depth=3050.0,
+    )
+
+    log_audit_event(
+        db=db,
+        action="AI_DOC_QUERY",
+        user_id=user.id,
+        resource_type="DOCUMENT",
+        resource_id=str(payload.doc_id or payload.well_id or "doc"),
+        metadata={
+            "query": question[:200],
+            "doc_id": payload.doc_id,
+        },
+    )
+    return response
+
+
+
 @router.get("/health", response_model=AIHealthResponse)
 def ai_health():
     """Returns AI model status and configured engine provider."""
@@ -56,5 +101,6 @@ def ai_health():
     return {
         "status": "online",
         "provider": "OpenAI" if has_key else "Demo (Offline / Knowledge Base)",
-        "model": os.getenv("AI_MODEL", "gpt-4o-mini") if has_key else "NWIS-Demo-Synthesizer",
+        "model": (os.getenv("AI_MODEL") or os.getenv("OPENAI_MODEL") or "gpt-4o-mini") if has_key else "NWIS-Demo-Synthesizer",
     }
+

@@ -281,8 +281,11 @@ def get_risk_zones_for_depth(
     result = []
     for zone in zones:
         depth_info = get_depth_overlap_score(current_depth, zone.depth_start, zone.depth_end)
+        status = depth_info["status"]
         result.append({
             "id": zone.id,
+            "zone_name": f"{zone.event_type} ({zone.depth_start:.0f}-{zone.depth_end:.0f}m)",
+            "risk_type": zone.event_type,
             "event_type": zone.event_type,
             "depth_start": zone.depth_start,
             "depth_end": zone.depth_end,
@@ -291,10 +294,13 @@ def get_risk_zones_for_depth(
             "severity": zone.severity,
             "evidence_count": zone.evidence_count,
             "explanation": zone.explanation,
+            "recommended_action": zone.explanation,
             "source_well_ids": zone.source_well_ids,
-            "status": depth_info["status"],
+            "status": status,
             "distance_ahead": depth_info["distance_ahead"],
             "proximity_score": depth_info["proximity_score"],
+            "is_active": (status == "ENTERED"),
+            "is_approaching": (status == "APPROACHING"),
         })
 
     return result
@@ -311,46 +317,61 @@ def calculate_overall_risk(
         return {
             "score": 5.0,
             "severity": "LOW",
+            "level": "LOW",
+            "highest_severity": "LOW",
             "message": "No historical risk zones detected in current depth range.",
+            "summary": "No historical risk zones detected in current depth range.",
             "active_zones": 0,
+            "active_zone_count": 0,
+            "approaching_count": 0,
             "disclaimer": DISCLAIMER_TEXT,
         }
 
     max_score = 0.0
     active_zones = 0
+    approaching_count = 0
     active_events = []
 
     for zone in risk_zones:
-        if zone["status"] in ("ENTERED", "APPROACHING"):
+        if zone.get("status") in ("ENTERED", "APPROACHING"):
             active_zones += 1
-            weighted_score = zone["risk_score"] * zone["proximity_score"]
+            if zone.get("status") == "APPROACHING":
+                approaching_count += 1
+            weighted_score = (zone.get("risk_score") or 0.0) * (zone.get("proximity_score") or 0.0)
             if weighted_score > max_score:
                 max_score = weighted_score
-            active_events.append(zone["event_type"])
+            if zone.get("event_type"):
+                active_events.append(zone["event_type"])
 
     overall_severity = score_to_severity(max_score)
 
     if active_zones == 0:
         message = "No immediate historical risk zones in current depth window."
-    elif any(z["status"] == "ENTERED" for z in risk_zones):
-        event_list = ", ".join(set(e.replace("_", " ") for z in risk_zones if z["status"] == "ENTERED" for e in [z["event_type"]]))
+    elif any(z.get("status") == "ENTERED" for z in risk_zones):
+        event_list = ", ".join(set(e.replace("_", " ") for z in risk_zones if z.get("status") == "ENTERED" for e in [z.get("event_type", "")] if e))
         message = f"Current depth has entered a historical {event_list} risk zone."
     else:
-        closest = min((z for z in risk_zones if z["status"] == "APPROACHING"),
-                      key=lambda z: z["distance_ahead"], default=None)
-        if closest:
-            message = f"Approaching historical {closest['event_type'].replace('_', ' ')} zone in {closest['distance_ahead']:.0f}m."
+        closest = min((z for z in risk_zones if z.get("status") == "APPROACHING"),
+                      key=lambda z: z.get("distance_ahead", 9999), default=None)
+        if closest and closest.get("distance_ahead") is not None:
+            message = f"Approaching historical {closest.get('event_type', '').replace('_', ' ')} zone in {closest['distance_ahead']:.0f}m."
         else:
             message = "Monitoring historical risk zones."
 
     return {
         "score": round(max_score, 1),
         "severity": overall_severity,
+        "level": overall_severity,
+        "highest_severity": overall_severity,
         "message": message,
+        "summary": message,
         "active_zones": active_zones,
+        "active_zone_count": active_zones,
+        "approaching_count": approaching_count,
         "active_event_types": list(set(active_events)),
         "disclaimer": DISCLAIMER_TEXT,
     }
+
 
 
 def generate_depth_alerts(

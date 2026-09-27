@@ -153,8 +153,20 @@ DEMO_USERS = [
         "designation": "Knowledge & Platform Administrator",
         "role": "KNOWLEDGE_ADMIN",
         "phone": "+91 374 280 0012",
+        "is_active": True,
+    },
+    {
+        "email": "disabled_operator@nwis.demo",
+        "full_name": "Disabled Operator",
+        "employee_id": "OIL-OPS-9999",
+        "department": "Field Operations",
+        "designation": "Associate Operator (Inactive)",
+        "role": "DRILLING_ENGINEER",
+        "phone": "+91 374 280 9999",
+        "is_active": False,
     },
 ]
+
 
 
 def seed_rbac():
@@ -277,7 +289,7 @@ def seed_rbac():
                     department=u_data["department"],
                     designation=u_data["designation"],
                     phone=u_data["phone"],
-                    is_active=True,
+                    is_active=u_data.get("is_active", True),
                 )
                 db.add(profile)
                 db.commit()
@@ -290,7 +302,7 @@ def seed_rbac():
                 profile.department = u_data["department"]
                 profile.designation = u_data["designation"]
                 profile.phone = u_data["phone"]
-                profile.is_active = True
+                profile.is_active = u_data.get("is_active", True)
                 db.commit()
                 print(f"  * Updated Profile for: {email}")
 

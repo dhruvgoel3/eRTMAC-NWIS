@@ -265,10 +265,25 @@ export const api = {
   },
 
   // Auth Context
+  registerUser: async (payload: {
+    email: string;
+    password?: string;
+    full_name: string;
+    employee_id?: string;
+    department?: string;
+    designation?: string;
+    role?: string;
+    auth_user_id?: string;
+  }): Promise<any> => {
+    const res = await client.post("/api/auth/register", payload);
+    return res.data;
+  },
+
   getMe: async (): Promise<UserProfile> => {
     const res = await client.get("/api/auth/me");
     return res.data.data;
   },
+
 
   getPermissions: async (): Promise<{ user_permissions: string[]; all_permissions: any[] }> => {
     const res = await client.get("/api/auth/permissions");

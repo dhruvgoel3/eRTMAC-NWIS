@@ -1,7 +1,7 @@
 """
 Pydantic schemas for Simulation control and telemetry state.
 """
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Literal
 from pydantic import BaseModel, Field
 from app.schemas.risk import RiskZoneResponse, OverallRiskResponse
 
@@ -12,9 +12,11 @@ class SimulationTelemetry(BaseModel):
     current_wob: float
     current_rpm: float
     current_torque: float
-    current_standpipe_pressure: float
-    current_flow_rate: float
-    current_mud_weight: float
+    current_pressure: float
+    current_mud_flow: float
+    current_standpipe_pressure: Optional[float] = None
+    current_flow_rate: Optional[float] = None
+    current_mud_weight: Optional[float] = None
     current_hook_load: float
     current_inclination: float
     current_azimuth: float
@@ -29,7 +31,7 @@ class SimulationStateResponse(BaseModel):
     speed_multiplier: int = 1
     current_depth: float = 3050.0
     start_depth: Optional[float] = 3050.0
-    target_depth: Optional[float] = 3800.0
+    target_depth: Optional[float] = 3850.0
     step_size_m: Optional[float] = 1.0
     current_rop: float = 12.4
     current_wob: float = 14.2
@@ -52,4 +54,5 @@ class SimulationStateResponse(BaseModel):
 
 
 class SimulationSpeedPayload(BaseModel):
-    speed: int = Field(..., ge=1, le=100, description="Multiplier (e.g. 1, 5, 10, 20)")
+    speed: Literal[1, 5, 10] = Field(..., description="Multiplier (1, 5, or 10)")
+

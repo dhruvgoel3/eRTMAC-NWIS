@@ -168,21 +168,22 @@ function OperationsDashboard({ initialTab = "overview" }: { initialTab?: string 
   return (
     <div className="app-container">
       {/* Top Operations Strip */}
-      <div className="auth-top-strip">
+      <div className="auth-top-strip" style={{ opacity: 0.85, fontSize: 11 }}>
         <div className="status-badge">
           <span className="pulse-dot" />
-          <span style={{ fontWeight: 700, color: "var(--color-mint-pulse)" }}>
-            LIVE OPERATIONS STREAM
+          <span style={{ fontWeight: 600, color: "var(--color-mint-pulse)" }}>
+            eRTMAC-NWIS · LIVE OPERATIONS
           </span>
           <span style={{ opacity: 0.35 }}>|</span>
           <span style={{ opacity: 0.85 }}>
-            Oil India Limited · Upper Assam Basin
+            Oil India Limited · Operational Decision Support System
           </span>
         </div>
-        <div style={{ opacity: 0.75, letterSpacing: "0.06em" }}>
-          ROLE-BASED ACCESS CONTROL ACTIVE
+        <div style={{ opacity: 0.75, letterSpacing: "0.05em", fontSize: 10 }}>
+          ACTIVE TELEMETRY STREAM & RBAC ACTIVE
         </div>
       </div>
+
 
       {/* Header with Navigation & Simulation Pills */}
       <Header
