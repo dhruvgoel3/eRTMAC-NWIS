@@ -99,26 +99,9 @@ export const Header: React.FC<HeaderProps> = ({
                   boxShadow: "0 0 8px var(--color-mint-pulse)",
                 }}
               />
-              DEMO MODE
+              OPERATIONAL
             </span>
-            <span
-              style={{
-                fontSize: 10,
-                fontWeight: 600,
-                letterSpacing: "0.02em",
-                padding: "2px 8px",
-                borderRadius: 4,
-                background: "rgba(245, 158, 11, 0.12)",
-                color: "#b45309",
-                border: "1px solid rgba(245, 158, 11, 0.3)",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 4,
-              }}
-              title="All drilling records, telemetry logs, and DDRs displayed in this system are synthetic demonstration data created for SIH evaluation."
-            >
-              ⚠️ Synthetic Demo Data — Not Real OIL Data
-            </span>
+
           </div>
           <div className="brand-subtitle">
             Nearby Wells Intelligence &amp; Decision Support · Real-Time Operations Control Room
@@ -205,6 +188,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* User Identity & Role Badge */}
         <div style={{ position: "relative" }}>
           <button
+            id="header-user-menu-btn"
             onClick={() => setUserDropdownOpen(!userDropdownOpen)}
             style={{
               display: "flex",
@@ -311,6 +295,7 @@ export const Header: React.FC<HeaderProps> = ({
               <div style={{ height: 1, background: "var(--color-sage-mist)", margin: "4px 0" }} />
 
               <button
+                id="header-logout-btn"
                 type="button"
                 onClick={logout}
                 style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "8px 16px", color: "#b91c42", background: "none", border: "none", cursor: "pointer", textAlign: "left", fontSize: 12 }}

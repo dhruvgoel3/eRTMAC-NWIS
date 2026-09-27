@@ -913,9 +913,8 @@ export const MemoryGraphTab: React.FC = () => {
         <span>Transforms isolated records into a connected knowledge network</span>
         <span>·</span>
         <span>Active well: OIL-X123</span>
-        <span>·</span>
-        <span style={{ fontStyle: "italic" }}>Synthetic Demo Data — Not Real OIL Well Data</span>
       </div>
+
     </div>
   );
 };

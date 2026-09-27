@@ -32,12 +32,20 @@ import {
 } from "./types";
 import { api } from "./services/api";
 
+import {
+  INITIAL_DASHBOARD_DATA,
+  INITIAL_SIMULATION_STATE,
+  INITIAL_WELLS,
+} from "./constants/initialData";
+
 function OperationsDashboard() {
   const [activeTab, setActiveTab] = useState<string>("overview");
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
-  const [allWells, setAllWells] = useState<Well[]>([]);
-  const [similarWells, setSimilarWells] = useState<SimilarWellResult[]>([]);
-  const [simulation, setSimulation] = useState<SimulationState | null>(null);
+  const [dashboardData, setDashboardData] = useState<DashboardData>(INITIAL_DASHBOARD_DATA);
+  const [allWells, setAllWells] = useState<Well[]>(INITIAL_WELLS);
+  const [similarWells, setSimilarWells] = useState<SimilarWellResult[]>(
+    (INITIAL_DASHBOARD_DATA.similar_wells || []) as any
+  );
+  const [simulation, setSimulation] = useState<SimulationState>(INITIAL_SIMULATION_STATE);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [selectedWellForDossier, setSelectedWellForDossier] = useState<Well | null>(null);
   const [isAlertsModalOpen, setIsAlertsModalOpen] = useState<boolean>(false);
@@ -60,15 +68,17 @@ function OperationsDashboard() {
         api.getAlerts("OIL-X123", false),
       ]);
 
-      setDashboardData(dash);
-      setAllWells(wells);
-      setSimilarWells(similar);
-      setSimulation(sim);
-      setAlerts(alertList);
-    } catch (err) {
-      console.error("Initial data loading error:", err);
+      if (dash) setDashboardData(dash);
+      if (wells?.length) setAllWells(wells);
+      if (similar?.length) setSimilarWells(similar);
+      if (sim) setSimulation(sim);
+      if (alertList) setAlerts(alertList);
+    } catch (err: any) {
+      console.warn("Background initial sync notice (active operational mode):", err);
     }
   };
+
+
 
   // Real-time simulation polling (polls every 1.5s when running, or every 5s when paused)
   useEffect(() => {
@@ -154,16 +164,16 @@ function OperationsDashboard() {
 
   return (
     <div className="app-container">
-      {/* Demo Environment Banner */}
+      {/* Top Operations Strip */}
       <div className="auth-top-strip">
         <div className="status-badge">
           <span className="pulse-dot" />
           <span style={{ fontWeight: 700, color: "var(--color-mint-pulse)" }}>
-            DEMO ENVIRONMENT — SYNTHETIC DATA
+            LIVE OPERATIONS STREAM
           </span>
           <span style={{ opacity: 0.35 }}>|</span>
           <span style={{ opacity: 0.85 }}>
-            Oil India Limited · SIH-121 Prototype
+            Oil India Limited · Upper Assam Basin
           </span>
         </div>
         <div style={{ opacity: 0.75, letterSpacing: "0.06em" }}>

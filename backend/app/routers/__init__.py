@@ -13,6 +13,7 @@ from app.routers.datasets import router as datasets_router
 from app.routers.memory_graph import router as memory_graph_router
 from app.routers.auth import router as auth_router
 from app.routers.admin import router as admin_router
+from app.routers.map import router as map_router
 
 all_routers = [
     wells_router,
@@ -26,6 +27,7 @@ all_routers = [
     memory_graph_router,
     auth_router,
     admin_router,
+    map_router,
 ]
 
 __all__ = [
@@ -40,5 +42,7 @@ __all__ = [
     "memory_graph_router",
     "auth_router",
     "admin_router",
+    "map_router",
     "all_routers",
 ]
+

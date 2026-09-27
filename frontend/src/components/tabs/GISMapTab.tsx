@@ -5,6 +5,9 @@ import {
   Marker,
   Popup,
   Circle,
+  Polygon,
+  Polyline,
+  Tooltip as LeafletTooltip,
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
@@ -264,6 +267,13 @@ export const GISMapTab: React.FC<GISMapTabProps> = ({
   const [depthMin, setDepthMin] = useState<number | "">("");
   const [depthMax, setDepthMax] = useState<number | "">("");
 
+  // Map API State (Carto basemaps & GIS layers)
+  const [mapConfig, setMapConfig] = useState<any>(null);
+  const [mapLayers, setMapLayers] = useState<any>(null);
+  const [selectedBasemap, setSelectedBasemap] = useState<string>("carto-dark");
+  const [showFields, setShowFields] = useState<boolean>(true);
+  const [showFaults, setShowFaults] = useState<boolean>(true);
+
   // API-driven nearby wells
   const [nearbyWells, setNearbyWells] = useState<NearbyWell[]>([]);
   const [similarityMap, setSimilarityMap] = useState<
@@ -281,40 +291,71 @@ export const GISMapTab: React.FC<GISMapTabProps> = ({
   const centerLat = activeWell?.latitude ?? 27.2;
   const centerLon = activeWell?.longitude ?? 95.1;
 
-  // ── Fetch nearby wells from API ───────────────────────────────────────────
+  // ── Fetch GIS Basemap Config and Layers ──────────────────────────────────
+  useEffect(() => {
+    api.getMapConfig().then((cfg) => {
+      if (cfg) {
+        setMapConfig(cfg);
+        if (cfg.default_provider) {
+          setSelectedBasemap(cfg.default_provider);
+        }
+      }
+    }).catch((err) => {
+      console.warn("Failed to load map config:", err);
+    });
+
+
+    api.getMapLayers().then((layers) => {
+      if (layers) setMapLayers(layers);
+    }).catch((err) => {
+      console.warn("Failed to load map layers:", err);
+    });
+  }, []);
+
+  // ── Fetch nearby wells from Backend Map API ───────────────────────────────
   const fetchNearby = useCallback(async () => {
     if (!activeWell) return;
     setIsLoading(true);
     setFetchError(null);
     try {
-      const params: Record<string, string | number> = {
+      const data = await api.getMapNearby({
         lat: activeWell.latitude,
         lon: activeWell.longitude,
         radius_km: radiusKm,
-      };
-      if (selectedFormation !== "ALL") params.formation = selectedFormation;
-      if (selectedEventType !== "ALL") params.event_type = selectedEventType;
-      if (selectedSeverity !== "ALL") params.severity = selectedSeverity;
-
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}/api/wells/nearby?` +
-          new URLSearchParams(
-            Object.fromEntries(
-              Object.entries(params).map(([k, v]) => [k, String(v)])
-            )
-          ).toString()
-      );
-      if (!response.ok) throw new Error(`API error ${response.status}`);
-      const data: NearbyWell[] = await response.json();
+        formation: selectedFormation !== "ALL" ? selectedFormation : undefined,
+        event_type: selectedEventType !== "ALL" ? selectedEventType : undefined,
+        severity: selectedSeverity !== "ALL" ? selectedSeverity : undefined,
+      });
       setNearbyWells(data);
       setLastFetch(new Date());
     } catch (err: any) {
-      console.error("Failed to fetch nearby wells:", err);
-      setFetchError(err.message || "Failed to fetch");
+      console.warn("Falling back to local offset wells query:", err);
+      // Fallback to client-side offset distance calculation
+      const fallback: NearbyWell[] = allWells
+        .filter((w) => !w.is_active)
+        .map((w) => {
+          const dLat = (w.latitude - activeWell.latitude) * 111.32;
+          const dLon =
+            (w.longitude - activeWell.longitude) *
+            111.32 *
+            Math.cos((activeWell.latitude * Math.PI) / 180);
+          const dist = Math.sqrt(dLat * dLat + dLon * dLon);
+          return {
+            ...w,
+            distance_km: Math.round(dist * 10) / 10,
+            event_count: 0,
+            max_severity: "LOW",
+            event_types: [],
+            total_npt: 0,
+          };
+        })
+        .filter((w) => (w.distance_km ?? 999) <= radiusKm);
+      setNearbyWells(fallback);
+      setFetchError(err.message || "Using cached offset wells");
     } finally {
       setIsLoading(false);
     }
-  }, [activeWell, radiusKm, selectedFormation, selectedEventType, selectedSeverity]);
+  }, [activeWell, allWells, radiusKm, selectedFormation, selectedEventType, selectedSeverity]);
 
   // ── Fetch similarity scores ───────────────────────────────────────────────
   const fetchSimilarity = useCallback(async () => {
@@ -334,6 +375,7 @@ export const GISMapTab: React.FC<GISMapTabProps> = ({
   useEffect(() => {
     fetchNearby();
   }, [fetchNearby]);
+
 
   useEffect(() => {
     fetchSimilarity();
@@ -435,8 +477,8 @@ export const GISMapTab: React.FC<GISMapTabProps> = ({
           </div>
         </div>
 
-        {/* Radius Quick Buttons */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        {/* Map Controls Toolbar: Radius, Basemap Switcher, Layer Toggles */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Radius:</span>
           {RADIUS_PRESETS.map((r) => (
             <button
@@ -458,6 +500,56 @@ export const GISMapTab: React.FC<GISMapTabProps> = ({
               {r} km
             </button>
           ))}
+
+          {/* Basemap Switcher */}
+          <span style={{ marginLeft: 12, fontSize: 11, color: "var(--text-muted)" }}>Basemap:</span>
+          <select
+            value={selectedBasemap}
+            onChange={(e) => setSelectedBasemap(e.target.value)}
+            style={{
+              padding: "3px 8px",
+              borderRadius: 6,
+              fontSize: 11,
+              background: "var(--bg-elevated)",
+              color: "var(--text-primary)",
+              border: "1px solid var(--border-subtle)",
+              cursor: "pointer",
+            }}
+          >
+            <option value="esri-dark">Dark Canvas (Clean / No Watermark)</option>
+            <option value="carto-dark">
+              Carto Dark Matter {mapConfig?.carto_api_key_configured ? "✓" : "(API Key Required)"}
+            </option>
+            <option value="carto-light">
+              Carto Positron {mapConfig?.carto_api_key_configured ? "✓" : "(API Key Required)"}
+            </option>
+            <option value="carto-voyager">
+              Carto Voyager {mapConfig?.carto_api_key_configured ? "✓" : "(API Key Required)"}
+            </option>
+            <option value="satellite">Esri Satellite</option>
+            <option value="osm">OpenStreetMap</option>
+          </select>
+
+          {/* Geological Layer Toggles */}
+          <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "var(--text-muted)", cursor: "pointer", marginLeft: 8 }}>
+            <input
+              type="checkbox"
+              checked={showFields}
+              onChange={(e) => setShowFields(e.target.checked)}
+              style={{ cursor: "pointer" }}
+            />
+            Oil Fields
+          </label>
+          <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "var(--text-muted)", cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={showFaults}
+              onChange={(e) => setShowFaults(e.target.checked)}
+              style={{ cursor: "pointer" }}
+            />
+            Fault Hazards
+          </label>
+
           <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--text-muted)" }}>
             {lastFetch && `Updated ${lastFetch.toLocaleTimeString()}`}
           </span>
@@ -492,11 +584,80 @@ export const GISMapTab: React.FC<GISMapTabProps> = ({
           >
             <MapViewUpdater center={[centerLat, centerLon]} zoom={11} />
 
-            {/* Dark basemap */}
+            {/* Dynamic Basemap from Map API */}
             <TileLayer
-              attribution='&copy; <a href="https://carto.com/">CartoDB</a> contributors'
-              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              key={selectedBasemap}
+              attribution={
+                mapConfig?.providers?.[selectedBasemap]?.attribution ||
+                '&copy; <a href="https://www.esri.com/">Esri</a>, CartoDB'
+              }
+              url={
+                mapConfig?.providers?.[selectedBasemap]?.url ||
+                (selectedBasemap === "carto-dark"
+                  ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                  : selectedBasemap === "carto-light"
+                  ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                  : selectedBasemap === "carto-voyager"
+                  ? "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                  : selectedBasemap === "satellite"
+                  ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                  : selectedBasemap === "osm"
+                  ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  : "https://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}")
+              }
             />
+
+            {/* Geological Concession Field Overlays */}
+            {showFields &&
+              mapLayers?.fields?.features?.map((f: any, idx: number) => {
+                const positions = f.geometry.coordinates[0].map((coord: number[]) => [coord[1], coord[0]]);
+                return (
+                  <Polygon
+                    key={`field-${idx}`}
+                    positions={positions}
+                    pathOptions={{
+                      color: f.properties?.color || "#00d2ff",
+                      fillColor: f.properties?.color || "#00d2ff",
+                      fillOpacity: 0.08,
+                      weight: 1.5,
+                      dashArray: "4, 6",
+                    }}
+                  >
+                    <LeafletTooltip sticky>
+                      <div style={{ fontSize: 11, padding: 2 }}>
+                        <strong>{f.properties?.name}</strong>
+                        <div>{f.properties?.type}</div>
+                      </div>
+                    </LeafletTooltip>
+                  </Polygon>
+                );
+              })}
+
+            {/* Structural Fault Hazard Lines */}
+            {showFaults &&
+              mapLayers?.faults?.features?.map((f: any, idx: number) => {
+                const positions = f.geometry.coordinates.map((coord: number[]) => [coord[1], coord[0]]);
+                return (
+                  <Polyline
+                    key={`fault-${idx}`}
+                    positions={positions}
+                    pathOptions={{
+                      color: f.properties?.color || "#f43f5e",
+                      weight: 2.5,
+                      dashArray: "6, 6",
+                    }}
+                  >
+                    <LeafletTooltip sticky>
+                      <div style={{ fontSize: 11, padding: 2 }}>
+                        <strong style={{ color: "#f43f5e" }}>{f.properties?.name}</strong>
+                        <div>Hazard: {f.properties?.hazard_level}</div>
+                        <div style={{ color: "#94a3b8" }}>{f.properties?.risk}</div>
+                      </div>
+                    </LeafletTooltip>
+                  </Polyline>
+                );
+              })}
+
 
             {/* Radius circle */}
             {activeWell && (

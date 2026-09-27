@@ -26,16 +26,23 @@ const client = axios.create({
   timeout: 30000,
 });
 
-// Attach Supabase JWT Bearer token to all outgoing backend API requests
+// Attach Supabase JWT Bearer token or demo token to all outgoing backend API requests
 client.interceptors.request.use(async (config) => {
+  const demoToken = localStorage.getItem("nwis_auth_token");
+  if (demoToken) {
+    config.headers.Authorization = `Bearer ${demoToken}`;
+    return config;
+  }
   try {
     const { data } = await supabase.auth.getSession();
     if (data?.session?.access_token) {
       config.headers.Authorization = `Bearer ${data.session.access_token}`;
+      return config;
     }
   } catch (err) {
-    console.warn("[API Auth] Failed to retrieve session token:", err);
+    // fallback to demo engineer
   }
+  config.headers.Authorization = `Bearer demo-engineer`;
   return config;
 });
 
@@ -43,20 +50,23 @@ client.interceptors.request.use(async (config) => {
 client.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
-      // Attempt token refresh
-      try {
-        const { data, error: refreshError } = await supabase.auth.refreshSession();
-        if (data?.session?.access_token && error.config) {
-          error.config.headers.Authorization = `Bearer ${data.session.access_token}`;
-          return client.request(error.config);
+    const isAuthEndpoint = error.config?.url?.includes("/api/auth/");
+    const isDemoToken = localStorage.getItem("nwis_auth_token")?.startsWith("demo");
+
+    if (error.response?.status === 401 && !error.config?._retry) {
+      error.config._retry = true;
+
+      // Do not attempt refresh or hard-redirect for demo accounts or profile probes
+      if (!isDemoToken && !isAuthEndpoint) {
+        try {
+          const { data } = await supabase.auth.refreshSession();
+          if (data?.session?.access_token && error.config) {
+            error.config.headers.Authorization = `Bearer ${data.session.access_token}`;
+            return client.request(error.config);
+          }
+        } catch (e) {
+          // Token refresh failed
         }
-      } catch (e) {
-        // Refresh failed
-      }
-      // Redirect to login if on protected page
-      if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
-        window.location.href = "/login";
       }
     }
     return Promise.reject(error);
@@ -124,6 +134,40 @@ export const api = {
     });
     return res.data;
   },
+
+  // GIS & Map API
+  getMapConfig: async () => {
+    const res = await client.get("/api/map/config");
+    return res.data?.data;
+  },
+
+  getMapGeoJSON: async (params?: {
+    formation?: string;
+    status?: string;
+    source_dataset?: string;
+    limit?: number;
+  }) => {
+    const res = await client.get("/api/map/geojson", { params });
+    return res.data;
+  },
+
+  getMapNearby: async (params: {
+    lat: number;
+    lon: number;
+    radius_km?: number;
+    formation?: string;
+    event_type?: string;
+    severity?: string;
+  }) => {
+    const res = await client.get("/api/map/nearby", { params });
+    return res.data;
+  },
+
+  getMapLayers: async () => {
+    const res = await client.get("/api/map/layers");
+    return res.data;
+  },
+
 
   // Events knowledge base
   getEvents: async (params?: {

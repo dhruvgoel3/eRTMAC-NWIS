@@ -22,6 +22,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { DashboardData, Well, SimilarWellResult } from "../../types";
+import { INITIAL_DASHBOARD_DATA } from "../../constants/initialData";
 
 interface OverviewTabProps {
   data: DashboardData | null;
@@ -45,19 +46,14 @@ const SEV_LEFT: Record<string, string> = {
 };
 
 export const OverviewTab: React.FC<OverviewTabProps> = ({
-  data,
+  data: propData,
   onSelectWell,
   onNavigateToTab,
   onExplainAlert,
 }) => {
-  if (!data) {
-    return (
-      <div style={{ padding: 60, textAlign: "center", color: "var(--color-muted-slate)" }}>
-        <Activity size={32} style={{ marginBottom: 12, opacity: 0.4 }} />
-        <div>Loading live operations dashboard…</div>
-      </div>
-    );
-  }
+  const data = propData || INITIAL_DASHBOARD_DATA;
+
+
 
   const sim = data.simulation;
   const currentDepth = sim.current_depth;

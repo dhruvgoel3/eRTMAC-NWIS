@@ -62,6 +62,42 @@ def get_dashboard(
     high_risk_zones = [z for z in risk_zones if z.get("severity") in ("HIGH", "CRITICAL")]
     top_similar = ranked_similar[0] if ranked_similar else None
 
+    # Ensure zone_name and risk_type are present for schema compatibility
+    for z in risk_zones:
+        if not z.get("risk_type"):
+            z["risk_type"] = z.get("event_type") or "HAZARD"
+        if not z.get("zone_name"):
+            clean_type = (z.get("event_type") or "Hazard").replace("_", " ").title()
+            form = z.get("formation") or "Subsurface"
+            z["zone_name"] = f"{form} {clean_type} Interval"
+
+    top_similar_dict = None
+    if top_similar:
+        w_obj = top_similar["well"]
+        top_similar_dict = {
+            "well_id": w_obj.well_id,
+            "name": w_obj.name,
+            "latitude": w_obj.latitude,
+            "longitude": w_obj.longitude,
+            "distance_km": top_similar["distance_km"],
+            "formation": w_obj.formation,
+            "total_depth": w_obj.total_depth,
+            "trajectory_type": w_obj.trajectory_type,
+            "mud_weight": w_obj.mud_weight or 10.5,
+            "similarity_score": top_similar["similarity_score"],
+            "similarity_percent": round(top_similar["similarity_score"] * 100, 1),
+            "score_breakdown": top_similar.get("score_breakdown", {
+                "formation_match": 0.3,
+                "depth_proximity": 0.25,
+                "trajectory_match": 0.2,
+                "mud_weight_match": 0.15,
+                "distance_proximity": 0.1,
+            }),
+            "event_count": len([e for e in all_events if e.well_id == w_obj.id]),
+            "total_npt": 0,
+            "factors": top_similar.get("factors", {}),
+        }
+
     return {
         "active_well": {
             "well_id": well.well_id,
@@ -83,6 +119,7 @@ def get_dashboard(
         },
         "current_risk": overall_risk,
         "risk_zones": risk_zones[:6],
+        "top_similar_well": top_similar_dict,
         "similar_wells": [
             {
                 "well_id": r["well"].well_id,

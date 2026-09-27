@@ -33,4 +33,8 @@ class DashboardResponse(BaseModel):
     current_risk: OverallRiskResponse
     risk_zones: List[RiskZoneResponse]
     similar_wells: List[SimilarWellSummary]
+    top_similar_well: Optional[Dict[str, Any]] = None
     recent_alerts: List[Dict[str, Any]]
+
+    class Config:
+        extra = "allow"

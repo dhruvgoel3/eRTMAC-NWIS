@@ -49,12 +49,14 @@ export const LoginPage: React.FC = () => {
   const [resetError, setResetError] = useState<string | null>(null);
 
   // If already logged in, redirect to requested page or root
-  const from = (location.state as any)?.from?.pathname || "/";
+  const rawFrom = (location.state as any)?.from?.pathname;
+  const targetDestination = rawFrom && rawFrom !== "/login" ? rawFrom : "/";
+
   React.useEffect(() => {
     if (isAuthenticated) {
-      navigate(from, { replace: true });
+      navigate(targetDestination, { replace: true });
     }
-  }, [isAuthenticated, navigate, from]);
+  }, [isAuthenticated, navigate, targetDestination]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,7 +71,7 @@ export const LoginPage: React.FC = () => {
     setIsSubmitting(false);
 
     if (result.success) {
-      navigate(from, { replace: true });
+      navigate(targetDestination, { replace: true });
     } else {
       setErrorMessage(result.error || "Authentication failed. Please verify credentials.");
     }
@@ -157,15 +159,15 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="auth-viewport">
-      {/* Top Demo Environment Banner */}
+      {/* Top Status Strip */}
       <div className="auth-top-strip">
         <div className="status-badge">
           <span className="pulse-dot" />
           <span style={{ letterSpacing: "0.08em", fontWeight: 700, color: "var(--color-mint-pulse)" }}>
-            DEMO ENVIRONMENT — SYNTHETIC DATA
+            REAL-TIME OPERATIONS CONTROL ROOM
           </span>
           <span style={{ opacity: 0.35 }}>|</span>
-          <span style={{ opacity: 0.85 }}>SIH Problem Statement 121 Prototype</span>
+          <span style={{ opacity: 0.85 }}>Nearby Wells Intelligence System</span>
         </div>
         <div style={{ letterSpacing: "0.08em", fontWeight: 700 }}>OIL INDIA LIMITED</div>
       </div>

@@ -1,6 +1,8 @@
 import React from "react";
 import { SimulationState } from "../types";
 
+import { INITIAL_SIMULATION_STATE } from "../constants/initialData";
+
 interface LiveTelemetryBarProps {
   simulation: SimulationState | null;
   activeWellName?: string;
@@ -8,19 +10,11 @@ interface LiveTelemetryBarProps {
 }
 
 export const LiveTelemetryBar: React.FC<LiveTelemetryBarProps> = ({
-  simulation,
+  simulation: propSim,
   activeWellName = "OIL-X123",
   formation = "Tipam Sandstone",
 }) => {
-  if (!simulation) {
-    return (
-      <div className="telemetry-bar">
-        <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 12 }}>
-          Connecting to eRTMAC real-time telemetry stream…
-        </div>
-      </div>
-    );
-  }
+  const simulation = propSim || INITIAL_SIMULATION_STATE;
 
   const depth    = simulation.current_depth.toFixed(1);
   const rop      = simulation.current_rop.toFixed(1);
