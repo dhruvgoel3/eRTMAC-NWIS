@@ -19,7 +19,7 @@ import { supabase } from "../lib/supabase";
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, profile, activeRole } = useAuth();
 
   // Tab mode: 'signin' | 'signup'
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -48,15 +48,26 @@ export const LoginPage: React.FC = () => {
   const [resetSuccess, setResetSuccess] = useState<boolean>(false);
   const [resetError, setResetError] = useState<string | null>(null);
 
-  // If already logged in, redirect to requested page or root
+  // Helper to resolve dashboard routing based on actual user role
+  const resolveTargetDestination = (role?: string | null, rawPath?: string): string => {
+    // Explicitly prevent users from getting routed to student dashboard
+    if (!rawPath || rawPath === "/login" || rawPath === "/" || rawPath === "/student") {
+      if (role === "KNOWLEDGE_ADMIN") {
+        return "/admin/users";
+      }
+      return "/dashboard";
+    }
+    return rawPath;
+  };
+
   const rawFrom = (location.state as any)?.from?.pathname;
-  const targetDestination = rawFrom && rawFrom !== "/login" ? rawFrom : "/";
 
   React.useEffect(() => {
     if (isAuthenticated) {
-      navigate(targetDestination, { replace: true });
+      const destination = resolveTargetDestination(profile?.active_role || activeRole, rawFrom);
+      navigate(destination, { replace: true });
     }
-  }, [isAuthenticated, navigate, targetDestination]);
+  }, [isAuthenticated, navigate, rawFrom, profile, activeRole]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +82,19 @@ export const LoginPage: React.FC = () => {
     setIsSubmitting(false);
 
     if (result.success) {
-      navigate(targetDestination, { replace: true });
+      // Determine destination based on authenticated profile
+      const storedProfileRaw = localStorage.getItem("nwis_auth_profile");
+      let currentRole = profile?.active_role || activeRole;
+      if (!currentRole && storedProfileRaw) {
+        try {
+          const parsed = JSON.parse(storedProfileRaw);
+          currentRole = parsed.active_role || (parsed.roles && parsed.roles[0]);
+        } catch {
+          // ignore
+        }
+      }
+      const destination = resolveTargetDestination(currentRole, rawFrom);
+      navigate(destination, { replace: true });
     } else {
       setErrorMessage(result.error || "Authentication failed. Please verify credentials.");
     }

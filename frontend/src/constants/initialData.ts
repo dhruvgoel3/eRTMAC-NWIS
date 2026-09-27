@@ -58,6 +58,7 @@ export const INITIAL_DASHBOARD_DATA: DashboardData = {
   },
   risk_zones: [
     {
+      id: 1,
       formation: "Tipam Sandstone",
       depth_start: 2980,
       depth_end: 3080,
@@ -73,6 +74,7 @@ export const INITIAL_DASHBOARD_DATA: DashboardData = {
       status: "CURRENT",
     },
     {
+      id: 2,
       formation: "Barail Transition",
       depth_start: 3100,
       depth_end: 3250,
@@ -88,6 +90,7 @@ export const INITIAL_DASHBOARD_DATA: DashboardData = {
       status: "APPROACHING",
     },
     {
+      id: 3,
       formation: "Barail Arenaceous",
       depth_start: 3320,
       depth_end: 3450,

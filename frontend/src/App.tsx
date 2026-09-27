@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { LoginPage } from "./pages/LoginPage";
 import { AccessDeniedPage } from "./pages/AccessDeniedPage";
@@ -38,12 +38,12 @@ import {
   INITIAL_WELLS,
 } from "./constants/initialData";
 
-function OperationsDashboard() {
-  const [activeTab, setActiveTab] = useState<string>("overview");
+function OperationsDashboard({ initialTab = "overview" }: { initialTab?: string }) {
+  const [activeTab, setActiveTab] = useState<string>(initialTab);
   const [dashboardData, setDashboardData] = useState<DashboardData>(INITIAL_DASHBOARD_DATA);
   const [allWells, setAllWells] = useState<Well[]>(INITIAL_WELLS);
   const [similarWells, setSimilarWells] = useState<SimilarWellResult[]>(
-    (INITIAL_DASHBOARD_DATA.similar_wells || []) as any
+    ((INITIAL_DASHBOARD_DATA as any).similar_wells || (INITIAL_DASHBOARD_DATA.top_similar_well ? [INITIAL_DASHBOARD_DATA.top_similar_well] : [])) as any
   );
   const [simulation, setSimulation] = useState<SimulationState>(INITIAL_SIMULATION_STATE);
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -52,6 +52,11 @@ function OperationsDashboard() {
   const [alertForEvidence, setAlertForEvidence] = useState<Alert | null>(null);
   const [radiusKm, setRadiusKm] = useState<number>(20);
   const [selectedFormation, setSelectedFormation] = useState<string>("ALL");
+
+  // Keep activeTab in sync if initialTab prop changes
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   // Initial load
   useEffect(() => {
@@ -78,8 +83,6 @@ function OperationsDashboard() {
     }
   };
 
-
-
   // Real-time simulation polling (polls every 1.5s when running, or every 5s when paused)
   useEffect(() => {
     const intervalTime = simulation?.is_running ? 1500 : 5000;
@@ -94,7 +97,7 @@ function OperationsDashboard() {
 
         // Update dashboard simulation and current depth
         if (dashboardData && sim) {
-          setDashboardData((prev) => (prev ? { ...prev, simulation: sim } : null));
+          setDashboardData((prev) => (prev ? { ...prev, simulation: sim } : INITIAL_DASHBOARD_DATA));
         }
       } catch (err) {
         // Silent fail during poll
@@ -110,10 +113,10 @@ function OperationsDashboard() {
     try {
       if (simulation.is_running) {
         await api.pauseSimulation();
-        setSimulation((prev) => (prev ? { ...prev, is_running: false } : null));
+        setSimulation((prev) => (prev ? { ...prev, is_running: false } : INITIAL_SIMULATION_STATE));
       } else {
         await api.startSimulation();
-        setSimulation((prev) => (prev ? { ...prev, is_running: true } : null));
+        setSimulation((prev) => (prev ? { ...prev, is_running: true } : INITIAL_SIMULATION_STATE));
       }
     } catch (err) {
       console.error("Failed to toggle simulation play/pause", err);
@@ -135,7 +138,7 @@ function OperationsDashboard() {
   const handleChangeSpeed = async (newSpeed: number) => {
     try {
       await api.setSimulationSpeed(newSpeed);
-      setSimulation((prev) => (prev ? { ...prev, speed_multiplier: newSpeed } : null));
+      setSimulation((prev) => (prev ? { ...prev, speed_multiplier: newSpeed } : INITIAL_SIMULATION_STATE));
     } catch (err) {
       console.error("Failed to set simulation speed", err);
     }
@@ -310,6 +313,23 @@ function OperationsDashboard() {
   );
 }
 
+function StudentRedirect() {
+  const { profile, activeRole } = useAuth();
+  const role = profile?.active_role || activeRole;
+  if (role === "KNOWLEDGE_ADMIN") {
+    return <Navigate to="/admin/users" replace />;
+  }
+  return <Navigate to="/dashboard" replace />;
+}
+
+function AdminRootRedirect() {
+  const { hasPermission, hasRole } = useAuth();
+  if (hasRole("KNOWLEDGE_ADMIN") || hasPermission("users.view")) {
+    return <Navigate to="/admin/users" replace />;
+  }
+  return <Navigate to="/403" replace />;
+}
+
 export function App() {
   return (
     <BrowserRouter>
@@ -319,16 +339,41 @@ export function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/403" element={<AccessDeniedPage />} />
 
-          {/* Protected Main Operations Dashboard */}
+          {/* Protected Main Operations Dashboard & Specific Operational Views */}
           <Route
             path="/"
             element={
               <ProtectedRoute>
-                <OperationsDashboard />
+                <OperationsDashboard initialTab="overview" />
               </ProtectedRoute>
             }
           />
-          <Route path="/dashboard" element={<Navigate to="/" replace />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <OperationsDashboard initialTab="overview" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/map"
+            element={
+              <ProtectedRoute>
+                <OperationsDashboard initialTab="map" />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Role-based Student / Trainee Route Handler */}
+          <Route
+            path="/student"
+            element={
+              <ProtectedRoute>
+                <StudentRedirect />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Protected Operator Profile */}
           <Route
@@ -341,6 +386,14 @@ export function App() {
           />
 
           {/* Protected Admin Routes */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminRootRedirect />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/admin/users"
             element={
@@ -366,8 +419,8 @@ export function App() {
             }
           />
 
-          {/* Catch-all */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* Catch-all fallback */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

@@ -3,7 +3,17 @@ eRTMAC-NWIS Backend Main Application
 FastAPI application entrypoint for Oil India Limited Nearby Wells Intelligence System.
 """
 import os
+from pathlib import Path
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv
+
+# Ensure backend/.env is strictly loaded on backend startup
+_backend_env_path = Path(__file__).resolve().parent.parent / ".env"
+if _backend_env_path.is_file():
+    load_dotenv(_backend_env_path)
+else:
+    load_dotenv()
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -85,3 +95,9 @@ def health():
 @app.get("/api/supabase/status")
 def supabase_status():
     return get_supabase_status()
+
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=False)

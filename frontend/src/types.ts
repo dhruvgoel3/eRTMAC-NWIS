@@ -213,6 +213,7 @@ export interface DashboardData {
   nearby_well_count?: number;
   nearby_wells?: Well[];
   top_similar_well?: SimilarWellResult;
+  similar_wells?: SimilarWellResult[];
   overall_risk?: {
     level: string;
     active_zone_count: number;
