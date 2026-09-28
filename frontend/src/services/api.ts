@@ -28,9 +28,9 @@ const client = axios.create({
 
 // Attach Supabase JWT Bearer token or demo token to all outgoing backend API requests
 client.interceptors.request.use(async (config) => {
-  const demoToken = localStorage.getItem("nwis_auth_token");
-  if (demoToken) {
-    config.headers.Authorization = `Bearer ${demoToken}`;
+  const token = localStorage.getItem("nwis_auth_token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
     return config;
   }
   try {
@@ -40,9 +40,8 @@ client.interceptors.request.use(async (config) => {
       return config;
     }
   } catch (err) {
-    // fallback to demo engineer
+    // No session available
   }
-  config.headers.Authorization = `Bearer demo-engineer`;
   return config;
 });
 
@@ -50,23 +49,32 @@ client.interceptors.request.use(async (config) => {
 client.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const isAuthEndpoint = error.config?.url?.includes("/api/auth/");
+    const isAuthEndpoint = error.config?.url?.includes("/api/auth/login") || error.config?.url?.includes("/api/auth/register");
     const isDemoToken = localStorage.getItem("nwis_auth_token")?.startsWith("demo");
 
     if (error.response?.status === 401 && !error.config?._retry) {
       error.config._retry = true;
 
-      // Do not attempt refresh or hard-redirect for demo accounts or profile probes
+      // Attempt token refresh if using Supabase real session
       if (!isDemoToken && !isAuthEndpoint) {
         try {
           const { data } = await supabase.auth.refreshSession();
           if (data?.session?.access_token && error.config) {
+            localStorage.setItem("nwis_auth_token", data.session.access_token);
             error.config.headers.Authorization = `Bearer ${data.session.access_token}`;
             return client.request(error.config);
           }
         } catch (e) {
-          // Token refresh failed
+          // Token refresh failed - session expired
         }
+      }
+
+      // If token is invalid or refresh failed, clear state and redirect to login
+      if (!isAuthEndpoint && typeof window !== "undefined" && window.location.pathname !== "/login") {
+        localStorage.removeItem("nwis_auth_token");
+        localStorage.removeItem("nwis_auth_user");
+        localStorage.removeItem("nwis_auth_profile");
+        window.location.href = "/login";
       }
     }
     return Promise.reject(error);
@@ -371,5 +379,82 @@ export const api = {
     });
     return res.data;
   },
+
+  getDrillingMemory: async (): Promise<import("../types").MemoryGraphData> => {
+    const res = await client.get("/api/drilling-memory");
+    return res.data;
+  },
+
+  getCurrentWellStream: async (): Promise<SimulationState> => {
+    const res = await client.get("/api/simulation/stream");
+    return res.data;
+  },
+
+  // Dedicated Role Dashboards
+  getEngineerDashboard: async (): Promise<DashboardData> => {
+    const res = await client.get("/api/engineer/dashboard");
+    return res.data;
+  },
+
+  getSupervisorDashboard: async (): Promise<any> => {
+    const res = await client.get("/api/supervisor/dashboard");
+    return res.data.data;
+  },
+
+  getAdminOverview: async (): Promise<any> => {
+    const res = await client.get("/api/admin/overview");
+    return res.data.data;
+  },
+
+  getAdminDocuments: async (): Promise<any[]> => {
+    const res = await client.get("/api/admin/documents");
+    return res.data.data;
+  },
+
+  uploadAdminDocument: async (payload: {
+    title: string;
+    document_type: string;
+    well_id?: string;
+    formation?: string;
+    text_content?: string;
+    depth_start?: number;
+    depth_end?: number;
+  }): Promise<any> => {
+    const res = await client.post("/api/admin/documents", payload);
+    return res.data.data;
+  },
+
+  processAdminDocument: async (docId: number): Promise<any> => {
+    const res = await client.post(`/api/admin/documents/${docId}/process`);
+    return res.data;
+  },
+
+  deleteAdminDocument: async (docId: number): Promise<any> => {
+    const res = await client.delete(`/api/admin/documents/${docId}`);
+    return res.data;
+  },
+
+  getAdminEntities: async (): Promise<any> => {
+    const res = await client.get("/api/admin/knowledge/entities");
+    return res.data.data;
+  },
+
+  escalateAlert: async (alertId: number): Promise<any> => {
+    const res = await client.post(`/api/alerts/${alertId}/escalate`);
+    return res.data;
+  },
+
+  getComparisonData: async (radiusKm: number = 50, topN: number = 5): Promise<SimilarWellResult[]> => {
+    const res = await client.get("/api/wells/comparison", {
+      params: { radius_km: radiusKm, top_n: topN },
+    });
+    return res.data;
+  },
+
+  getEvidence: async (evidenceId: string): Promise<any> => {
+    const res = await client.get(`/api/alerts/evidence/${evidenceId}`);
+    return res.data;
+  },
 };
+
 

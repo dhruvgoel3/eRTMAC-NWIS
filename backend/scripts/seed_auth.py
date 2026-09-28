@@ -70,7 +70,6 @@ PERMISSIONS_DATA = [
     {"name": "system.manage", "description": "Configure system settings, demo parameters, and system caches"},
 ]
 
-# ─── 3. Role-Permission Matrix ────────────────────────────────────────────────
 ENGINEER_PERMISSIONS = [
     "dashboard.view",
     "wells.view",
@@ -87,10 +86,20 @@ ENGINEER_PERMISSIONS = [
     "simulation.control",
 ]
 
-SUPERVISOR_PERMISSIONS = ENGINEER_PERMISSIONS + [
+SUPERVISOR_PERMISSIONS = [
+    "dashboard.view",
+    "wells.view",
+    "wells.nearby",
+    "wells.compare",
+    "events.view",
+    "risk.view",
+    "alerts.view",
+    "alerts.acknowledge",
     "alerts.escalate",
-    "audit.view",
-    "users.view",
+    "ai.query",
+    "ai.view_sources",
+    "documents.view",
+    "simulation.view",
 ]
 
 ADMIN_PERMISSIONS = [
@@ -220,10 +229,12 @@ def seed_rbac():
         print("[Seed Auth] Mapping role permissions...")
         for role_name, perm_list in ROLE_PERMISSIONS_MAPPING.items():
             role = roles_by_name[role_name]
+            allowed_perm_ids = set()
             for perm_name in perm_list:
                 perm = perms_by_name.get(perm_name)
                 if not perm:
                     continue
+                allowed_perm_ids.add(perm.id)
                 rp = db.query(RolePermission).filter(
                     RolePermission.role_id == role.id,
                     RolePermission.permission_id == perm.id,
@@ -231,6 +242,12 @@ def seed_rbac():
                 if not rp:
                     rp = RolePermission(role_id=role.id, permission_id=perm.id)
                     db.add(rp)
+            # Prune obsolete role permissions
+            if allowed_perm_ids:
+                db.query(RolePermission).filter(
+                    RolePermission.role_id == role.id,
+                    ~RolePermission.permission_id.in_(allowed_perm_ids),
+                ).delete(synchronize_session=False)
             db.commit()
             print(f"  * Configured permissions for {role_name} ({len(perm_list)} grants)")
 
@@ -317,7 +334,7 @@ def seed_rbac():
             )
             db.add(ur)
             db.commit()
-            print(f"  ✓ Assigned Role '{target_role.name}' to {email}")
+            print(f"  [OK] Assigned Role '{target_role.name}' to {email}")
 
         # 5. Seed Initial Audit Logs
         print("[Seed Auth] Recording initial audit log trail...")
@@ -340,10 +357,10 @@ def seed_rbac():
             )
             db.add(entry)
         db.commit()
-        print("  ✓ Seeded baseline audit log records.")
+        print("  [OK] Seeded baseline audit log records.")
 
         print("\n=======================================================")
-        print("✓ RBAC SEEDING COMPLETED SUCCESSFULLY!")
+        print("[OK] RBAC SEEDING COMPLETED SUCCESSFULLY!")
         print("  Demo Users Available:")
         print(f"  1. engineer@nwis.demo   [DRILLING_ENGINEER]   Password: {DEMO_PASSWORD}")
         print(f"  2. supervisor@nwis.demo [DRILLING_SUPERVISOR] Password: {DEMO_PASSWORD}")

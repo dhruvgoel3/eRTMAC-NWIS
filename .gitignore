@@ -62,3 +62,5 @@ frontend/dist-ssr/
 # Database & artifacts
 backend/*.db
 backend/*.sqlite3
+chroma_db/
+**/chroma_db/

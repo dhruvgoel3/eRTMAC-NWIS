@@ -4,7 +4,7 @@ Provides access to institutional DDRs, Well Completion Reports, and Mud Logs.
 """
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.database import get_db
 from app.models import Well, Document
 from app.auth.dependencies import require_permission, AuthenticatedUser
@@ -21,7 +21,7 @@ def get_documents(
     db: Session = Depends(get_db),
 ):
     """List operational documents with optional filtering by well and document type."""
-    q = db.query(Document)
+    q = db.query(Document).options(joinedload(Document.well))
     if well_id_str:
         well = db.query(Well).filter(Well.well_id == well_id_str).first()
         if well:
@@ -33,7 +33,7 @@ def get_documents(
 
     result = []
     for d in docs:
-        well = db.query(Well).filter(Well.id == d.well_id).first()
+        well = d.well
         result.append({
             "id": d.id,
             "document_id": d.document_id,

@@ -81,6 +81,31 @@ def get_active_well(
     return well_to_dict(well)
 
 
+@router.get("/current")
+def get_current_well(
+    user: AuthenticatedUser = Depends(require_permission("wells.view")),
+    db: Session = Depends(get_db),
+):
+    """Get the current active drilling well (convenience alias)."""
+    return get_active_well(user=user, db=db)
+
+
+@router.get("/comparison")
+def get_comparison(
+    radius_km: float = Query(50.0),
+    top_n: int = Query(5, le=10),
+    user: AuthenticatedUser = Depends(require_permission("wells.compare")),
+    db: Session = Depends(get_db),
+):
+    """Comparison dataset comparing active well against top similar offset wells."""
+    active_well = db.query(Well).filter(Well.is_active == True).first()
+    if not active_well:
+        active_well = db.query(Well).first()
+    if not active_well:
+        raise HTTPException(status_code=404, detail="No wells found for comparison")
+    return get_similar_wells(well_id_str=active_well.well_id, radius_km=radius_km, top_n=top_n, user=user, db=db)
+
+
 @router.get("/nearby")
 def get_nearby_wells(
     lat: float = Query(..., description="Center latitude"),
@@ -300,16 +325,17 @@ def get_similar_wells(
             "factors": factors,
             "factor_explanations": r.get("factor_explanations", {}),
             "score_breakdown": {
-                "formation_match": factors.get("formation", 96.0),
-                "depth_proximity": factors.get("depth", 91.0),
-                "distance_proximity": factors.get("distance", 88.0),
-                "trajectory_match": factors.get("trajectory", 82.0),
-                "mud_weight_match": factors.get("parameters", 95.0),
+                "formation_match": factors.get("formation", factors.get("formation_match", 96.0)),
+                "depth_proximity": factors.get("depth", factors.get("depth_proximity", 91.0)),
+                "distance_proximity": factors.get("distance", factors.get("distance_proximity", 88.0)),
+                "trajectory_match": factors.get("trajectory", factors.get("trajectory_match", 82.0)),
+                "mud_weight_match": factors.get("parameters", factors.get("mud_weight_match", 95.0)),
             },
-            "weights": r["weights"],
-            "explanation": r["explanation"],
+            "weights": r.get("weights") or r.get("ahp_weights") or {},
+            "explanation": r.get("explanation", []),
             "event_count": len(events),
             "total_npt": round(total_npt, 1),
+
             "event_types": list(set(e.event_type for e in events)),
         })
 
@@ -330,6 +356,17 @@ def get_well_risk_zones(
 
     zones = get_risk_zones_for_depth(db, well.id, current_depth, max_look_ahead_m=800)
     return zones
+
+
+@router.get("/{well_id_str}/risks")
+def get_well_risks_alias(
+    well_id_str: str,
+    current_depth: float = Query(3050.0),
+    user: AuthenticatedUser = Depends(require_permission("risk.view")),
+    db: Session = Depends(get_db),
+):
+    """Get risk zones for the active well at a given current depth (alias)."""
+    return get_well_risk_zones(well_id_str=well_id_str, current_depth=current_depth, user=user, db=db)
 
 
 @router.get("/{well_id_str}/parameters")

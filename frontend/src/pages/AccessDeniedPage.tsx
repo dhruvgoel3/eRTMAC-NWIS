@@ -4,7 +4,8 @@ import { ShieldAlert, ArrowLeft } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
 export const AccessDeniedPage: React.FC = () => {
-  const { profile, activeRole } = useAuth();
+  const { profile, activeRole, logout } = useAuth();
+
 
   return (
     <div className="access-denied-viewport">
@@ -48,15 +49,31 @@ export const AccessDeniedPage: React.FC = () => {
           </div>
         )}
 
-        <Link
-          to="/"
-          className="auth-btn-submit"
-          style={{ textDecoration: "none" }}
-        >
-          <ArrowLeft style={{ width: 16, height: 16 }} />
-          <span>Return to Dashboard</span>
-        </Link>
+        <div style={{ display: "flex", gap: 12, width: "100%", marginTop: 8 }}>
+          <Link
+            to="/"
+            className="auth-btn-submit"
+            style={{ textDecoration: "none", flex: 1, justifyContent: "center" }}
+          >
+            <ArrowLeft style={{ width: 16, height: 16 }} />
+            <span>My Dashboard</span>
+          </Link>
+          <button
+            onClick={() => logout()}
+            className="auth-btn-submit"
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              background: "var(--color-surface, #fff)",
+              color: "var(--color-navy, #1e293b)",
+              border: "1px solid var(--color-border, #cbd5e1)",
+            }}
+          >
+            <span>Switch Account</span>
+          </button>
+        </div>
       </div>
+
 
       <div style={{ textAlign: "center", fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--color-muted-slate)" }}>
         eRTMAC-NWIS · Oil India Limited · Operational Decision Support · SIH PS-121

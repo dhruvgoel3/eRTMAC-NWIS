@@ -307,3 +307,28 @@ def require_role(role_name: str):
         return user
 
     return role_dependency
+
+
+def require_any_role(*role_names: str):
+    """
+    Factory creating a FastAPI dependency enforcing that the authenticated user
+    has at least one of the specified roles.
+    """
+    def any_role_dependency(
+        user: AuthenticatedUser = Depends(get_current_user),
+    ) -> AuthenticatedUser:
+        if not any(user.has_role(r) for r in role_names):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={
+                    "success": False,
+                    "error": {
+                        "code": "FORBIDDEN",
+                        "message": f"Access denied. Requires one of roles: {', '.join(role_names)}.",
+                    },
+                },
+            )
+        return user
+
+    return any_role_dependency
+

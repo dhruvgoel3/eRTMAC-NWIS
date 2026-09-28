@@ -52,10 +52,13 @@ export const LoginPage: React.FC = () => {
 
   // Helper to resolve dashboard routing based on actual user role
   const resolveTargetDestination = (role?: string | null, rawPath?: string): string => {
-    // Explicitly prevent users from getting routed to student dashboard
+    // Explicitly prevent users from getting routed to student dashboard or generic root
     if (!rawPath || rawPath === "/login" || rawPath === "/" || rawPath === "/student") {
       if (role === "KNOWLEDGE_ADMIN") {
-        return "/admin/users";
+        return "/admin";
+      }
+      if (role === "DRILLING_SUPERVISOR") {
+        return "/operations";
       }
       return "/dashboard";
     }
@@ -363,20 +366,48 @@ export const LoginPage: React.FC = () => {
                   <span style={{ fontSize: 10, opacity: 0.7 }}>Default Password: OIL_nwis_demo_2026!</span>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px" }}>
-                  <div>
-                    <span style={{ fontWeight: 600, color: "var(--color-pearl)" }}>Drilling Engineer: </span>
+                  <div
+                    onClick={() => {
+                      setEmail("engineer@nwis.demo");
+                      setPassword("OIL_nwis_demo_2026!");
+                    }}
+                    style={{ cursor: "pointer", padding: "4px 8px", borderRadius: 6, background: "rgba(255,255,255,0.04)", transition: "all 0.15s ease" }}
+                    title="Click to fill credentials"
+                  >
+                    <span style={{ fontWeight: 600, color: "var(--color-mint-pulse)" }}>⚡ Drilling Engineer: </span>
                     <span style={{ fontFamily: "monospace", fontSize: 11 }}>engineer@nwis.demo</span>
                   </div>
-                  <div>
-                    <span style={{ fontWeight: 600, color: "var(--color-pearl)" }}>Drilling Supervisor: </span>
+                  <div
+                    onClick={() => {
+                      setEmail("supervisor@nwis.demo");
+                      setPassword("OIL_nwis_demo_2026!");
+                    }}
+                    style={{ cursor: "pointer", padding: "4px 8px", borderRadius: 6, background: "rgba(255,255,255,0.04)", transition: "all 0.15s ease" }}
+                    title="Click to fill credentials"
+                  >
+                    <span style={{ fontWeight: 600, color: "var(--color-mint-pulse)" }}>⚡ Drilling Supervisor: </span>
                     <span style={{ fontFamily: "monospace", fontSize: 11 }}>supervisor@nwis.demo</span>
                   </div>
-                  <div>
-                    <span style={{ fontWeight: 600, color: "var(--color-pearl)" }}>Knowledge Admin: </span>
+                  <div
+                    onClick={() => {
+                      setEmail("admin@nwis.demo");
+                      setPassword("OIL_nwis_demo_2026!");
+                    }}
+                    style={{ cursor: "pointer", padding: "4px 8px", borderRadius: 6, background: "rgba(255,255,255,0.04)", transition: "all 0.15s ease" }}
+                    title="Click to fill credentials"
+                  >
+                    <span style={{ fontWeight: 600, color: "var(--color-mint-pulse)" }}>⚡ Knowledge Admin: </span>
                     <span style={{ fontFamily: "monospace", fontSize: 11 }}>admin@nwis.demo</span>
                   </div>
-                  <div>
-                    <span style={{ fontWeight: 600, color: "var(--color-pearl)" }}>Disabled Account: </span>
+                  <div
+                    onClick={() => {
+                      setEmail("disabled_operator@nwis.demo");
+                      setPassword("OIL_nwis_demo_2026!");
+                    }}
+                    style={{ cursor: "pointer", padding: "4px 8px", borderRadius: 6, background: "rgba(255,255,255,0.04)", transition: "all 0.15s ease" }}
+                    title="Click to fill credentials"
+                  >
+                    <span style={{ fontWeight: 600, color: "#f87171" }}>🔒 Disabled Account: </span>
                     <span style={{ fontFamily: "monospace", fontSize: 11 }}>disabled_operator@nwis.demo</span>
                   </div>
                 </div>
