@@ -66,7 +66,7 @@ export const AdminDashboardPage: React.FC = () => {
             padding: "8px 16px",
             borderRadius: 10,
             border: "1px solid var(--color-sage-mist)",
-            background: "#ffffff",
+            background: "var(--bg-elevated)",
             color: "var(--color-bark)",
             fontSize: 12,
             fontWeight: 700,
@@ -80,7 +80,7 @@ export const AdminDashboardPage: React.FC = () => {
 
       {/* KPI Cards Grid */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 16 }}>
-        <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", textTransform: "uppercase", color: "var(--color-muted-slate)", fontWeight: 700 }}>Total Documents</span>
             <FolderOpen size={16} color="var(--color-canopy)" />
@@ -91,7 +91,7 @@ export const AdminDashboardPage: React.FC = () => {
           <div style={{ fontSize: 11, color: "var(--color-slate)" }}>Institutional DDRs &amp; WCRs</div>
         </div>
 
-        <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", textTransform: "uppercase", color: "var(--color-muted-slate)", fontWeight: 700 }}>Vector Chunks</span>
             <Layers size={16} color="#2563eb" />
@@ -102,7 +102,7 @@ export const AdminDashboardPage: React.FC = () => {
           <div style={{ fontSize: 11, color: "var(--color-slate)" }}>Indexed for Semantic Search</div>
         </div>
 
-        <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", textTransform: "uppercase", color: "var(--color-muted-slate)", fontWeight: 700 }}>Well Dossiers</span>
             <Database size={16} color="#d97706" />
@@ -113,7 +113,7 @@ export const AdminDashboardPage: React.FC = () => {
           <div style={{ fontSize: 11, color: "var(--color-slate)" }}>Assam Basin Wells Curated</div>
         </div>
 
-        <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", textTransform: "uppercase", color: "var(--color-muted-slate)", fontWeight: 700 }}>Historical Events</span>
             <Activity size={16} color="#b91c42" />
@@ -124,7 +124,7 @@ export const AdminDashboardPage: React.FC = () => {
           <div style={{ fontSize: 11, color: "var(--color-slate)" }}>Stuck Pipe, Mud Loss &amp; Kicks</div>
         </div>
 
-        <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", textTransform: "uppercase", color: "var(--color-muted-slate)", fontWeight: 700 }}>Registered Users</span>
             <Users size={16} color="var(--color-canopy)" />
@@ -141,7 +141,7 @@ export const AdminDashboardPage: React.FC = () => {
       {/* Two Column Section */}
       <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 20 }}>
         {/* Left: Document Processing & Ingestion Status */}
-        <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: 20 }}>
+        <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: 20 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <h3 style={{ fontSize: 15, fontWeight: 800, color: "var(--color-bark)", margin: 0 }}>
               Document Processing Pipeline Status
@@ -197,7 +197,7 @@ export const AdminDashboardPage: React.FC = () => {
         </div>
 
         {/* Right: Quick Admin Navigation */}
-        <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: 20, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: 20, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div>
             <h3 style={{ fontSize: 15, fontWeight: 800, color: "var(--color-bark)", margin: "0 0 16px" }}>
               Administrative Controls
@@ -205,9 +205,9 @@ export const AdminDashboardPage: React.FC = () => {
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <Link
                 to="/admin/users"
-                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderRadius: 10, border: "1px solid var(--color-sage-mist)", background: "#ffffff", textDecoration: "none", color: "var(--color-bark)", transition: "all 0.15s ease" }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-elevated)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "#ffffff")}
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderRadius: 10, border: "1px solid var(--color-sage-mist)", background: "var(--bg-elevated)", textDecoration: "none", color: "var(--color-bark)", transition: "all 0.15s ease" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0, 230, 153, 0.12)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "var(--bg-elevated)")}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <Users size={16} color="var(--color-canopy)" />
@@ -221,9 +221,9 @@ export const AdminDashboardPage: React.FC = () => {
 
               <Link
                 to="/admin/documents"
-                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderRadius: 10, border: "1px solid var(--color-sage-mist)", background: "#ffffff", textDecoration: "none", color: "var(--color-bark)", transition: "all 0.15s ease" }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-elevated)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "#ffffff")}
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderRadius: 10, border: "1px solid var(--color-sage-mist)", background: "var(--bg-elevated)", textDecoration: "none", color: "var(--color-bark)", transition: "all 0.15s ease" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0, 230, 153, 0.12)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "var(--bg-elevated)")}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <FileText size={16} color="#2563eb" />
@@ -237,9 +237,9 @@ export const AdminDashboardPage: React.FC = () => {
 
               <Link
                 to="/admin/wells-events"
-                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderRadius: 10, border: "1px solid var(--color-sage-mist)", background: "#ffffff", textDecoration: "none", color: "var(--color-bark)", transition: "all 0.15s ease" }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-elevated)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "#ffffff")}
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderRadius: 10, border: "1px solid var(--color-sage-mist)", background: "var(--bg-elevated)", textDecoration: "none", color: "var(--color-bark)", transition: "all 0.15s ease" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0, 230, 153, 0.12)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "var(--bg-elevated)")}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <Database size={16} color="#d97706" />
@@ -253,9 +253,9 @@ export const AdminDashboardPage: React.FC = () => {
 
               <Link
                 to="/admin/audit-logs"
-                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderRadius: 10, border: "1px solid var(--color-sage-mist)", background: "#ffffff", textDecoration: "none", color: "var(--color-bark)", transition: "all 0.15s ease" }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-elevated)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "#ffffff")}
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderRadius: 10, border: "1px solid var(--color-sage-mist)", background: "var(--bg-elevated)", textDecoration: "none", color: "var(--color-bark)", transition: "all 0.15s ease" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0, 230, 153, 0.12)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "var(--bg-elevated)")}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <Shield size={16} color="#b91c42" />

@@ -69,7 +69,7 @@ export const AdminProcessingPage: React.FC = () => {
 
       {/* Pipeline Status Cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
-        <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: 20 }}>
+        <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: 20 }}>
           <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", textTransform: "uppercase", color: "var(--color-muted-slate)", fontWeight: 700, marginBottom: 4 }}>Pipeline State</div>
           <div style={{ fontSize: 22, fontWeight: 800, color: pipelineState === "RUNNING" ? "#2563eb" : "#0d7a4e", display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ width: 10, height: 10, borderRadius: "50%", background: pipelineState === "RUNNING" ? "#2563eb" : "#0d7a4e" }} />
@@ -78,13 +78,13 @@ export const AdminProcessingPage: React.FC = () => {
           <div style={{ fontSize: 11, color: "var(--color-slate)", marginTop: 6 }}>Last execution: {lastBatchTime}</div>
         </div>
 
-        <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: 20 }}>
+        <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: 20 }}>
           <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", textTransform: "uppercase", color: "var(--color-muted-slate)", fontWeight: 700, marginBottom: 4 }}>Extraction Accuracy</div>
           <div style={{ fontSize: 22, fontWeight: 800, color: "var(--color-bark)" }}>99.4%</div>
           <div style={{ fontSize: 11, color: "#0d7a4e", fontWeight: 700, marginTop: 6 }}>Zero parse failures reported</div>
         </div>
 
-        <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: 20 }}>
+        <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: 20 }}>
           <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", textTransform: "uppercase", color: "var(--color-muted-slate)", fontWeight: 700, marginBottom: 4 }}>Vector Generation Latency</div>
           <div style={{ fontSize: 22, fontWeight: 800, color: "var(--color-bark)" }}>42 ms / chunk</div>
           <div style={{ fontSize: 11, color: "var(--color-slate)", marginTop: 6 }}>Dense embeddings normalized</div>
@@ -92,7 +92,7 @@ export const AdminProcessingPage: React.FC = () => {
       </div>
 
       {/* Pipeline Diagram */}
-      <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: 24 }}>
+      <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: 24 }}>
         <h3 style={{ fontSize: 15, fontWeight: 800, color: "var(--color-bark)", margin: "0 0 16px" }}>
           End-to-End Institutional Ingestion Architecture
         </h3>

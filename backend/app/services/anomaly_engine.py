@@ -20,8 +20,12 @@ from collections import deque
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 import numpy as np
-import pandas as pd
 try:
+    import pandas as pd
+except ImportError:
+    pd = None
+try:
+    # pyrefly: ignore [missing-import]
     from statsmodels.stats.proportion import proportion_confint
 except ImportError:
     def proportion_confint(count: int, nobs: int, alpha: float = 0.05, method: str = "wilson") -> Tuple[float, float]:

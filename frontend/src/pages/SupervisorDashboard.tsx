@@ -181,7 +181,7 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({ initia
                 fontSize: 11,
                 fontWeight: 700,
                 border: activeSubtab === tab.id ? "1px solid var(--color-canopy)" : "1px solid var(--color-sage-mist)",
-                background: activeSubtab === tab.id ? "var(--color-canopy)" : "#ffffff",
+                background: activeSubtab === tab.id ? "var(--color-canopy)" : "var(--color-sheet-white)",
                 color: activeSubtab === tab.id ? "#ffffff" : "var(--color-bark)",
                 cursor: "pointer",
                 transition: "all 0.15s ease",
@@ -197,7 +197,7 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({ initia
               padding: "6px 10px",
               borderRadius: 8,
               border: "1px solid var(--color-sage-mist)",
-              background: "#ffffff",
+              background: "var(--color-sheet-white)",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
@@ -387,7 +387,7 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({ initia
                         style={{
                           padding: "6px 8px",
                           borderRadius: 6,
-                          background: "#ffffff",
+                          background: "var(--color-sheet-white)",
                           border: "1px solid var(--color-sage-mist)",
                           cursor: "pointer",
                           fontSize: 11,
@@ -543,7 +543,7 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({ initia
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-sage-mist)" opacity={0.5} />
                   <XAxis dataKey="name" stroke="var(--color-muted-slate)" fontSize={10} tick={{ angle: -20 }} />
                   <YAxis stroke="var(--color-muted-slate)" fontSize={10} />
-                  <Tooltip contentStyle={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 8, fontSize: 11 }} />
+                  <Tooltip contentStyle={{ background: "var(--color-sheet-white)", color: "var(--color-bark)", border: "1px solid var(--color-sage-mist)", borderRadius: 8, fontSize: 11 }} />
                   <Bar dataKey="count" fill="var(--color-canopy)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -602,7 +602,7 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({ initia
         >
           <div
             style={{
-              background: "#ffffff",
+              background: "var(--color-sheet-white)",
               borderRadius: 14,
               border: "1px solid var(--color-sage-mist)",
               boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
@@ -761,7 +761,7 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({ initia
         >
           <div
             style={{
-              background: "#ffffff",
+              background: "var(--color-sheet-white)",
               borderRadius: 14,
               border: "1px solid var(--color-sage-mist)",
               boxShadow: "0 20px 40px rgba(0,0,0,0.2)",

@@ -142,7 +142,7 @@ export const AdminRolesPage: React.FC = () => {
                       key={perm.name}
                       style={{
                         borderBottom: "1px solid rgba(175, 196, 191, 0.25)",
-                        background: idx % 2 === 0 ? "#ffffff" : "var(--bg-elevated)",
+                        background: idx % 2 === 0 ? "var(--color-sheet-white)" : "var(--bg-elevated)",
                       }}
                     >
                       <td style={{ padding: "12px 18px", fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--color-bark)" }}>

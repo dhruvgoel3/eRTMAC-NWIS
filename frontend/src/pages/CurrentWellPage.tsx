@@ -71,7 +71,7 @@ export const CurrentWellPage: React.FC<CurrentWellPageProps> = ({ simulation, on
             padding: "8px 16px",
             borderRadius: 10,
             border: "1px solid var(--color-sage-mist)",
-            background: "#ffffff",
+            background: "var(--bg-elevated)",
             color: "var(--color-bark)",
             fontSize: 12,
             fontWeight: 700,
@@ -84,7 +84,7 @@ export const CurrentWellPage: React.FC<CurrentWellPageProps> = ({ simulation, on
       </div>
 
       {/* Depth Advancement Progress */}
-      <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: 20 }}>
+      <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: 20 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
           <span style={{ fontSize: 12, fontWeight: 700, color: "var(--color-bark)" }}>Drilling Progress to Total Depth</span>
           <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--color-canopy)" }}>
@@ -96,54 +96,44 @@ export const CurrentWellPage: React.FC<CurrentWellPageProps> = ({ simulation, on
         </div>
       </div>
 
-      {/* Real-time Drilling Parameters Grid */}
-      <div>
-        <h3 style={{ fontSize: 14, fontWeight: 800, color: "var(--color-bark)", margin: "0 0 12px" }}>
-          Live Operating Parameters
-        </h3>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 12 }}>
-          <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 12, padding: "14px 16px" }}>
-            <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--color-muted-slate)", fontWeight: 700, textTransform: "uppercase" }}>Rate of Penetration</div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: "var(--color-bark)", marginTop: 4 }}>
-              {simulation?.current_rop?.toFixed(1) || "12.4"} <span style={{ fontSize: 11, fontWeight: 500, color: "var(--color-slate)" }}>m/h</span>
-            </div>
+      {/* Section Progress & Geological Horizon Bar */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>
+        <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 12, padding: "14px 18px" }}>
+          <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--color-muted-slate)", fontWeight: 700, textTransform: "uppercase" }}>Current Section</div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: "var(--color-bark)", marginTop: 4 }}>
+            12-1/4" Hole Section
           </div>
-          <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 12, padding: "14px 16px" }}>
-            <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--color-muted-slate)", fontWeight: 700, textTransform: "uppercase" }}>Weight on Bit</div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: "var(--color-bark)", marginTop: 4 }}>
-              {simulation?.current_wob?.toFixed(1) || "18.2"} <span style={{ fontSize: 11, fontWeight: 500, color: "var(--color-slate)" }}>klbs</span>
-            </div>
+          <div style={{ fontSize: 11, color: "var(--color-slate)", marginTop: 2 }}>2,100m – 3,180m (Tipam Intermediate)</div>
+        </div>
+
+        <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 12, padding: "14px 18px" }}>
+          <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--color-muted-slate)", fontWeight: 700, textTransform: "uppercase" }}>Active Drillstring BHA</div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: "var(--color-bark)", marginTop: 4 }}>
+            Steerable Motor BHA
           </div>
-          <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 12, padding: "14px 16px" }}>
-            <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--color-muted-slate)", fontWeight: 700, textTransform: "uppercase" }}>Rotary Speed</div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: "var(--color-bark)", marginTop: 4 }}>
-              {simulation?.current_rpm?.toFixed(0) || "110"} <span style={{ fontSize: 11, fontWeight: 500, color: "var(--color-slate)" }}>RPM</span>
-            </div>
+          <div style={{ fontSize: 11, color: "var(--color-slate)", marginTop: 2 }}>1.5° AKO Bend · PDC Matrix 5-Blade</div>
+        </div>
+
+        <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 12, padding: "14px 18px" }}>
+          <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--color-muted-slate)", fontWeight: 700, textTransform: "uppercase" }}>Drilling Fluid System</div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: "var(--color-canopy)", marginTop: 4 }}>
+            10.8 ppg KCl-Polymer
           </div>
-          <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 12, padding: "14px 16px" }}>
-            <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--color-muted-slate)", fontWeight: 700, textTransform: "uppercase" }}>Rotary Torque</div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: "var(--color-bark)", marginTop: 4 }}>
-              {simulation?.current_torque?.toFixed(0) || "6200"} <span style={{ fontSize: 11, fontWeight: 500, color: "var(--color-slate)" }}>ft-lbs</span>
-            </div>
+          <div style={{ fontSize: 11, color: "var(--color-slate)", marginTop: 2 }}>ECD: 11.2 ppg · PV: 22 · YP: 18</div>
+        </div>
+
+        <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 12, padding: "14px 18px" }}>
+          <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--color-muted-slate)", fontWeight: 700, textTransform: "uppercase" }}>Next Casing Point</div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: "#b91c42", marginTop: 4 }}>
+            9-5/8" Casing @ 3,180m
           </div>
-          <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 12, padding: "14px 16px" }}>
-            <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--color-muted-slate)", fontWeight: 700, textTransform: "uppercase" }}>Standpipe Pressure</div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: "var(--color-bark)", marginTop: 4 }}>
-              {simulation?.current_pressure?.toFixed(0) || "2850"} <span style={{ fontSize: 11, fontWeight: 500, color: "var(--color-slate)" }}>psi</span>
-            </div>
-          </div>
-          <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 12, padding: "14px 16px" }}>
-            <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--color-muted-slate)", fontWeight: 700, textTransform: "uppercase" }}>Mud Flow Rate</div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: "var(--color-bark)", marginTop: 4 }}>
-              {simulation?.current_mud_flow?.toFixed(0) || "550"} <span style={{ fontSize: 11, fontWeight: 500, color: "var(--color-slate)" }}>gpm</span>
-            </div>
-          </div>
+          <div style={{ fontSize: 11, color: "var(--color-slate)", marginTop: 2 }}>8.0m remaining to section TD</div>
         </div>
       </div>
 
       {/* Well Technical Profile */}
       <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 20 }}>
-        <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: 20 }}>
+        <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: 20 }}>
           <h3 style={{ fontSize: 15, fontWeight: 800, color: "var(--color-bark)", margin: "0 0 14px" }}>
             Technical Well Architecture
           </h3>
@@ -171,7 +161,7 @@ export const CurrentWellPage: React.FC<CurrentWellPageProps> = ({ simulation, on
           </div>
         </div>
 
-        <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: 20 }}>
+        <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: 20 }}>
           <h3 style={{ fontSize: 15, fontWeight: 800, color: "var(--color-bark)", margin: "0 0 14px" }}>
             Casing Program &amp; Geological Notes
           </h3>

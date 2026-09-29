@@ -66,7 +66,7 @@ export const AdminWellsEventsPage: React.FC = () => {
             padding: "8px 16px",
             borderRadius: 10,
             border: "1px solid var(--color-sage-mist)",
-            background: "#ffffff",
+            background: "var(--bg-elevated)",
             color: "var(--color-bark)",
             fontSize: 12,
             fontWeight: 700,
@@ -141,7 +141,7 @@ export const AdminWellsEventsPage: React.FC = () => {
 
       {/* Content for Active Subtab */}
       {activeSubtab === "wells" && (
-        <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 14, overflow: "hidden" }}>
+        <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, overflow: "hidden" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, textAlign: "left" }}>
             <thead>
               <tr style={{ background: "var(--bg-elevated)", borderBottom: "1px solid var(--color-sage-mist)", color: "var(--color-slate)", fontSize: 11, fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>
@@ -174,7 +174,7 @@ export const AdminWellsEventsPage: React.FC = () => {
       )}
 
       {activeSubtab === "events" && (
-        <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 14, overflow: "hidden" }}>
+        <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, overflow: "hidden" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, textAlign: "left" }}>
             <thead>
               <tr style={{ background: "var(--bg-elevated)", borderBottom: "1px solid var(--color-sage-mist)", color: "var(--color-slate)", fontSize: 11, fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>
@@ -209,7 +209,7 @@ export const AdminWellsEventsPage: React.FC = () => {
       )}
 
       {activeSubtab === "risks" && (
-        <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 14, overflow: "hidden" }}>
+        <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, overflow: "hidden" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, textAlign: "left" }}>
             <thead>
               <tr style={{ background: "var(--bg-elevated)", borderBottom: "1px solid var(--color-sage-mist)", color: "var(--color-slate)", fontSize: 11, fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>

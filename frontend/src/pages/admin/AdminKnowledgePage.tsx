@@ -91,7 +91,7 @@ export const AdminKnowledgePage: React.FC = () => {
               padding: "8px 16px",
               borderRadius: 10,
               border: "1px solid var(--color-sage-mist)",
-              background: "#ffffff",
+              background: "var(--bg-elevated)",
               color: "var(--color-bark)",
               fontSize: 12,
               fontWeight: 700,
