@@ -289,7 +289,7 @@ export const AlertEvidenceModal: React.FC<AlertEvidenceModalProps> = ({
             style={{
               padding: "12px 16px",
               borderRadius: 8,
-              background: "#faf9f6",
+              background: "var(--bg-elevated)",
               border: "1px solid var(--color-sage-mist)",
               display: "grid",
               gridTemplateColumns: "repeat(3, 1fr)",
@@ -316,7 +316,7 @@ export const AlertEvidenceModal: React.FC<AlertEvidenceModalProps> = ({
               <div style={{ fontSize: 10, fontWeight: 700, color: "var(--color-muted-slate)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                 Primary Mechanism
               </div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: "#c47d0e", marginTop: 2 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "var(--accent-amber)", marginTop: 2 }}>
                 Differential Sticking / Loss
               </div>
             </div>
@@ -348,10 +348,10 @@ export const AlertEvidenceModal: React.FC<AlertEvidenceModalProps> = ({
                     fontSize: 11,
                     padding: "4px 10px",
                     borderRadius: 6,
-                    background: "#f1f5f9",
+                    background: "var(--bg-elevated)",
                     color: "var(--color-slate)",
                     fontWeight: 600,
-                    border: "1px solid #cbd5e1",
+                    border: "1px solid var(--border-subtle)",
                     display: "inline-flex",
                     alignItems: "center",
                     gap: 5,

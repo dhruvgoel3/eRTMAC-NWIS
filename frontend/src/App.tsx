@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { LoginPage } from "./pages/LoginPage";
 import { AccessDeniedPage } from "./pages/AccessDeniedPage";
@@ -36,10 +37,10 @@ import { AICopilotTab } from "./components/tabs/AICopilotTab";
 import { MemoryGraphTab } from "./components/tabs/MemoryGraphTab";
 import { WellComparisonTab } from "./components/tabs/WellComparisonTab";
 
-// Modals
-import { WellDossierModal } from "./components/WellDossierModal";
+// Modals & Slide-Over Drawers
+import { WellDossierDrawer } from "./components/WellDossierDrawer";
 import { AlertsModal } from "./components/AlertsModal";
-import { AlertEvidenceModal } from "./components/AlertEvidenceModal";
+import { AlertEvidenceDrawer } from "./components/AlertEvidenceDrawer";
 
 // Types & Services
 import {
@@ -223,24 +224,7 @@ function EngineerShell({ view }: EngineerShellProps) {
 
       {/* Main Content Area */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, height: "100vh", overflow: "hidden" }}>
-        {/* Top Operations Strip */}
-        <div className="auth-top-strip" style={{ opacity: 0.85, fontSize: 11 }}>
-          <div className="status-badge">
-            <span className="pulse-dot" />
-            <span style={{ fontWeight: 600, color: "var(--color-mint-pulse)" }}>
-              eRTMAC-NWIS · DRILLING ENGINEER OPERATIONAL INTELLIGENCE
-            </span>
-            <span style={{ opacity: 0.35 }}>|</span>
-            <span style={{ opacity: 0.85 }}>
-              Active Well: OIL-X123 · Formation Target: F3 (Tipam Sandstone)
-            </span>
-          </div>
-          <div style={{ opacity: 0.75, letterSpacing: "0.05em", fontSize: 10 }}>
-            ROLE: DRILLING_ENGINEER · DECISION SUPPORT ACTIVE
-          </div>
-        </div>
-
-        {/* Header with eRTMAC Prototype Stream Controls */}
+        {/* Unified Operations Header with Stream Controls */}
         <Header
           simulation={simulation}
           onTogglePlay={handleTogglePlay}
@@ -326,7 +310,7 @@ function EngineerShell({ view }: EngineerShellProps) {
                       Correlate current well OIL-X123 against nearby offset wells, event histories, and root cause mitigations.
                     </p>
                   </div>
-                  <div style={{ display: "flex", gap: 8, background: "#ffffff", padding: "4px 6px", borderRadius: 10, border: "1px solid var(--color-sage-mist)" }}>
+                  <div style={{ display: "flex", gap: 8, background: "var(--bg-elevated)", padding: "4px 6px", borderRadius: 10, border: "1px solid var(--color-sage-mist)" }}>
                     <button
                       onClick={() => setIntelTab("similarity")}
                       style={{
@@ -389,7 +373,7 @@ function EngineerShell({ view }: EngineerShellProps) {
                 </div>
 
                 {/* Depth Risk Timeline Graphic */}
-                <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: "24px 28px" }}>
+                <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: "24px 28px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
                     <div style={{ fontWeight: 800, fontSize: 15, color: "var(--color-bark)" }}>
                       Historical Risk Zone Timeline vs. Current Depth
@@ -467,7 +451,7 @@ function EngineerShell({ view }: EngineerShellProps) {
                       key={alt.id}
                       style={{
                         padding: "18px 20px",
-                        background: "#ffffff",
+                        background: "var(--color-sheet-white)",
                         border: "1px solid var(--color-sage-mist)",
                         borderLeft: "5px solid #ef4444",
                         borderRadius: 12,
@@ -544,9 +528,9 @@ function EngineerShell({ view }: EngineerShellProps) {
           </main>
         </ErrorBoundary>
 
-        {/* Dossier Modal */}
+        {/* Responsive Well Dossier Slide-Over Drawer */}
         {selectedWellForDossier && (
-          <WellDossierModal
+          <WellDossierDrawer
             well={selectedWellForDossier}
             onClose={() => setSelectedWellForDossier(null)}
             onAskAIAboutWell={(_wellId) => {
@@ -569,9 +553,9 @@ function EngineerShell({ view }: EngineerShellProps) {
           />
         )}
 
-        {/* Why Am I Seeing This Alert? Modal */}
+        {/* Responsive Why Am I Seeing This Alert? Slide-Over Drawer */}
         {alertForEvidence && (
-          <AlertEvidenceModal
+          <AlertEvidenceDrawer
             alert={alertForEvidence}
             currentFormation={activeWell?.formation || "F3 (Tipam)"}
             onClose={() => setAlertForEvidence(null)}
@@ -701,8 +685,9 @@ function AdminShell({ children }: { children: React.ReactNode }) {
 export function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <Routes>
+      <ThemeProvider>
+        <AuthProvider>
+          <Routes>
           {/* Public Authentication Routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/403" element={<AccessDeniedPage />} />
@@ -944,7 +929,8 @@ export function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
-    </BrowserRouter>
+    </ThemeProvider>
+  </BrowserRouter>
   );
 }
 

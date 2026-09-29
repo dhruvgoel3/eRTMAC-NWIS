@@ -196,7 +196,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               padding: "12px 14px",
               margin: "12px 12px 8px 12px",
               borderRadius: 10,
-              background: "#ffffff",
+              background: "var(--color-sheet-white)",
               border: "1px solid var(--color-sage-mist)",
               borderLeft: `4px solid ${roleAccentColor}`,
             }}

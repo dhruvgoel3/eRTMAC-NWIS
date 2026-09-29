@@ -235,14 +235,14 @@ export const SimilarityTab: React.FC<SimilarityTabProps> = ({
                     width: 52,
                     height: 52,
                     borderRadius: "50%",
-                    border: "3px solid var(--color-mint)",
+                    border: "3px solid var(--color-mint-pulse)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     fontSize: 16,
                     fontWeight: 800,
                     color: "var(--color-canopy)",
-                    background: "#fff",
+                    background: "var(--bg-elevated)",
                   }}
                 >
                   {selectedOffset.similarity_percent || Math.round(selectedOffset.similarity_score)}%

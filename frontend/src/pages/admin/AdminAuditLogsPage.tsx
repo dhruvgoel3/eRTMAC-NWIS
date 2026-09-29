@@ -118,7 +118,7 @@ export const AdminAuditLogsPage: React.FC = () => {
                   fontWeight: 600,
                   cursor: "pointer",
                   border: actionFilter === act ? "1px solid var(--color-canopy)" : "1px solid var(--color-sage-mist)",
-                  background: actionFilter === act ? "var(--color-canopy)" : "#ffffff",
+                  background: actionFilter === act ? "var(--color-canopy)" : "var(--color-sheet-white)",
                   color: actionFilter === act ? "#ffffff" : "var(--color-slate)",
                   transition: "all 0.15s ease",
                 }}
@@ -161,7 +161,7 @@ export const AdminAuditLogsPage: React.FC = () => {
                       key={log.id}
                       style={{
                         borderBottom: "1px solid rgba(175, 196, 191, 0.25)",
-                        background: idx % 2 === 0 ? "#ffffff" : "var(--bg-elevated)",
+                        background: idx % 2 === 0 ? "var(--color-sheet-white)" : "var(--bg-elevated)",
                       }}
                     >
                       <td style={{ padding: "10px 16px", fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--color-muted-slate)", whiteSpace: "nowrap" }}>

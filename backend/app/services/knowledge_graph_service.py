@@ -10,7 +10,10 @@ Formats nodes and links for react-force-graph-2d with rich colors, badges, and t
 import pickle
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Set
-import networkx as nx
+try:
+    import networkx as nx
+except ImportError:
+    nx = None
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "real"
 GRAPH_PATH = DATA_DIR / "knowledge_graph.gpickle"
@@ -37,10 +40,13 @@ NODE_COLORS = {
 
 class KnowledgeGraphService:
     def __init__(self):
-        self.graph: Optional[nx.DiGraph] = None
+        self.graph: Optional[Any] = None
         self._load_graph()
 
     def _load_graph(self):
+        if nx is None:
+            self.graph = None
+            return
         if GRAPH_PATH.is_file():
             try:
                 print(f"[KnowledgeGraph] Loading graph from {GRAPH_PATH}...")
@@ -49,9 +55,9 @@ class KnowledgeGraphService:
                 print(f"[KnowledgeGraph] Successfully loaded graph with {self.graph.number_of_nodes()} nodes and {self.graph.number_of_edges()} edges.")
             except Exception as e:
                 print(f"[KnowledgeGraph Warning] Failed to load graph: {e}")
-                self.graph = nx.DiGraph()
+                self.graph = nx.DiGraph() if nx else None
         else:
-            self.graph = nx.DiGraph()
+            self.graph = nx.DiGraph() if nx else None
 
     def get_stats(self) -> Dict[str, Any]:
         if not self.graph or self.graph.number_of_nodes() == 0:

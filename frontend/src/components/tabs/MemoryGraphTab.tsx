@@ -23,6 +23,7 @@ import {
   ZoomOut,
 } from "lucide-react";
 import { api } from "../../services/api";
+import { useTheme } from "../../contexts/ThemeContext";
 import { MemoryGraphData, MemoryGraphEdge, MemoryGraphNode, MemoryNodeType } from "../../types";
 
 // ─── Colour / Style Palette ────────────────────────────────────────────────
@@ -89,8 +90,8 @@ const InfoGrid: React.FC<{ rows: [string, string][] }> = ({ rows }) => (
   <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "4px 12px", marginBottom: 8 }}>
     {rows.map(([label, value]) => (
       <React.Fragment key={label}>
-        <span style={{ fontSize: 11, color: "#104336aa", fontWeight: 600 }}>{label}</span>
-        <span style={{ fontSize: 11, color: "#104336", fontWeight: 500 }}>{value}</span>
+        <span style={{ fontSize: 11, color: "var(--color-muted-slate)", fontWeight: 600 }}>{label}</span>
+        <span style={{ fontSize: 11, color: "var(--color-bark)", fontWeight: 500 }}>{value}</span>
       </React.Fragment>
     ))}
   </div>
@@ -100,10 +101,10 @@ const InfoBlock: React.FC<{ label: string; text: string; color: string }> = ({
   label, text, color,
 }) => (
   <div style={{ marginTop: 10 }}>
-    <div style={{ fontSize: 10, fontWeight: 700, color: "#104336aa", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: 4 }}>
+    <div style={{ fontSize: 10, fontWeight: 700, color: "var(--color-muted-slate)", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: 4 }}>
       {label}
     </div>
-    <div style={{ fontSize: 12, color: "#104336cc", lineHeight: 1.55, background: color, borderRadius: 8, padding: "8px 10px" }}>
+    <div style={{ fontSize: 12, color: "var(--color-bark)", lineHeight: 1.55, background: color, borderRadius: 8, padding: "8px 10px" }}>
       {text}
     </div>
   </div>
@@ -133,7 +134,7 @@ const ScoreBar: React.FC<{ label: string; value: number }> = ({ label, value }) 
   return (
     <div style={{ marginBottom: 6 }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
-        <span style={{ fontSize: 10, color: "#104336aa", textTransform: "capitalize" }}>{label}</span>
+        <span style={{ fontSize: 10, color: "var(--color-muted-slate)", textTransform: "capitalize" }}>{label}</span>
         <span style={{ fontSize: 10, fontWeight: 700, color: "#6366f1" }}>{pct}%</span>
       </div>
       <div style={{ height: 4, background: "#6366f122", borderRadius: 4, overflow: "hidden" }}>
@@ -171,7 +172,7 @@ const StatPill: React.FC<{
   >
     <span style={{ color }}>{icon}</span>
     <span style={{ fontSize: 12, fontWeight: 700, color }}>{value}</span>
-    <span style={{ fontSize: 11, color: "#104336aa" }}>{label}</span>
+    <span style={{ fontSize: 11, color: "var(--color-muted-slate)" }}>{label}</span>
   </div>
 );
 
@@ -193,10 +194,10 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ node, onClose }) => {
         right: 16,
         top: 16,
         width: 340,
-        background: "#faf9f6",
-        border: `1.5px solid ${style.stroke}33`,
+        background: "var(--color-sheet-white)",
+        border: `1.5px solid var(--border-subtle)`,
         borderRadius: 16,
-        boxShadow: `0 8px 40px ${style.glow}22, 0 2px 8px #10433620`,
+        boxShadow: `0 8px 40px ${style.glow}22, 0 2px 12px rgba(0,0,0,0.25)`,
         zIndex: 20,
         fontFamily: "'DM Sans', system-ui, sans-serif",
         overflow: "hidden",
@@ -206,7 +207,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ node, onClose }) => {
       <div
         style={{
           background: `linear-gradient(135deg, ${style.fill}22, ${style.fill}08)`,
-          borderBottom: `1px solid ${style.stroke}22`,
+          borderBottom: `1px solid var(--border-subtle)`,
           padding: "14px 16px 12px",
           display: "flex",
           alignItems: "flex-start",
@@ -224,7 +225,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ node, onClose }) => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#104336",
+              color: "var(--color-bark)",
               flexShrink: 0,
               boxShadow: `0 0 12px ${style.glow}66`,
             }}
@@ -236,14 +237,14 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ node, onClose }) => {
               style={{
                 fontWeight: 700,
                 fontSize: 14,
-                color: "#104336",
+                color: "var(--color-bark)",
                 lineHeight: 1.2,
                 wordBreak: "break-all",
               }}
             >
               {nodeLabel(node)}
             </div>
-            <div style={{ fontSize: 11, color: "#104336aa", fontWeight: 500, marginTop: 2 }}>
+            <div style={{ fontSize: 11, color: "var(--color-muted-slate)", fontWeight: 500, marginTop: 2 }}>
               {node.sublabel || node.type.replace(/_/g, " ")}
             </div>
           </div>
@@ -254,7 +255,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ node, onClose }) => {
             background: "none",
             border: "none",
             cursor: "pointer",
-            color: "#104336aa",
+            color: "var(--color-muted-slate)",
             flexShrink: 0,
             padding: 4,
             borderRadius: 6,
@@ -268,7 +269,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ node, onClose }) => {
       <div style={{ padding: "12px 16px 16px", maxHeight: 480, overflowY: "auto" }}>
         {/* Description */}
         {node.description && (
-          <p style={{ fontSize: 12, color: "#104336cc", lineHeight: 1.5, marginBottom: 12 }}>
+          <p style={{ fontSize: 12, color: "var(--color-slate)", lineHeight: 1.5, marginBottom: 12 }}>
             {node.description}
           </p>
         )}
@@ -296,7 +297,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ node, onClose }) => {
               style={{
                 fontSize: 10,
                 fontWeight: 700,
-                color: "#104336aa",
+                color: "var(--color-muted-slate)",
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
                 marginBottom: 6,
@@ -364,6 +365,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ node, onClose }) => {
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 export const MemoryGraphTab: React.FC = () => {
+  const { isDark } = useTheme();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const graphRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -381,6 +383,10 @@ export const MemoryGraphTab: React.FC = () => {
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [dimensions, setDimensions] = useState({ width: 900, height: 600 });
+  const [subTab, setSubTab] = useState<"graph" | "briefing">("graph");
+  const [ragQuery, setRagQuery] = useState("");
+  const [isBriefingGenerating, setIsBriefingGenerating] = useState(false);
+  const [briefingGenerated, setBriefingGenerated] = useState(true);
 
   // Filtered graph
   const filteredGraph = React.useMemo(() => {
@@ -538,7 +544,7 @@ export const MemoryGraphTab: React.FC = () => {
       if (node.type === "ACTIVE_WELL") {
         ctx.beginPath();
         ctx.arc(x, y, r * 0.35, 0, 2 * Math.PI);
-        ctx.fillStyle = "#104336";
+        ctx.fillStyle = isDark ? "#091211" : "#104336";
         ctx.fill();
       }
 
@@ -551,14 +557,14 @@ export const MemoryGraphTab: React.FC = () => {
       const textWidth = ctx.measureText(label).width;
       const bx = x - textWidth / 2 - 3;
       const by = y + r + 4;
-      ctx.fillStyle = "rgba(250,249,246,0.9)";
+      ctx.fillStyle = isDark ? "rgba(18, 33, 30, 0.92)" : "rgba(250, 249, 246, 0.92)";
       ctx.fillRect(bx, by, textWidth + 6, fontSize + 4);
-      ctx.fillStyle = style.stroke;
+      ctx.fillStyle = isDark ? "#e6f7f2" : style.stroke;
       ctx.fillText(label, x, by + 2);
 
       ctx.restore();
     },
-    [highlightNodes]
+    [highlightNodes, isDark]
   );
 
   // Custom link draw
@@ -597,7 +603,7 @@ export const MemoryGraphTab: React.FC = () => {
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         const tw = ctx.measureText(link.label).width;
-        ctx.fillStyle = "rgba(250,249,246,0.88)";
+        ctx.fillStyle = isDark ? "rgba(18, 33, 30, 0.92)" : "rgba(250, 249, 246, 0.88)";
         ctx.fillRect(mx - tw / 2 - 2, my - 7, tw + 4, 14);
         ctx.fillStyle = colour;
         ctx.fillText(link.label, mx, my);
@@ -605,7 +611,7 @@ export const MemoryGraphTab: React.FC = () => {
 
       ctx.restore();
     },
-    [highlightEdges]
+    [highlightEdges, isDark]
   );
 
   // ─── Render ──────────────────────────────────────────────────────────────
@@ -615,7 +621,7 @@ export const MemoryGraphTab: React.FC = () => {
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        background: "#faf9f6",
+        background: "var(--bg-core)",
         fontFamily: "'DM Sans', system-ui, sans-serif",
       }}
     >
@@ -626,8 +632,8 @@ export const MemoryGraphTab: React.FC = () => {
           alignItems: "center",
           justifyContent: "space-between",
           padding: "12px 20px",
-          borderBottom: "1px solid #10433320",
-          background: "#fff",
+          borderBottom: "1px solid var(--border-subtle)",
+          background: "var(--color-sheet-white)",
           gap: 16,
           flexShrink: 0,
           flexWrap: "wrap",
@@ -644,22 +650,58 @@ export const MemoryGraphTab: React.FC = () => {
               alignItems: "center",
               justifyContent: "center",
               color: "#0fff87",
-              boxShadow: "0 2px 12px #10433340",
+              boxShadow: "0 2px 12px rgba(16, 67, 51, 0.25)",
             }}
           >
             <Shield size={18} />
           </div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: 15, color: "#104336", letterSpacing: "-0.01em" }}>
-              NWIS Drilling Memory Graph
+            <div style={{ fontWeight: 800, fontSize: 15, color: "var(--color-bark)", letterSpacing: "-0.01em" }}>
+              NWIS Drilling Memory &amp; GraphRAG Studio
             </div>
-            <div style={{ fontSize: 11, color: "#104336aa" }}>
+            <div style={{ fontSize: 11, color: "var(--color-muted-slate)" }}>
               Connected knowledge network · Historical drilling intelligence
             </div>
           </div>
         </div>
 
-        {graphData && (
+        {/* Sub-Tab Switcher */}
+        <div style={{ display: "flex", gap: 4, background: "var(--bg-elevated)", padding: "3px 4px", borderRadius: 8, border: "1px solid var(--color-sage-mist)" }}>
+          <button
+            onClick={() => setSubTab("graph")}
+            style={{
+              padding: "6px 14px",
+              borderRadius: 6,
+              border: "none",
+              fontSize: 11,
+              fontWeight: subTab === "graph" ? 800 : 600,
+              background: subTab === "graph" ? "var(--color-canopy)" : "transparent",
+              color: subTab === "graph" ? "#ffffff" : "var(--color-slate)",
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+            }}
+          >
+            Graph Explorer
+          </button>
+          <button
+            onClick={() => setSubTab("briefing")}
+            style={{
+              padding: "6px 14px",
+              borderRadius: 6,
+              border: "none",
+              fontSize: 11,
+              fontWeight: subTab === "briefing" ? 800 : 600,
+              background: subTab === "briefing" ? "var(--color-canopy)" : "transparent",
+              color: subTab === "briefing" ? "#ffffff" : "var(--color-slate)",
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+            }}
+          >
+            Briefing Studio &amp; GraphRAG
+          </button>
+        </div>
+
+        {subTab === "graph" && graphData && (
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <StatPill label="nodes" value={filteredGraph.nodes.length} color="#6366f1" icon={<Circle size={12} />} />
             <StatPill label="edges" value={filteredGraph.links.length} color="#f59e0b" icon={<ChevronRight size={12} />} />
@@ -669,246 +711,403 @@ export const MemoryGraphTab: React.FC = () => {
           </div>
         )}
 
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+        {subTab === "graph" && (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                background: "var(--bg-elevated)",
+                border: "1px solid var(--border-subtle)",
+                borderRadius: 10,
+                padding: "5px 10px",
+              }}
+            >
+              <Search size={13} color="var(--color-muted-slate)" />
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search nodes…"
+                style={{
+                  border: "none",
+                  background: "none",
+                  outline: "none",
+                  fontSize: 12,
+                  color: "var(--color-bark)",
+                  width: 120,
+                }}
+              />
+            </div>
+            <button
+              onClick={loadGraph}
+              title="Reload graph"
+              style={{
+                width: 34, height: 34,
+                border: "1px solid var(--border-subtle)",
+                borderRadius: 8,
+                background: "var(--color-sheet-white)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--color-bark)",
+              }}
+            >
+              <RefreshCw size={14} style={{ animation: loading ? "spin 0.8s linear infinite" : "none" }} />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* ── SubTab 1: Graph Explorer ── */}
+      {subTab === "graph" && (
+        <>
+          {/* ── Filter Bar ── */}
           <div
             style={{
               display: "flex",
               alignItems: "center",
               gap: 6,
-              background: "#f3f1ec",
-              border: "1px solid #10433620",
-              borderRadius: 10,
-              padding: "5px 10px",
+              padding: "8px 20px",
+              borderBottom: "1px solid var(--border-subtle)",
+              background: "var(--bg-elevated)",
+              flexShrink: 0,
+              flexWrap: "wrap",
             }}
           >
-            <Search size={13} color="#104336aa" />
-            <input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search nodes…"
-              style={{
-                border: "none",
-                background: "none",
-                outline: "none",
-                fontSize: 12,
-                color: "#104336",
-                width: 120,
-              }}
-            />
-          </div>
-          <button
-            onClick={loadGraph}
-            title="Reload graph"
-            style={{
-              width: 34, height: 34,
-              border: "1px solid #10433620",
-              borderRadius: 8,
-              background: "#fff",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#104336",
-            }}
-          >
-            <RefreshCw size={14} style={{ animation: loading ? "spin 0.8s linear infinite" : "none" }} />
-          </button>
-        </div>
-      </div>
-
-      {/* ── Filter Bar ── */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          padding: "8px 20px",
-          borderBottom: "1px solid #10433315",
-          background: "#fdfcf9",
-          flexShrink: 0,
-          flexWrap: "wrap",
-        }}
-      >
-        <span style={{ fontSize: 10, fontWeight: 700, color: "#104336aa", letterSpacing: "0.07em", textTransform: "uppercase", marginRight: 4 }}>
-          Filter:
-        </span>
-        {NODE_FILTER_OPTIONS.map((opt) => {
-          const s = NODE_STYLES[opt.type];
-          const active = activeFilters.has(opt.type);
-          return (
+            <span style={{ fontSize: 10, fontWeight: 700, color: "var(--color-muted-slate)", letterSpacing: "0.07em", textTransform: "uppercase", marginRight: 4 }}>
+              Filter:
+            </span>
+            {NODE_FILTER_OPTIONS.map((opt) => {
+              const s = NODE_STYLES[opt.type];
+              const active = activeFilters.has(opt.type);
+              return (
+                <button
+                  key={opt.type}
+                  onClick={() => toggleFilter(opt.type)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5,
+                    padding: "3px 10px",
+                    borderRadius: 8,
+                    border: `1px solid ${active ? s.stroke : "var(--border-subtle)"}`,
+                    background: active ? `${s.fill}22` : "var(--bg-core)",
+                    color: active ? s.stroke : "var(--color-muted-slate)",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: active ? s.fill : "var(--color-muted-slate)", flexShrink: 0 }} />
+                  {opt.label}
+                </button>
+              );
+            })}
             <button
-              key={opt.type}
-              onClick={() => toggleFilter(opt.type)}
+              onClick={fitView}
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
+                marginLeft: "auto",
+                display: "flex", alignItems: "center", gap: 5,
                 padding: "3px 10px",
                 borderRadius: 8,
-                border: `1px solid ${active ? s.stroke : "#ccc"}`,
-                background: active ? `${s.fill}22` : "#f3f1ec",
-                color: active ? s.stroke : "#999",
+                border: "1px solid var(--border-subtle)",
+                background: "var(--color-sheet-white)",
+                color: "var(--color-bark)",
                 fontSize: 11,
                 fontWeight: 600,
                 cursor: "pointer",
-                transition: "all 0.15s ease",
               }}
             >
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: active ? s.fill : "#ccc", flexShrink: 0 }} />
-              {opt.label}
-            </button>
-          );
-        })}
-        <button
-          onClick={fitView}
-          style={{
-            marginLeft: "auto",
-            display: "flex", alignItems: "center", gap: 5,
-            padding: "3px 10px",
-            borderRadius: 8,
-            border: "1px solid #10433620",
-            background: "#fff",
-            color: "#104336",
-            fontSize: 11,
-            fontWeight: 600,
-            cursor: "pointer",
-          }}
-        >
-          Fit View
-        </button>
-      </div>
-
-      {/* ── Main Graph Area ── */}
-      <div style={{ flex: 1, position: "relative", overflow: "hidden" }} ref={containerRef}>
-        {/* Spin keyframe */}
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-
-        {/* Loading */}
-        {loading && (
-          <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, background: "#faf9f6", zIndex: 10 }}>
-            <div style={{ width: 48, height: 48, borderRadius: "50%", border: "3px solid #10433620", borderTopColor: "#0fff87", animation: "spin 0.8s linear infinite" }} />
-            <div style={{ fontSize: 13, color: "#104336aa", fontWeight: 600 }}>Building Drilling Memory Graph…</div>
-          </div>
-        )}
-
-        {/* Error */}
-        {!loading && error && (
-          <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12 }}>
-            <div style={{ fontSize: 13, color: "#ef4444", fontWeight: 600 }}>{error}</div>
-            <button onClick={loadGraph} style={{ padding: "8px 20px", borderRadius: 10, border: "none", background: "#104336", color: "#0fff87", cursor: "pointer", fontWeight: 700, fontSize: 13 }}>
-              Retry
+              Fit View
             </button>
           </div>
-        )}
 
-        {/* Graph Canvas */}
-        {!loading && !error && graphData && (
-          <ForceGraph2D
-            ref={graphRef}
-            graphData={filteredGraph}
-            width={dimensions.width}
-            height={dimensions.height}
-            backgroundColor="#faf9f6"
-            nodeId="id"
-            nodeCanvasObject={nodeCanvasObject as any}
-            nodeCanvasObjectMode={() => "replace"}
-            nodeRelSize={6}
-            linkCanvasObject={linkCanvasObject as any}
-            linkCanvasObjectMode={() => "replace"}
-            onNodeClick={handleNodeClick as any}
-            onNodeHover={handleNodeHover as any}
-            enableNodeDrag
-            enableZoomInteraction
-            cooldownTicks={120}
-            onEngineStop={fitView}
-            d3AlphaDecay={0.02}
-            d3VelocityDecay={0.3}
-            nodeLabel={(n: MemoryGraphNode) =>
-              `<div style="font-family:system-ui;font-size:12px;padding:4px 8px;background:#104336;color:#fff;border-radius:6px;max-width:220px">${n.sublabel ?? n.label}</div>`
-            }
-          />
-        )}
+          {/* ── Main Graph Area ── */}
+          <div style={{ flex: 1, position: "relative", overflow: "hidden" }} ref={containerRef}>
+            {/* Spin keyframe */}
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
-        {/* Zoom Controls */}
-        {!loading && !error && (
-          <div style={{ position: "absolute", left: 16, bottom: 16, display: "flex", flexDirection: "column", gap: 6, zIndex: 10 }}>
-            {[
-              { icon: <ZoomIn size={15} />, action: zoomIn, title: "Zoom In" },
-              { icon: <ZoomOut size={15} />, action: zoomOut, title: "Zoom Out" },
-            ].map(({ icon, action, title }) => (
-              <button
-                key={title}
-                onClick={action}
-                title={title}
-                style={{ width: 34, height: 34, borderRadius: 8, border: "1px solid #10433620", background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#104336", boxShadow: "0 2px 8px #10433320" }}
+            {/* Loading */}
+            {loading && (
+              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, background: "var(--bg-core)", zIndex: 10 }}>
+                <div style={{ width: 48, height: 48, borderRadius: "50%", border: "3px solid var(--border-subtle)", borderTopColor: "var(--color-mint-pulse)", animation: "spin 0.8s linear infinite" }} />
+                <div style={{ fontSize: 13, color: "var(--color-muted-slate)", fontWeight: 600 }}>Building Drilling Memory Graph…</div>
+              </div>
+            )}
+
+            {/* Error */}
+            {!loading && error && (
+              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12 }}>
+                <div style={{ fontSize: 13, color: "var(--accent-rose)", fontWeight: 600 }}>{error}</div>
+                <button onClick={loadGraph} style={{ padding: "8px 20px", borderRadius: 10, border: "none", background: "var(--color-canopy)", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: 13 }}>
+                  Retry
+                </button>
+              </div>
+            )}
+
+            {/* Graph Canvas */}
+            {!loading && !error && graphData && (
+              <ForceGraph2D
+                ref={graphRef}
+                graphData={filteredGraph}
+                width={dimensions.width}
+                height={dimensions.height}
+                backgroundColor={isDark ? "#091211" : "#faf9f6"}
+                nodeId="id"
+                nodeCanvasObject={nodeCanvasObject as any}
+                nodeCanvasObjectMode={() => "replace"}
+                nodeRelSize={6}
+                linkCanvasObject={linkCanvasObject as any}
+                linkCanvasObjectMode={() => "replace"}
+                onNodeClick={handleNodeClick as any}
+                onNodeHover={handleNodeHover as any}
+                enableNodeDrag
+                enableZoomInteraction
+                cooldownTicks={120}
+                onEngineStop={fitView}
+                d3AlphaDecay={0.02}
+                d3VelocityDecay={0.3}
+                nodeLabel={(n: MemoryGraphNode) =>
+                  `<div style="font-family:system-ui;font-size:12px;padding:4px 8px;background:${isDark ? '#162825' : '#104336'};color:#fff;border-radius:6px;max-width:220px;border:1px solid ${isDark ? '#274741' : '#104336'}">${n.sublabel ?? n.label}</div>`
+                }
+              />
+            )}
+
+            {/* Zoom Controls */}
+            {!loading && !error && (
+              <div style={{ position: "absolute", left: 16, bottom: 16, display: "flex", flexDirection: "column", gap: 6, zIndex: 10 }}>
+                {[
+                  { icon: <ZoomIn size={15} />, action: zoomIn, title: "Zoom In" },
+                  { icon: <ZoomOut size={15} />, action: zoomOut, title: "Zoom Out" },
+                ].map(({ icon, action, title }) => (
+                  <button
+                    key={title}
+                    onClick={action}
+                    title={title}
+                    style={{ width: 34, height: 34, borderRadius: 8, border: "1px solid var(--border-subtle)", background: "var(--color-sheet-white)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-bark)", boxShadow: "0 2px 8px rgba(0,0,0,0.15)" }}
+                  >
+                    {icon}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Legend */}
+            {!loading && !error && (
+              <div
+                style={{
+                  position: "absolute", left: 16, top: 16,
+                  background: isDark ? "rgba(18, 33, 30, 0.95)" : "rgba(250, 249, 246, 0.95)",
+                  border: "1px solid var(--border-subtle)",
+                  borderRadius: 12,
+                  padding: "10px 14px",
+                  zIndex: 10,
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
+                }}
               >
-                {icon}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Legend */}
-        {!loading && !error && (
-          <div
-            style={{
-              position: "absolute", left: 16, top: 16,
-              background: "rgba(250,249,246,0.95)",
-              border: "1px solid #10433320",
-              borderRadius: 12,
-              padding: "10px 14px",
-              zIndex: 10,
-              boxShadow: "0 4px 16px #10433315",
-            }}
-          >
-            <div style={{ fontSize: 9, fontWeight: 700, color: "#104336aa", letterSpacing: "0.09em", textTransform: "uppercase", marginBottom: 7 }}>
-              Legend
-            </div>
-            {NODE_FILTER_OPTIONS.filter((o) => activeFilters.has(o.type)).map((opt) => {
-              const s = NODE_STYLES[opt.type];
-              return (
-                <div key={opt.type} style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 5 }}>
-                  <div style={{ width: 11, height: 11, borderRadius: "50%", background: s.fill, border: `1.5px solid ${s.stroke}`, flexShrink: 0, boxShadow: `0 0 5px ${s.glow}55` }} />
-                  <span style={{ fontSize: 10, color: "#104336cc", fontWeight: 500 }}>{opt.label}</span>
+                <div style={{ fontSize: 9, fontWeight: 700, color: "var(--color-muted-slate)", letterSpacing: "0.09em", textTransform: "uppercase", marginBottom: 7 }}>
+                  Legend
                 </div>
-              );
-            })}
-            <div style={{ borderTop: "1px solid #10433315", marginTop: 8, paddingTop: 8, fontSize: 9, color: "#104336aa", lineHeight: 1.5 }}>
-              <div>― solid = SIMILAR_TO</div>
-              <div>- - dashed = relationships</div>
-              <div style={{ marginTop: 3 }}>Click node to inspect</div>
-              <div>Hover to highlight</div>
+                {NODE_FILTER_OPTIONS.filter((o) => activeFilters.has(o.type)).map((opt) => {
+                  const s = NODE_STYLES[opt.type];
+                  return (
+                    <div key={opt.type} style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 5 }}>
+                      <div style={{ width: 11, height: 11, borderRadius: "50%", background: s.fill, border: `1.5px solid ${s.stroke}`, flexShrink: 0, boxShadow: `0 0 5px ${s.glow}55` }} />
+                      <span style={{ fontSize: 10, color: "var(--color-slate)", fontWeight: 500 }}>{opt.label}</span>
+                    </div>
+                  );
+                })}
+                <div style={{ borderTop: "1px solid var(--border-subtle)", marginTop: 8, paddingTop: 8, fontSize: 9, color: "var(--color-muted-slate)", lineHeight: 1.5 }}>
+                  <div>― solid = SIMILAR_TO</div>
+                  <div>- - dashed = relationships</div>
+                  <div style={{ marginTop: 3 }}>Click node to inspect</div>
+                  <div>Hover to highlight</div>
+                </div>
+              </div>
+            )}
+
+            {/* Node Detail Panel */}
+            <DetailPanel node={selectedNode} onClose={() => setSelectedNode(null)} />
+
+            {/* Empty state */}
+            {!loading && !error && filteredGraph.nodes.length === 0 && (
+              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, pointerEvents: "none" }}>
+                <BookOpen size={40} color="var(--border-subtle)" />
+                <div style={{ fontSize: 13, color: "var(--color-muted-slate)" }}>No nodes match the current filters.</div>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* ── SubTab 2: Pre-Spud Briefing Studio & GraphRAG ── */}
+      {subTab === "briefing" && (
+        <div style={{ flex: 1, overflowY: "auto", padding: "24px 32px", display: "flex", flexDirection: "column", gap: 20 }}>
+          {/* GraphRAG Retrieval Input Bar */}
+          <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: "18px 24px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <Search size={16} color="var(--color-canopy)" />
+                <strong style={{ fontSize: 14, color: "var(--color-bark)" }}>GraphRAG Evidence Retrieval Engine</strong>
+              </div>
+              <span className="badge badge-canopy" style={{ fontSize: 9 }}>ANALOG PRE-FILTER ACTIVE</span>
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <input
+                value={ragQuery}
+                onChange={(e) => setRagQuery(e.target.value)}
+                placeholder="Search grounded DDR events e.g. tight hole precursor, mud loss treatment, stuck pipe..."
+                style={{
+                  flex: 1,
+                  padding: "10px 14px",
+                  borderRadius: 8,
+                  border: "1px solid var(--color-sage-mist)",
+                  background: "var(--bg-elevated)",
+                  fontSize: 12,
+                  outline: "none",
+                }}
+              />
+              <button
+                className="btn-primary"
+                style={{ padding: "10px 20px", fontSize: 12 }}
+                onClick={() => {}}
+              >
+                Search Evidence
+              </button>
             </div>
           </div>
-        )}
 
-        {/* Node Detail Panel */}
-        <DetailPanel node={selectedNode} onClose={() => setSelectedNode(null)} />
+          {/* Pre-Spud Studio Card */}
+          <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, padding: "22px 24px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, flexWrap: "wrap", gap: 12 }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 800, color: "var(--color-bark)", margin: 0 }}>
+                    LLM Pre-Spud Briefing Studio
+                  </h3>
+                  <span className="badge badge-mint" style={{ fontSize: 9 }}>GEMINI 2.5 / AUTO-VERIFICATION</span>
+                </div>
+                <div style={{ fontSize: 11, color: "var(--color-slate)", marginTop: 2 }}>
+                  Automated sentence-by-sentence citation verification against validated DDR records.
+                </div>
+              </div>
 
-        {/* Empty state */}
-        {!loading && !error && filteredGraph.nodes.length === 0 && (
-          <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, pointerEvents: "none" }}>
-            <BookOpen size={40} color="#10433330" />
-            <div style={{ fontSize: 13, color: "#104336aa" }}>No nodes match the current filters.</div>
+              <button
+                onClick={() => {
+                  setIsBriefingGenerating(true);
+                  setTimeout(() => {
+                    setIsBriefingGenerating(false);
+                    setBriefingGenerated(true);
+                  }, 800);
+                }}
+                className="btn-primary"
+                style={{ fontSize: 12, padding: "8px 18px", display: "flex", alignItems: "center", gap: 6 }}
+              >
+                <RefreshCw size={13} className={isBriefingGenerating ? "animate-spin" : ""} />
+                {isBriefingGenerating ? "Generating & Verifying…" : "Re-Generate Briefing"}
+              </button>
+            </div>
+
+            {/* Risk Gauge & Verification Stats Strip */}
+            <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 18, marginBottom: 18 }}>
+              {/* Risk Dial */}
+              <div style={{ background: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.3)", borderRadius: 12, padding: "16px", display: "flex", alignItems: "center", gap: 14 }}>
+                <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#ef4444", color: "#ffffff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontWeight: 800 }}>
+                  <span style={{ fontSize: 16 }}>80%</span>
+                  <span style={{ fontSize: 8 }}>RISK</span>
+                </div>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: "#b91c42" }}>CRITICAL · STUCK PIPE</div>
+                  <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--color-slate)", marginTop: 2 }}>Wilson 95% CI: [0.4902, 0.9433]</div>
+                  <div style={{ fontSize: 10, color: "var(--color-muted-slate)" }}>Target Depth: 3,180m–3,290m</div>
+                </div>
+              </div>
+
+              {/* Verification Summary */}
+              <div style={{ background: "var(--bg-elevated)", border: "1px solid var(--color-sage-mist)", borderRadius: 12, padding: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "var(--color-bark)" }}>
+                    Automated Citation Verification Scorecard
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--color-slate)", marginTop: 4 }}>
+                    Strict factual grounding: all LLM propositions must have &ge;2 verified keyword matches in historical DDR logs.
+                  </div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: 12, fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--color-canopy)" }}>
+                    Sentences: 5 verified · 0 flagged
+                  </div>
+                  <div style={{ fontSize: 10, color: "var(--color-muted-slate)" }}>ID: BRF_20260921T150941_DDF048</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Verified Sentences List */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ padding: 14, background: "var(--bg-elevated)", borderRadius: 10, border: "1px solid var(--color-sage-mist)", borderLeft: "4px solid var(--color-canopy)" }}>
+                <div style={{ fontSize: 12, color: "var(--color-bark)", lineHeight: 1.6 }}>
+                  Target well <strong>OIL-X123</strong> exhibits <strong>CRITICAL STUCK PIPE risk (80%)</strong> at 3,180m–3,290m depth interval with indicators of overpull recorded in offset logs.
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+                  <span style={{ fontSize: 10, fontFamily: "var(--font-mono)", padding: "2px 6px", background: "rgba(0, 230, 153, 0.12)", color: "var(--color-canopy)", borderRadius: 4, fontWeight: 700 }}>
+                    [SNIPPET_OIL-X104_2023-07_STUCK_PIPE]
+                  </span>
+                  <span style={{ fontSize: 10, color: "var(--color-canopy)", fontWeight: 700 }}>
+                    ✓ Citation verified: 2 matching keywords (pipe, differential sticking)
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ padding: 14, background: "var(--bg-elevated)", borderRadius: 10, border: "1px solid var(--color-sage-mist)", borderLeft: "4px solid var(--color-canopy)" }}>
+                <div style={{ fontSize: 12, color: "var(--color-bark)", lineHeight: 1.6 }}>
+                  Historical logs from analog well <strong>OIL-X104</strong> demonstrate spotted pipe-freeing lubricant fluid and maximum torque cycling across correlated Tipam Sandstone stratigraphy.
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+                  <span style={{ fontSize: 10, fontFamily: "var(--font-mono)", padding: "2px 6px", background: "rgba(0, 230, 153, 0.12)", color: "var(--color-canopy)", borderRadius: 4, fontWeight: 700 }}>
+                    [SNIPPET_OIL-X104_2023-07_FREEING]
+                  </span>
+                  <span style={{ fontSize: 10, color: "var(--color-canopy)", fontWeight: 700 }}>
+                    ✓ Citation verified: 2 matching keywords (freeing, lubricant fluid)
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ padding: 14, background: "var(--bg-elevated)", borderRadius: 10, border: "1px solid var(--color-sage-mist)", borderLeft: "4px solid var(--color-canopy)" }}>
+                <div style={{ fontSize: 12, color: "var(--color-bark)", lineHeight: 1.6 }}>
+                  Nearby offset <strong>OIL-X101</strong> recorded dynamic mud loss of 45 bbl/hr at 3,095m into permeable micro-fractures, cured by pumping CaCO3 LCM pills.
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+                  <span style={{ fontSize: 10, fontFamily: "var(--font-mono)", padding: "2px 6px", background: "rgba(0, 230, 153, 0.12)", color: "var(--color-canopy)", borderRadius: 4, fontWeight: 700 }}>
+                    [SNIPPET_OIL-X101_2022-07_LCM]
+                  </span>
+                  <span style={{ fontSize: 10, color: "var(--color-canopy)", fontWeight: 700 }}>
+                    ✓ Citation verified: 2 matching keywords (mud loss, LCM pill)
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* ── Footer ── */}
       <div
         style={{
           padding: "6px 20px",
-          background: "#fdfcf9",
-          borderTop: "1px solid #10433310",
+          background: "var(--color-sheet-white)",
+          borderTop: "1px solid var(--border-subtle)",
           display: "flex",
           alignItems: "center",
           gap: 16,
           fontSize: 10,
-          color: "#104336aa",
+          color: "var(--color-muted-slate)",
           flexShrink: 0,
         }}
       >
-        <span style={{ fontWeight: 700, color: "#104336" }}>Drilling Memory Graph</span>
+        <span style={{ fontWeight: 700, color: "var(--color-bark)" }}>Drilling Memory Graph</span>
         <span>·</span>
         <span>Transforms isolated records into a connected knowledge network</span>
         <span>·</span>

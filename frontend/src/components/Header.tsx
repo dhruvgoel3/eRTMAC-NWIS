@@ -19,9 +19,12 @@ import {
   Users,
   Database,
   FileCheck,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { SimulationState } from "../types";
 import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 interface HeaderProps {
   activeTab?: string;
@@ -45,6 +48,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAlerts,
 }) => {
   const { profile, activeRole, logout, hasRole, switchRole } = useAuth();
+  const { theme, toggleTheme, isDark } = useTheme();
   const [userDropdownOpen, setUserDropdownOpen] = useState<boolean>(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -113,17 +117,21 @@ export const Header: React.FC<HeaderProps> = ({
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "10px 24px",
-        background: "#ffffff",
+        padding: "0 24px",
+        height: 56,
+        background: "var(--color-sheet-white)",
         borderBottom: "1px solid var(--color-sage-mist)",
         position: "sticky",
         top: 0,
         zIndex: 40,
         gap: 16,
+        boxSizing: "border-box",
+        flexWrap: "nowrap",
+        overflow: "visible",
       }}
     >
       {/* Left: Role Context & Breadcrumb */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
         <div
           style={{
             display: "inline-flex",
@@ -132,9 +140,9 @@ export const Header: React.FC<HeaderProps> = ({
             padding: "4px 10px",
             borderRadius: 9999,
             background: isKnowledgeAdmin
-              ? "rgba(147, 51, 234, 0.1)"
+              ? "rgba(147, 51, 234, 0.12)"
               : isSupervisor
-              ? "rgba(217, 119, 6, 0.1)"
+              ? "rgba(217, 119, 6, 0.12)"
               : "rgba(0, 230, 153, 0.15)",
             border: isKnowledgeAdmin
               ? "1px solid rgba(147, 51, 234, 0.3)"
@@ -149,7 +157,7 @@ export const Header: React.FC<HeaderProps> = ({
             fontSize: 11,
             fontWeight: 800,
             fontFamily: "var(--font-mono)",
-            letterSpacing: "0.06em",
+            letterSpacing: "0.05em",
           }}
         >
           <span
@@ -169,81 +177,80 @@ export const Header: React.FC<HeaderProps> = ({
 
         <div style={{ fontSize: 12, color: "var(--color-slate)", display: "flex", alignItems: "center", gap: 6 }}>
           <span>·</span>
-          <span>
+          <span style={{ fontWeight: 600, color: "var(--color-bark)" }}>
             {isKnowledgeAdmin
-              ? "Institutional Knowledge Base, Users & Document Processing"
+              ? "Institutional Governance Portal"
               : isSupervisor
-              ? "Multi-Well Surveillance, Risk Overview & Alerts"
-              : "Active Well OIL-X123 · Depth 3,172m · Formation F3"}
+              ? "Multi-Well Surveillance"
+              : "Sentinel Decision Cockpit"}
           </span>
-          <span>·</span>
-          <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 6, background: "rgba(16, 67, 54, 0.08)", color: "var(--color-slate)", border: "1px solid var(--color-sage-mist)", fontWeight: 600 }}>
-            Prototype — Synthetic / Anonymized Demonstration Data
+          <span style={{ fontSize: 10, padding: "2px 7px", borderRadius: 4, background: "var(--bg-elevated)", color: "var(--color-slate)", border: "1px solid var(--color-sage-mist)", fontWeight: 600 }}>
+            Demo
           </span>
         </div>
       </div>
 
-
-      {/* Center: Persona-Specific Status & Simulator Controls */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        {/* DRILLING ENGINEER: eRTMAC Prototype Stream Controls */}
+      {/* Center: Inline Simulator Controls (Non-wrapping, single-line) */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        {/* DRILLING ENGINEER: Compact Stream Control Cluster */}
         {isEngineer && (
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 12,
-              padding: "4px 12px",
-              borderRadius: 10,
+              gap: 8,
+              padding: "4px 10px",
+              borderRadius: 8,
               background: "var(--bg-elevated)",
               border: "1px solid var(--color-sage-mist)",
             }}
           >
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ fontSize: 10, fontWeight: 800, color: "var(--color-bark)", letterSpacing: "0.04em" }}>
-                  eRTMAC Prototype Stream
-                </span>
-                <span
-                  style={{
-                    fontSize: 9,
-                    fontWeight: 700,
-                    padding: "1px 6px",
-                    borderRadius: 999,
-                    background: streamStateBadge.bg,
-                    color: streamStateBadge.color,
-                    border: `1px solid ${streamStateBadge.border}`,
-                  }}
-                >
-                  {streamStateBadge.label}
-                </span>
-              </div>
-              <span style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--color-slate)" }}>
-                {streamStateBadge.subtext}
-              </span>
+            {/* Stream Status Pill */}
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
+                padding: "2px 8px",
+                borderRadius: 5,
+                background: streamStateBadge.bg,
+                border: `1px solid ${streamStateBadge.border}`,
+                color: streamStateBadge.color,
+                fontSize: 10,
+                fontWeight: 800,
+                fontFamily: "var(--font-mono)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: streamStateBadge.color }} />
+              <span>{streamStateBadge.label}</span>
+              <span style={{ opacity: 0.65 }}>·</span>
+              <span>{currentDepth.toFixed(1)}m</span>
             </div>
 
             {/* Play/Pause, Reset, Speed Controls */}
             {onTogglePlay && (
-              <div style={{ display: "flex", alignItems: "center", gap: 6, borderLeft: "1px solid var(--color-sage-mist)", paddingLeft: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                 <button
                   onClick={onTogglePlay}
                   style={{
                     display: "flex",
                     alignItems: "center",
                     gap: 4,
-                    padding: "4px 10px",
-                    borderRadius: 6,
-                    background: isRunning ? "rgba(185, 28, 66, 0.1)" : "rgba(0, 230, 153, 0.2)",
-                    border: isRunning ? "1px solid rgba(185, 28, 66, 0.3)" : "1px solid rgba(0, 230, 153, 0.4)",
-                    color: isRunning ? "#b91c42" : "var(--color-canopy)",
-                    fontSize: 11,
-                    fontWeight: 700,
+                    padding: "3px 8px",
+                    borderRadius: 5,
+                    background: isRunning ? "rgba(185, 28, 66, 0.15)" : "var(--color-canopy)",
+                    border: isRunning ? "1px solid rgba(185, 28, 66, 0.4)" : "none",
+                    color: isRunning ? "#ef4444" : "var(--color-mint-pulse)",
+                    fontSize: 10,
+                    fontWeight: 800,
                     cursor: "pointer",
+                    height: 24,
+                    boxSizing: "border-box",
                   }}
                   title={isRunning ? "Pause stream" : "Start stream"}
                 >
-                  {isRunning ? <Pause size={12} /> : <Play size={12} />}
+                  {isRunning ? <Pause size={11} /> : <Play size={11} />}
                   <span>{isRunning ? "PAUSE" : "START"}</span>
                 </button>
 
@@ -254,18 +261,20 @@ export const Header: React.FC<HeaderProps> = ({
                       display: "flex",
                       alignItems: "center",
                       gap: 4,
-                      padding: "4px 8px",
-                      borderRadius: 6,
-                      background: "#ffffff",
+                      padding: "3px 8px",
+                      borderRadius: 5,
+                      background: "var(--color-sheet-white)",
                       border: "1px solid var(--color-sage-mist)",
                       color: "var(--color-slate)",
-                      fontSize: 11,
+                      fontSize: 10,
                       fontWeight: 700,
                       cursor: "pointer",
+                      height: 24,
+                      boxSizing: "border-box",
                     }}
                     title="Reset to 3050m"
                   >
-                    <RotateCcw size={12} />
+                    <RotateCcw size={11} />
                     <span>RESET</span>
                   </button>
                 )}
@@ -274,15 +283,17 @@ export const Header: React.FC<HeaderProps> = ({
                   <button
                     onClick={() => onChangeSpeed(nextSpeed)}
                     style={{
-                      padding: "4px 8px",
-                      borderRadius: 6,
-                      background: "var(--color-canopy)",
-                      border: "none",
-                      color: "#ffffff",
+                      padding: "3px 8px",
+                      borderRadius: 5,
+                      background: "var(--color-sheet-white)",
+                      border: "1px solid var(--color-sage-mist)",
+                      color: "var(--color-bark)",
                       fontSize: 10,
                       fontFamily: "var(--font-mono)",
                       fontWeight: 800,
                       cursor: "pointer",
+                      height: 24,
+                      boxSizing: "border-box",
                     }}
                     title="Cycle simulation speed"
                   >
@@ -300,29 +311,25 @@ export const Header: React.FC<HeaderProps> = ({
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 16,
-              padding: "6px 14px",
-              borderRadius: 10,
+              gap: 14,
+              padding: "4px 12px",
+              borderRadius: 8,
               background: "rgba(217, 119, 6, 0.08)",
               border: "1px solid rgba(217, 119, 6, 0.25)",
               fontSize: 11,
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
               <span style={{ color: "var(--color-muted-slate)" }}>Active Wells:</span>
               <strong style={{ color: "var(--color-bark)" }}>12</strong>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
               <span style={{ color: "var(--color-muted-slate)" }}>Approaching:</span>
               <strong style={{ color: "#d97706" }}>3</strong>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
               <span style={{ color: "var(--color-muted-slate)" }}>Active Risk:</span>
               <strong style={{ color: "#b91c42" }}>1</strong>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ color: "var(--color-muted-slate)" }}>Open Alerts:</span>
-              <strong style={{ color: "#b91c42" }}>5</strong>
             </div>
           </div>
         )}
@@ -334,8 +341,8 @@ export const Header: React.FC<HeaderProps> = ({
               display: "flex",
               alignItems: "center",
               gap: 14,
-              padding: "6px 14px",
-              borderRadius: 10,
+              padding: "4px 12px",
+              borderRadius: 8,
               background: "rgba(147, 51, 234, 0.08)",
               border: "1px solid rgba(147, 51, 234, 0.25)",
               fontSize: 11,
@@ -348,29 +355,41 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <FileCheck size={13} color="#9333ea" />
-              <span style={{ color: "var(--color-muted-slate)" }}>Audit Traceability:</span>
+              <span style={{ color: "var(--color-muted-slate)" }}>Audit:</span>
               <strong style={{ color: "var(--color-bark)" }}>ACTIVE</strong>
             </div>
           </div>
         )}
       </div>
 
-      {/* Right Controls: Alerts Bell + User Identity & Role Switcher */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        {/* Operational Alerts Bell: Shown for Engineer & Supervisor, NEVER for Admin */}
+      {/* Right Controls: Theme Toggle + Alerts Bell + User Menu */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+        {/* Dark / Light Mode Switcher Button */}
+        <button
+          onClick={toggleTheme}
+          className="theme-toggle-btn"
+          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          aria-label="Toggle Theme"
+        >
+          {isDark ? <Sun size={15} color="#f59e0b" /> : <Moon size={15} color="var(--color-canopy)" />}
+        </button>
+
+        {/* Operational Alerts Bell */}
         {!isKnowledgeAdmin && onOpenAlerts && (
           <button
             onClick={onOpenAlerts}
             style={{
               position: "relative",
-              padding: "8px 12px",
-              borderRadius: 10,
+              padding: "6px 10px",
+              borderRadius: 8,
               border: "1px solid var(--color-sage-mist)",
-              background: "#ffffff",
+              background: "var(--color-sheet-white)",
               display: "flex",
               alignItems: "center",
               gap: 6,
               cursor: "pointer",
+              height: 32,
+              boxSizing: "border-box",
             }}
             title="Operational Alerts"
           >
@@ -399,23 +418,25 @@ export const Header: React.FC<HeaderProps> = ({
               display: "flex",
               alignItems: "center",
               gap: 8,
-              padding: "6px 12px 6px 8px",
-              borderRadius: 10,
+              padding: "4px 10px 4px 6px",
+              borderRadius: 8,
               border: "1px solid var(--color-sage-mist)",
-              background: "#ffffff",
+              background: "var(--color-sheet-white)",
               cursor: "pointer",
               textAlign: "left",
+              height: 32,
+              boxSizing: "border-box",
             }}
           >
             <div
               style={{
-                width: 28,
-                height: 28,
-                borderRadius: 8,
+                width: 22,
+                height: 22,
+                borderRadius: 6,
                 background: "var(--color-canopy)",
                 color: "var(--color-mint-pulse)",
                 fontWeight: 800,
-                fontSize: 12,
+                fontSize: 11,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -424,14 +445,11 @@ export const Header: React.FC<HeaderProps> = ({
               {profile?.full_name ? profile.full_name.charAt(0).toUpperCase() : "O"}
             </div>
             <div style={{ textAlign: "left" }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--color-bark)", lineHeight: 1.1 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--color-bark)", lineHeight: 1.1 }}>
                 {profile?.full_name || "Operator"}
               </div>
-              <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--color-slate)", letterSpacing: "0.02em" }}>
-                {activeRole || "DRILLING_ENGINEER"}
-              </div>
             </div>
-            <ChevronDown size={14} color="var(--color-muted-slate)" />
+            <ChevronDown size={13} color="var(--color-muted-slate)" />
           </button>
 
           {/* User Menu Dropdown with 1-Click Role Switcher */}
@@ -441,11 +459,11 @@ export const Header: React.FC<HeaderProps> = ({
                 position: "absolute",
                 right: 0,
                 marginTop: 6,
-                width: 260,
-                background: "#ffffff",
-                borderRadius: 12,
+                width: 250,
+                background: "var(--color-sheet-white)",
+                borderRadius: 10,
                 border: "1px solid var(--color-sage-mist)",
-                boxShadow: "0 10px 30px rgba(16, 67, 54, 0.15)",
+                boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)",
                 padding: "8px 0",
                 zIndex: 100,
                 fontSize: 12,

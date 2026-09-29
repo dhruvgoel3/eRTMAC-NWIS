@@ -208,7 +208,7 @@ export const AdminUsersPage: React.FC = () => {
                   fontWeight: 600,
                   cursor: "pointer",
                   border: selectedRoleFilter === r ? "1px solid var(--color-canopy)" : "1px solid var(--color-sage-mist)",
-                  background: selectedRoleFilter === r ? "var(--color-canopy)" : "#ffffff",
+                  background: selectedRoleFilter === r ? "var(--color-canopy)" : "var(--color-sheet-white)",
                   color: selectedRoleFilter === r ? "#ffffff" : "var(--color-slate)",
                   transition: "all 0.15s ease",
                 }}
@@ -254,7 +254,7 @@ export const AdminUsersPage: React.FC = () => {
                         key={u.id}
                         style={{
                           borderBottom: "1px solid rgba(175, 196, 191, 0.25)",
-                          background: idx % 2 === 0 ? "#ffffff" : "var(--bg-elevated)",
+                          background: idx % 2 === 0 ? "var(--color-sheet-white)" : "var(--bg-elevated)",
                         }}
                       >
                         <td style={{ padding: "12px 16px" }}>
@@ -292,7 +292,7 @@ export const AdminUsersPage: React.FC = () => {
                                 setEditingUser(u);
                                 setEditRoleSelection(u.roles[0] || "DRILLING_ENGINEER");
                               }}
-                              style={{ padding: "5px 10px", borderRadius: 8, border: "1px solid var(--color-sage-mist)", background: "#ffffff", fontSize: 11, cursor: "pointer", color: "var(--color-canopy)" }}
+                              style={{ padding: "5px 10px", borderRadius: 8, border: "1px solid var(--color-sage-mist)", background: "var(--bg-elevated)", fontSize: 11, cursor: "pointer", color: "var(--color-canopy)" }}
                               title="Modify Role"
                             >
                               <Edit2 style={{ width: 12, height: 12 }} />

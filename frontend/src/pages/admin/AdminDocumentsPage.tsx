@@ -161,7 +161,7 @@ export const AdminDocumentsPage: React.FC = () => {
               padding: "9px 12px",
               borderRadius: 10,
               border: "1px solid var(--color-sage-mist)",
-              background: "#ffffff",
+              background: "var(--bg-elevated)",
               color: "var(--color-bark)",
               cursor: "pointer",
             }}
@@ -185,7 +185,7 @@ export const AdminDocumentsPage: React.FC = () => {
               padding: "10px 14px 10px 40px",
               borderRadius: 10,
               border: "1px solid var(--color-sage-mist)",
-              background: "#ffffff",
+              background: "var(--color-sheet-white)",
               fontSize: 13,
               color: "var(--color-bark)",
               outline: "none",
@@ -198,7 +198,7 @@ export const AdminDocumentsPage: React.FC = () => {
       </div>
 
       {/* Documents Table */}
-      <div style={{ background: "#ffffff", border: "1px solid var(--color-sage-mist)", borderRadius: 14, overflow: "hidden" }}>
+      <div style={{ background: "var(--color-sheet-white)", border: "1px solid var(--color-sage-mist)", borderRadius: 14, overflow: "hidden" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: 13 }}>
           <thead>
             <tr style={{ background: "var(--bg-elevated)", borderBottom: "1px solid var(--color-sage-mist)", color: "var(--color-slate)", fontSize: 11, fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>
@@ -307,7 +307,7 @@ export const AdminDocumentsPage: React.FC = () => {
       {/* Upload Modal */}
       {isUploadOpen && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0, 0, 0, 0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ background: "#ffffff", borderRadius: 16, width: "100%", maxWidth: 600, padding: 24, boxShadow: "0 20px 40px rgba(0,0,0,0.2)" }}>
+          <div style={{ background: "var(--color-sheet-white)", borderRadius: 16, width: "100%", maxWidth: 600, padding: 24, boxShadow: "0 20px 40px rgba(0,0,0,0.2)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, borderBottom: "1px solid var(--color-sage-mist)", paddingBottom: 12 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <Upload size={18} color="var(--color-canopy)" />
@@ -410,7 +410,7 @@ export const AdminDocumentsPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsUploadOpen(false)}
-                  style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid var(--color-sage-mist)", background: "#ffffff", color: "var(--color-slate)", cursor: "pointer", fontSize: 12, fontWeight: 700 }}
+                  style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid var(--color-sage-mist)", background: "var(--bg-elevated)", color: "var(--color-slate)", cursor: "pointer", fontSize: 12, fontWeight: 700 }}
                 >
                   Cancel
                 </button>

@@ -173,13 +173,13 @@ export const AICopilotTab: React.FC<AICopilotTabProps> = ({
           <span
             style={{
               fontSize: 9,
-              fontWeight: 700,
+              fontWeight: 800,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
               padding: "4px 10px",
               borderRadius: 9999,
               background: "var(--color-mint-pulse)",
-              color: "var(--color-canopy)",
+              color: "#081a15",
             }}
           >
             Ask NWIS Engine Ready
@@ -195,7 +195,7 @@ export const AICopilotTab: React.FC<AICopilotTabProps> = ({
             display: "flex",
             flexDirection: "column",
             gap: 18,
-            background: "#faf9f6",
+            background: "var(--bg-core)",
           }}
         >
           {messages.map((m) => {
@@ -237,7 +237,7 @@ export const AICopilotTab: React.FC<AICopilotTabProps> = ({
                           style={{
                             padding: "10px 14px",
                             borderRadius: 8,
-                            background: "rgba(16, 67, 54, 0.05)",
+                            background: "var(--accent-cyan-dim)",
                             borderLeft: "3px solid var(--color-canopy)",
                           }}
                         >
@@ -289,8 +289,8 @@ export const AICopilotTab: React.FC<AICopilotTabProps> = ({
                                 style={{
                                   padding: "8px 12px",
                                   borderRadius: 6,
-                                  background: "#f4f6f4",
-                                  border: "1px solid rgba(16, 67, 54, 0.1)",
+                                  background: "var(--bg-elevated)",
+                                  border: "1px solid var(--border-subtle)",
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "space-between",
@@ -319,16 +319,16 @@ export const AICopilotTab: React.FC<AICopilotTabProps> = ({
                                       borderRadius: 4,
                                       background:
                                         ev.severity === "CRITICAL"
-                                          ? "#ffebee"
+                                          ? "var(--accent-rose-dim)"
                                           : ev.severity === "HIGH"
-                                          ? "#fff3e0"
-                                          : "#e8f5e9",
+                                          ? "var(--accent-amber-dim)"
+                                          : "var(--accent-emerald-dim)",
                                       color:
                                         ev.severity === "CRITICAL"
-                                          ? "#c62828"
+                                          ? "var(--accent-rose)"
                                           : ev.severity === "HIGH"
-                                          ? "#ef6c00"
-                                          : "#2e7d32",
+                                          ? "var(--accent-amber)"
+                                          : "var(--accent-emerald)",
                                     }}
                                   >
                                     {ev.severity}
@@ -367,10 +367,10 @@ export const AICopilotTab: React.FC<AICopilotTabProps> = ({
                                   fontSize: 11,
                                   padding: "4px 8px",
                                   borderRadius: 6,
-                                  background: "rgba(16, 67, 54, 0.06)",
+                                  background: "var(--accent-cyan-dim)",
                                   color: "var(--color-canopy)",
                                   fontWeight: 600,
-                                  border: "1px solid rgba(16, 67, 54, 0.12)",
+                                  border: "1px solid var(--border-subtle)",
                                 }}
                               >
                                 {sw}
@@ -386,9 +386,9 @@ export const AICopilotTab: React.FC<AICopilotTabProps> = ({
                           style={{
                             padding: "10px 14px",
                             borderRadius: 8,
-                            background: "#fffaf0",
-                            border: "1px solid #fed7aa",
-                            borderLeft: "3px solid #f97316",
+                            background: "var(--accent-amber-dim)",
+                            border: "1px solid var(--accent-amber)",
+                            borderLeft: "3px solid var(--accent-amber)",
                           }}
                         >
                           <div
@@ -397,17 +397,17 @@ export const AICopilotTab: React.FC<AICopilotTabProps> = ({
                               fontWeight: 800,
                               letterSpacing: "0.08em",
                               textTransform: "uppercase",
-                              color: "#c2410c",
+                              color: "var(--accent-amber)",
                               marginBottom: 4,
                               display: "flex",
                               alignItems: "center",
                               gap: 5,
                             }}
                           >
-                            <AlertTriangle size={12} color="#c2410c" />
+                            <AlertTriangle size={12} color="var(--accent-amber)" />
                             Risk Interpretation & Operational Advisory
                           </div>
-                          <div style={{ fontSize: 12, color: "#7c2d12", lineHeight: 1.5 }}>
+                          <div style={{ fontSize: 12, color: "var(--color-bark)", lineHeight: 1.5 }}>
                             {m.risk_interpretation}
                           </div>
                         </div>
@@ -440,10 +440,10 @@ export const AICopilotTab: React.FC<AICopilotTabProps> = ({
                                   fontSize: 11,
                                   padding: "3px 8px",
                                   borderRadius: 4,
-                                  background: "#f1f5f9",
+                                  background: "var(--bg-elevated)",
                                   color: "var(--color-slate)",
                                   fontWeight: 600,
-                                  border: "1px solid #cbd5e1",
+                                  border: "1px solid var(--border-subtle)",
                                   display: "inline-flex",
                                   alignItems: "center",
                                   gap: 4,

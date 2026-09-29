@@ -46,7 +46,7 @@ export const LiveTelemetryBar: React.FC<LiveTelemetryBarProps> = ({
                 padding: "2px 7px",
                 borderRadius: 9999,
                 background: "var(--color-mint-pulse)",
-                color: "var(--color-bark)",
+                color: "#081a15",
                 fontWeight: 700,
                 letterSpacing: "0.07em",
                 textTransform: "uppercase",
