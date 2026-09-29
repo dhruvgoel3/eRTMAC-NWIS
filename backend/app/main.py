@@ -27,6 +27,11 @@ from app.routers import all_routers
 async def lifespan(app: FastAPI):
     # Ensure database schema is initialized
     Base.metadata.create_all(bind=engine)
+    try:
+        from scripts.seed_auth import seed_rbac
+        seed_rbac()
+    except Exception as e:
+        print(f"[Main Startup Warning] Auto-seed RBAC: {e}")
     yield
 
 
