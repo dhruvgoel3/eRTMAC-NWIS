@@ -1,6 +1,4 @@
 # Environment & Secret credential files
-.env
-.env.*
 *.env
 backend/.env
 backend/.env.*
@@ -55,7 +53,6 @@ frontend/dist-ssr/
 # IDE & OS
 .DS_Store
 .idea/
-.vscode/
 *.swp
 *.swo
 
@@ -64,3 +61,4 @@ backend/*.db
 backend/*.sqlite3
 chroma_db/
 **/chroma_db/
+config.bat

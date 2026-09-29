@@ -5,7 +5,7 @@ Enforces Supabase JWT verification and PostgreSQL permission validation server-s
 import os
 import uuid
 import jwt
-from typing import List, Optional, Set
+from typing import List, Optional, Set, Dict
 from fastapi import Depends, HTTPException, Security, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
@@ -14,6 +14,27 @@ from app.models.auth import Profile, Role, Permission, UserRole, RolePermission
 from app.services.supabase_service import get_supabase_client
 
 security_scheme = HTTPBearer(auto_error=False)
+
+
+DEFAULT_ROLE_PERMISSIONS: Dict[str, Set[str]] = {
+    "DRILLING_ENGINEER": {
+        "dashboard.view", "wells.view", "wells.nearby", "wells.compare", "events.view",
+        "risk.view", "alerts.view", "alerts.acknowledge", "ai.query", "ai.view_sources",
+        "documents.view", "simulation.view", "simulation.control",
+    },
+    "DRILLING_SUPERVISOR": {
+        "dashboard.view", "wells.view", "wells.nearby", "wells.compare", "events.view",
+        "risk.view", "alerts.view", "alerts.acknowledge", "alerts.escalate", "ai.query",
+        "ai.view_sources", "documents.view", "simulation.view",
+    },
+    "KNOWLEDGE_ADMIN": {
+        "dashboard.view", "wells.view", "wells.nearby", "wells.compare", "events.view",
+        "risk.view", "alerts.view", "ai.query", "ai.view_sources", "documents.view", "documents.upload",
+        "documents.update", "documents.delete", "documents.process", "users.view",
+        "users.create", "users.update", "users.disable", "roles.view", "roles.assign",
+        "audit.view", "system.manage",
+    },
+}
 
 
 class AuthenticatedUser:
@@ -44,7 +65,14 @@ class AuthenticatedUser:
         self.permissions = permissions or set()
 
     def has_permission(self, perm: str) -> bool:
-        return perm in self.permissions
+        if perm in self.permissions:
+            return True
+        for r in self.roles:
+            if perm in DEFAULT_ROLE_PERMISSIONS.get(r, set()):
+                return True
+        if not self.roles and perm in DEFAULT_ROLE_PERMISSIONS["DRILLING_ENGINEER"]:
+            return True
+        return False
 
     def has_role(self, role: str) -> bool:
         return role in self.roles
@@ -227,6 +255,13 @@ def get_current_user_optional(
             .all()
         )
         permissions = set(p[0] for p in perm_records)
+
+    # Populate baseline permissions for user roles
+    for r in role_names:
+        if r in DEFAULT_ROLE_PERMISSIONS:
+            permissions.update(DEFAULT_ROLE_PERMISSIONS[r])
+    if not role_names:
+        permissions.update(DEFAULT_ROLE_PERMISSIONS["DRILLING_ENGINEER"])
 
     return AuthenticatedUser(
         id=profile.id,
