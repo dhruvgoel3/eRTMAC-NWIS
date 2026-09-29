@@ -5,13 +5,13 @@
 import { DashboardData, SimulationState, Well, SimilarWellResult } from "../types";
 
 export const INITIAL_SIMULATION_STATE: SimulationState = {
-  active_well_id: 64,
+  active_well_id: 1,
   active_well_name: "OIL-X123",
-  current_depth: 3050.0,
-  is_running: true,
+  current_depth: 3172.0,
+  is_running: false,
   speed_multiplier: 1.0,
-  start_depth: 3000.0,
-  current_rop: 12.4,
+  start_depth: 3050.0,
+  current_rop: 14.5,
   current_wob: 14.2,
   current_rpm: 110,
   current_torque: 18.2,
@@ -24,9 +24,9 @@ export const INITIAL_SIMULATION_STATE: SimulationState = {
   overall_risk: {
     level: "HIGH",
     active_zone_count: 1,
-    approaching_count: 2,
-    highest_severity: "HIGH",
-    summary: "Active Barail formation transition with elevated torque and offset mud loss history.",
+    approaching_count: 1,
+    highest_severity: "CRITICAL",
+    summary: "Approaching historical Stuck Pipe risk zone (3180m–3290m) in Tipam / F3. Distance ahead: 8m.",
   },
 };
 
@@ -34,14 +34,14 @@ export const INITIAL_DASHBOARD_DATA: DashboardData = {
   active_well: {
     well_id: "OIL-X123",
     name: "Oil India Well X123 (Active)",
-    formation: "Tipam Sandstone",
+    formation: "F3 (Tipam Sandstone)",
     total_depth: 3850.0,
     trajectory_type: "DIRECTIONAL",
     latitude: 27.2000,
     longitude: 95.1000,
   },
   simulation: INITIAL_SIMULATION_STATE,
-  current_depth: 3050.0,
+  current_depth: 3172.0,
   kpis: {
     nearby_wells_count: 25,
     historical_events_count: 114,
@@ -50,12 +50,13 @@ export const INITIAL_DASHBOARD_DATA: DashboardData = {
     top_similar_well: "OIL-X104",
   },
   current_risk: {
-    score: 74,
-    severity: "HIGH",
-    message: "Approaching Barail Transition (3,100m) — High Mud Loss & Differential Sticking Risk",
+    score: 88,
+    severity: "CRITICAL",
+    message: "HISTORICAL RISK APPROACHING: Stuck Pipe risk zone at 3180m (8m ahead in F3 / Tipam)",
     active_zones: 1,
-    active_event_types: ["MUD_LOSS", "TORQUE_SPIKE"],
+    active_event_types: ["STUCK_PIPE"],
   },
+
   risk_zones: [
     {
       id: 1,

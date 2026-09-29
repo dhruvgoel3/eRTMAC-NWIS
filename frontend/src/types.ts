@@ -72,14 +72,20 @@ export interface Alert {
   depth: number;
   message: string;
   explanation: string;
-  evidence?: {
+  evidence?: Array<{
+    well_id?: string;
+    event?: string;
+    depth?: number;
+    severity?: string;
+    npt_hrs?: number;
     risk_type?: string;
     formation?: string;
     zone_start?: number;
     zone_end?: number;
     source_wells?: string[];
     recommended_action?: string;
-  };
+    [key: string]: any;
+  }> | Record<string, any>;
   acknowledged: boolean;
   created_at: string;
 }

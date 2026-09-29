@@ -3,10 +3,8 @@
    Forest observatory at dawn: cream canvas, canopy-green authority,
    electric-mint LED accent, violet data-orb highlights.
    ========================================================================== */
-
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap');
-
 /* ── Arcadia Tokens ─────────────────────────────────────────────────────── */
+
 :root {
   /* Brand Colors */
   --color-canopy:      #104336;

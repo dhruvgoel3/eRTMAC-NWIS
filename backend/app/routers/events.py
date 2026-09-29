@@ -4,7 +4,7 @@ Provides query access to historical offset well drilling events (Mud Loss, Stuck
 """
 from typing import Optional, List
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.database import get_db
 from app.models import Well, WellEvent
 from app.auth.dependencies import require_permission, AuthenticatedUser
@@ -25,7 +25,7 @@ def get_all_events(
     db: Session = Depends(get_db),
 ):
     """Retrieve historical drilling events with multi-criteria filtering."""
-    q = db.query(WellEvent)
+    q = db.query(WellEvent).options(joinedload(WellEvent.well))
     if event_type:
         q = q.filter(WellEvent.event_type == event_type)
     if severity:
@@ -41,7 +41,7 @@ def get_all_events(
 
     result = []
     for e in events:
-        well = db.query(Well).filter(Well.id == e.well_id).first()
+        well = e.well
         result.append({
             "id": e.id,
             "well_id": well.well_id if well else None,

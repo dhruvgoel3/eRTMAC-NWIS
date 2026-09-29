@@ -1,7 +1,7 @@
 """
 Pydantic schemas for AI Assistant ("Ask NWIS") and Knowledge Retrieval.
 """
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Union
 from pydantic import BaseModel, Field
 
 
@@ -31,13 +31,13 @@ class AICitationModel(BaseModel):
 
 class AIQueryResponse(BaseModel):
     summary: str = Field(..., description="Direct synthesized summary answering the query")
-    historical_evidence: List[Dict[str, Any]] = Field(default_factory=list, description="Structured historical evidence citations")
-    similar_wells: List[str] = Field(default_factory=list, description="Relevant similar offset wells")
+    historical_evidence: List[Union[Dict[str, Any], str]] = Field(default_factory=list, description="Structured historical evidence citations")
+    similar_wells: List[Union[Dict[str, Any], str]] = Field(default_factory=list, description="Relevant similar offset wells")
     risk_interpretation: str = Field(default="", description="Operational risk interpretation")
     sources: List[str] = Field(default_factory=list, description="Ground truth document IDs (e.g. DDR-X104, WCR-X109)")
     answer: str = Field(..., description="Full pre-formatted text answer with all 5 sections")
     query: Optional[str] = None
-    citations: List[AICitationModel] = Field(default_factory=list)
+    citations: List[Union[AICitationModel, Dict[str, Any], str]] = Field(default_factory=list)
     confidence: float = 0.92
     source_wells: List[str] = Field(default_factory=list)
     recommendations: List[str] = Field(default_factory=list)
@@ -46,6 +46,7 @@ class AIQueryResponse(BaseModel):
         "but do not guarantee downhole conditions. Real-time telemetry monitoring is required."
     )
     provider: Optional[str] = "Ask NWIS"
+
 
 
 class AIHealthResponse(BaseModel):

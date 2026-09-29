@@ -18,21 +18,56 @@ interface AuthContextType {
   hasRole: (role: string) => boolean;
   hasPermission: (perm: string) => boolean;
   refreshProfile: () => Promise<void>;
+  switchRole: (role: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [profile, setProfile] = useState<UserProfile | null>(() => {
+    try {
+      const cached = typeof window !== "undefined" ? localStorage.getItem("nwis_auth_profile") : null;
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const cached = typeof window !== "undefined" ? localStorage.getItem("nwis_auth_user") : null;
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [session, setSession] = useState<Session | null>(() => {
+    if (typeof window === "undefined") return null;
+    const token = localStorage.getItem("nwis_auth_token");
+    if (!token) return null;
+    return {
+      access_token: token,
+      token_type: "bearer",
+      expires_in: 3600,
+      refresh_token: "",
+      user: null as any,
+    };
+  });
+
+  const [isLoading, setIsLoading] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    const token = localStorage.getItem("nwis_auth_token");
+    const cachedProfile = localStorage.getItem("nwis_auth_profile");
+    return !(token && cachedProfile);
+  });
 
   const clearAuthStorage = () => {
     localStorage.removeItem("nwis_auth_token");
     localStorage.removeItem("nwis_auth_user");
     localStorage.removeItem("nwis_auth_profile");
   };
+
 
   // Initialize auth state
   useEffect(() => {
@@ -147,8 +182,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const supervisorPerms = [
       "dashboard.view", "wells.view", "wells.nearby", "wells.compare", "events.view",
       "risk.view", "alerts.view", "alerts.acknowledge", "alerts.escalate", "ai.query",
-      "ai.view_sources", "documents.view", "simulation.view", "simulation.control",
-      "audit.view", "users.view"
+      "ai.view_sources", "documents.view", "simulation.view"
     ];
     const engineerPerms = [
       "dashboard.view", "wells.view", "wells.nearby", "wells.compare", "events.view",
@@ -374,6 +408,33 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const switchRole = (newRole: string) => {
+    const roleName = newRole as UserRoleName;
+    const demoToken = roleName === "KNOWLEDGE_ADMIN" 
+      ? "demo-admin" 
+      : roleName === "DRILLING_SUPERVISOR" 
+      ? "demo-supervisor" 
+      : "demo-engineer";
+    const demoEmail = roleName === "KNOWLEDGE_ADMIN" 
+      ? "admin@nwis.demo" 
+      : roleName === "DRILLING_SUPERVISOR" 
+      ? "supervisor@nwis.demo" 
+      : "engineer@nwis.demo";
+
+    const updatedProfile = createDemoProfile(demoEmail, { full_name: roleName.replace("_", " ") }, "demo-" + roleName.toLowerCase());
+    
+    localStorage.setItem("nwis_auth_token", demoToken);
+    localStorage.setItem("nwis_auth_profile", JSON.stringify(updatedProfile));
+    
+    setProfile(updatedProfile);
+    if (session) {
+      setSession({
+        ...session,
+        access_token: demoToken,
+      });
+    }
+  };
+
   const roles = profile?.roles || [];
   const activeRole = profile?.active_role || null;
   const permissions = profile?.permissions || [];
@@ -395,6 +456,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         hasRole,
         hasPermission,
         refreshProfile,
+        switchRole,
       }}
     >
       {children}

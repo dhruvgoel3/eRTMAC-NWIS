@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Document
 from app.services.ai_service import get_ai_provider
-from app.auth.dependencies import require_permission, AuthenticatedUser
+from app.auth.dependencies import require_permission, require_role, AuthenticatedUser
 from app.services.audit_service import log_audit_event
 from app.schemas.ai import AIQueryRequest, AIDocQueryRequest, AIQueryResponse, AIHealthResponse
 
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/api/ai", tags=["ai"])
 @router.post("/query", response_model=AIQueryResponse)
 def ai_query(
     payload: AIQueryRequest,
-    user: AuthenticatedUser = Depends(require_permission("ai.query")),
+    user: AuthenticatedUser = Depends(require_role("DRILLING_ENGINEER")),
     db: Session = Depends(get_db),
 ):
     """
@@ -29,6 +29,27 @@ def ai_query(
     question = payload.question.strip()
     if not question:
         raise HTTPException(status_code=400, detail="Query question cannot be empty")
+
+    q_lower = question.lower()
+    # RBAC Guardrail: Non-admin users cannot access administrative, user, or audit information via AI
+    admin_topics = ["user", "users", "all users", "list users", "audit log", "audit logs", "audit trail", "credential", "credentials", "password", "passwords", "role management", "system config"]
+    if not user.has_role("KNOWLEDGE_ADMIN") and any(w in q_lower for w in admin_topics):
+        restricted_msg = "I can help with drilling and well intelligence, but user administration is outside your access scope."
+        return {
+            "summary": "Access Restricted: Administrative and user data is outside your access scope.",
+            "historical_evidence": [],
+            "similar_wells": [],
+            "risk_interpretation": "Operational access control prevents retrieval of administrative records.",
+            "sources": [],
+            "answer": restricted_msg,
+            "provider": "Ask NWIS (Role Guardrail)",
+            "citations": [],
+            "query_context": {
+                "active_well": payload.well_id or "OIL-X123",
+                "current_depth": payload.current_depth or 3050.0,
+                "formation": "Tipam",
+            },
+        }
 
     provider = get_ai_provider(db)
     response = provider.query(
@@ -54,7 +75,7 @@ def ai_query(
 @router.post("/ask-doc", response_model=AIQueryResponse)
 def ai_ask_doc(
     payload: AIDocQueryRequest,
-    user: AuthenticatedUser = Depends(require_permission("ai.query")),
+    user: AuthenticatedUser = Depends(require_role("DRILLING_ENGINEER")),
     db: Session = Depends(get_db),
 ):
     """
@@ -70,7 +91,9 @@ def ai_ask_doc(
     if payload.doc_id:
         doc = db.query(Document).filter(Document.id == payload.doc_id).first()
         if doc:
-            doc_context = f"\n[Document Focus: {doc.title} ({doc.file_name}) - Type: {doc.doc_type}]\nSummary: {doc.summary or ''}\nKey Findings: {doc.key_findings or ''}"
+            fname = getattr(doc, "file_path", "") or getattr(doc, "document_id", "")
+            dtype = getattr(doc, "document_type", "")
+            doc_context = f"\n[Document Focus: {doc.title} ({fname}) - Type: {dtype}]\nSummary: {getattr(doc, 'text_content', '')[:400] if getattr(doc, 'text_content', None) else ''}"
 
     augmented_question = f"{question}{doc_context}" if doc_context else question
     response = provider.query(

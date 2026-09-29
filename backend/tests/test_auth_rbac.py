@@ -72,8 +72,8 @@ def test_drilling_engineer_authorization():
 def test_drilling_supervisor_authorization():
     """
     Role: DRILLING_SUPERVISOR
-    - ALLOW: wells.view, audit.view, users.view
-    - DENY: users.create (Supervisor cannot provision or delete users)
+    - ALLOW: wells.view, dashboard.view, ai.query
+    - STRICT DENY: audit.view, users.view, users.create, roles.view (Must return 403 Forbidden)
     """
     headers = {"Authorization": "Bearer demo_token_supervisor"}
 
@@ -81,18 +81,59 @@ def test_drilling_supervisor_authorization():
     assert res_me.status_code == 200
     assert "DRILLING_SUPERVISOR" in res_me.json()["data"]["roles"]
 
+    # Supervisor CANNOT access administrative audit logs (must return 403 Forbidden)
     res_audit = client.get("/api/admin/audit-logs", headers=headers)
-    assert res_audit.status_code == 200
-    assert res_audit.json()["success"] is True
+    assert res_audit.status_code == 403
+    assert res_audit.json()["error"]["code"] == "FORBIDDEN"
 
-    # Supervisor can view users
+    # Supervisor CANNOT access user management (must return 403 Forbidden)
     res_users = client.get("/api/admin/users", headers=headers)
-    assert res_users.status_code == 200
+    assert res_users.status_code == 403
+    assert res_users.json()["error"]["code"] == "FORBIDDEN"
 
     # Supervisor CANNOT create users
     res_create = client.post("/api/admin/users", headers=headers, json={"email": "test@demo.com"})
     assert res_create.status_code == 403
     assert res_create.json()["error"]["code"] == "FORBIDDEN"
+
+
+def test_role_dashboard_isolation():
+    """
+    Role Dashboard Isolation:
+    - Engineer Dashboard: Only DRILLING_ENGINEER (Supervisor & Admin get 403)
+    - Supervisor Dashboard: Only DRILLING_SUPERVISOR (Engineer & Admin get 403)
+    - Admin Overview: Only KNOWLEDGE_ADMIN (Engineer & Supervisor get 403)
+    """
+    eng_headers = {"Authorization": "Bearer demo_token_engineer"}
+    sup_headers = {"Authorization": "Bearer demo_token_supervisor"}
+    adm_headers = {"Authorization": "Bearer demo_token_admin"}
+
+    # Engineer Dashboard
+    assert client.get("/api/engineer/dashboard", headers=eng_headers).status_code == 200
+    assert client.get("/api/engineer/dashboard", headers=sup_headers).status_code == 403
+    assert client.get("/api/engineer/dashboard", headers=adm_headers).status_code == 403
+
+    # Supervisor Dashboard
+    assert client.get("/api/supervisor/dashboard", headers=sup_headers).status_code == 200
+    assert client.get("/api/supervisor/dashboard", headers=eng_headers).status_code == 403
+    assert client.get("/api/supervisor/dashboard", headers=adm_headers).status_code == 403
+
+    # Admin Overview
+    assert client.get("/api/admin/overview", headers=adm_headers).status_code == 200
+    assert client.get("/api/admin/overview", headers=eng_headers).status_code == 403
+    assert client.get("/api/admin/overview", headers=sup_headers).status_code == 403
+
+
+def test_ai_assistant_rbac_isolation():
+    """
+    AI Assistant RBAC:
+    Non-admin querying users, passwords, or audit logs must be blocked with an informative notice.
+    """
+    eng_headers = {"Authorization": "Bearer demo_token_engineer"}
+    res = client.post("/api/ai/query", headers=eng_headers, json={"question": "Show me all users in the system"})
+    assert res.status_code == 200
+    data = res.json()
+    assert "user administration is outside your access scope" in data["answer"].lower()
 
 
 def test_knowledge_admin_authorization():

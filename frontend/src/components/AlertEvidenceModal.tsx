@@ -52,10 +52,11 @@ export const AlertEvidenceModal: React.FC<AlertEvidenceModalProps> = ({
       ];
 
   const similarWells = [
-    { well: "OIL-X104", similarity: "91%", distance: "3.42 km", td: "3,520m", formation: "Tipam" },
+    { well: "OIL-X104", similarity: "91%", distance: "8.30 km", td: "3,850m", formation: "Tipam" },
     { well: "OIL-X101", similarity: "84%", distance: "5.30 km", td: "3,720m", formation: "Tipam" },
     { well: "OIL-X106", similarity: "71%", distance: "11.20 km", td: "3,400m", formation: "Tipam" },
   ];
+
 
   const documents = isStuckPipe
     ? ["DDR-X104-2023-07", "WCR-X106-2022", "DDR-X101-2022-07"]
