@@ -13,7 +13,7 @@ from app.database import get_db
 from app.models import Well, WellEvent, Document
 from app.services.knowledge_graph_service import knowledge_graph_service, NODE_COLORS
 from app.services.similarity import rank_similar_wells
-from app.auth.dependencies import require_permission, AuthenticatedUser
+from app.auth.dependencies import get_current_user, AuthenticatedUser
 
 router = APIRouter(prefix="/api", tags=["memory-graph"])
 
@@ -23,7 +23,7 @@ router = APIRouter(prefix="/api", tags=["memory-graph"])
 def get_drilling_memory_default(
     radius_km: float = Query(50.0, description="Search radius km"),
     top_n: int = Query(8, description="Max similar wells to include"),
-    user: AuthenticatedUser = Depends(require_permission("dashboard.view")),
+    user: AuthenticatedUser = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Build the NWIS Drilling Memory Graph for the current active well."""
@@ -37,7 +37,7 @@ def get_memory_graph(
     well_id_str: str,
     radius_km: float = Query(50.0, description="Search radius km"),
     top_n: int = Query(8, description="Max similar wells to include"),
-    user: AuthenticatedUser = Depends(require_permission("dashboard.view")),
+    user: AuthenticatedUser = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """
